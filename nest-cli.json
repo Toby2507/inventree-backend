@@ -37,13 +37,13 @@
         "tsConfigPath": "apps/worker-core/tsconfig.app.json"
       }
     },
-    "worker-intelligence": {
+    "intelligence-worker": {
       "type": "application",
-      "root": "apps/worker-intelligence",
+      "root": "apps/intelligence-worker",
       "entryFile": "main",
-      "sourceRoot": "apps/worker-intelligence/src",
+      "sourceRoot": "apps/intelligence-worker/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/worker-intelligence/tsconfig.app.json"
+        "tsConfigPath": "apps/intelligence-worker/tsconfig.app.json"
       }
     },
     "report-worker": {

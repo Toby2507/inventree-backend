@@ -3,7 +3,7 @@
   "compilerOptions": {
     "declaration": false,
     "root": "src",
-    "outDir": "../../dist/apps/worker-intelligence"
+    "outDir": "../../dist/apps/intelligence-worker"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test"]

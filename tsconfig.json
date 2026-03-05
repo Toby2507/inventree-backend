@@ -19,11 +19,11 @@
     "noFallthroughCasesInSwitch": true,
     "strict": true,
     "paths": {
-      "@app/database": ["./libs/database/src/index.ts"],
+      "@app/database": ["./libs/database/src/index"],
       "@app/database/*": ["./libs/database/src/*"],
-      "@app/domain": ["./libs/domain/src/index.ts"],
+      "@app/domain": ["./libs/domain/src/index"],
       "@app/domain/*": ["./libs/domain/src/*"],
-      "@app/common": ["./libs/common/src/index.ts"],
+      "@app/common": ["./libs/common/src/index"],
       "@app/common/*": ["./libs/common/src/*"]
     }
   }

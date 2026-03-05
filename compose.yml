@@ -1,0 +1,185 @@
+name: InvenTree
+
+services:
+  # --------------------- Infrastructure services ---------------------
+  db:
+    image: postgis/postgis:18-3.6
+    container_name: inventree_db
+    environment:
+      POSTGRES_USER: inventree
+      POSTGRES_DB: inventree
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+    restart: unless-stopped
+    networks:
+      - inventree
+    volumes:
+      - db_data:/var/lib/postgresql
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inventree -d inventree"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  cache:
+    image: redis:8-alpine
+    container_name: inventree_cache
+    restart: unless-stopped
+    networks:
+      - inventree
+    volumes:
+      - cache_data:/data
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:-secret}
+      --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy volatile-lru
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-secret}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # --------------------- Application services ---------------------
+  api:
+    image: inventree_api:latest
+    container_name: inventree_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: api
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    networks:
+      - inventree
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  outbox-processor:
+    image: inventree_outbox_processor:latest
+    container_name: inventree_outbox_processor
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: outbox-processor
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    networks:
+      - inventree
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  worker-core:
+    image: inventree_worker_core:latest
+    container_name: inventree_worker_core
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: worker-core
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    networks:
+      - inventree
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  intelligence-worker:
+    image: inventree_intelligence_worker:latest
+    container_name: inventree_intelligence_worker
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: intelligence-worker
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    networks:
+      - inventree
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  report-worker:
+    image: inventree_report_worker:latest
+    container_name: inventree_report_worker
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: report-worker
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    networks:
+      - inventree
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - report_tmp:/tmp/reports
+
+networks:
+  inventree:
+    driver: bridge
+    name: inventree_network
+
+volumes:
+  db_data:
+    driver: local
+    name: inventree_db_data
+  cache_data:
+    driver: local
+    name: inventree_cache_data
+  report_tmp:
+    driver: local
+    name: inventree_report_tmp

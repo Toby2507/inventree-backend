@@ -19,6 +19,7 @@
     "docker:prod:down": "docker compose down",
     "docker:prod:restart": "docker compose restart",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "migrate:create": "tsx scripts/create-migrations.ts",
     "start:dev:api": "nest start api --watch",
     "start:dev:outbox": "nest start outbox-processor --watch",
     "start:dev:worker-core": "nest start worker-core --watch",
@@ -76,6 +77,7 @@
     "ts-loader": "^9.5.4",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@10.30.3",

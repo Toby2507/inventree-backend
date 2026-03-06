@@ -16,9 +16,16 @@
     "docker:prod:down": "docker compose down",
     "docker:prod:restart": "docker compose restart",
     "migrate:run": "nest start migrator",
+    "migrate:ci": "tsx apps/migrator/src/main.ts",
     "migrate:create": "tsx scripts/create-migrations.ts",
     "lint": "eslint \"{apps,libs}/**/*.ts\" --fix",
     "test": "jest",
+    "test:unit": "jest --testMatch=\"**/src/**/*.spec.ts\"",
+    "test:integration": "jest --testMatch=\"**/test/integration/**/*.int.spec.ts\"",
+    "test:e2e": "jest --testMatch=\"**/test/e2e/**/*.e2e.spec.ts\"",
+    "test:unit:project": "pnpm test:unit --selectProjects",
+    "test:integration:project": "pnpm test:integration --selectProjects",
+    "test:e2e:project": "pnpm test:e2e --selectProjects",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "typecheck": "tsc --noEmit"
@@ -65,5 +72,9 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
-  "packageManager": "pnpm@10.30.3"
+  "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": "^22.0.0 || ^24.0.0",
+    "pnpm": ">=9.0.0"
+  }
 }

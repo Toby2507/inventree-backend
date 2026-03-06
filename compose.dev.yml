@@ -51,6 +51,25 @@ services:
       start_period: 5s
 
   # --------------------- Application services ---------------------
+  migrator:
+    container_name: inventree_migrator
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        APP_NAME: migrator
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - inventree
+    restart: "no"
+
   api:
     container_name: inventree_api
     build:
@@ -71,6 +90,8 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     networks:
       - inventree
     security_opt:
@@ -94,6 +115,8 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     networks:
       - inventree
     security_opt:
@@ -117,6 +140,8 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     networks:
       - inventree
     security_opt:
@@ -140,6 +165,8 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     networks:
       - inventree
     security_opt:
@@ -160,6 +187,8 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     networks:
       - inventree
     security_opt:

@@ -19,6 +19,15 @@
         "tsConfigPath": "apps/api/tsconfig.app.json"
       }
     },
+    "migrator": {
+      "type": "application",
+      "root": "apps/migrator",
+      "entryFile": "main",
+      "sourceRoot": "apps/migrator/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/migrator/tsconfig.app.json"
+      }
+    },
     "outbox-processor": {
       "type": "application",
       "root": "apps/outbox-processor",

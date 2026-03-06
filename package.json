@@ -16,7 +16,6 @@
     "docker:prod:down": "docker compose down",
     "docker:prod:restart": "docker compose restart",
     "migrate:run": "nest start migrator",
-    "migrate:ci": "tsx apps/migrator/src/main.ts",
     "migrate:create": "tsx scripts/create-migrations.ts",
     "lint": "eslint \"{apps,libs}/**/*.ts\" --fix",
     "test": "jest",

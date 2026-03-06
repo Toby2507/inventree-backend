@@ -63,7 +63,7 @@ jobs:
       - name: Load CI environment
         run: grep -v -E '^[[:space:]]*(#|$)' .github/env/ci.env >> $GITHUB_ENV
       - name: Run migrations
-        run: pnpm migrate:ci
+        run: pnpm migrate:run
       - name: Integration tests for ${{ matrix.service }}
         run: pnpm test:integration:project ${{ matrix.service }}
   
@@ -105,6 +105,6 @@ jobs:
       - name: Load CI environment
         run: grep -v -E '^[[:space:]]*(#|$)' .github/env/ci.env >> $GITHUB_ENV
       - name: Run migrations
-        run: pnpm migrate:ci
+        run: pnpm migrate:run
       - name: End-to-End tests
         run: pnpm test:e2e

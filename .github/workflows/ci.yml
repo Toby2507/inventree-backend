@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  filters:
+    runs-on: ubuntu-24.04
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Paths Changes Filter
+        id: filter
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: .github/utils/file-filters.yml
+
+  validate:
+    uses: ./.github/workflows/validate.yml
+
+  test:
+    needs: [validate, filters]
+    uses: ./.github/workflows/test.yml
+    with:
+      services: ${{ needs.filters.outputs.services }}
+
+  build:
+    needs: [validate, filters]
+    uses: ./.github/workflows/build.yml
+    with:
+      services: ${{ needs.filters.outputs.services }}

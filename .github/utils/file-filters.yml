@@ -1,0 +1,22 @@
+api:
+  - "apps/api/**"
+  - "libs/**"
+
+outbox-processor:
+  - "apps/outbox-processor/**"
+  - "libs/**"
+
+intelligence-worker:
+  - "apps/intelligence-worker/**"
+  - "libs/**"
+
+report-worker:
+  - "apps/report-worker/**"
+  - "libs/**"
+
+worker-core:
+  - "apps/worker-core/**"
+  - "libs/**"
+
+libs:
+  - "libs/**"

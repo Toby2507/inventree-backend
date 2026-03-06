@@ -1,0 +1,26 @@
+version: '3'
+
+env:
+  GITHUB_TOKEN:
+    sh: gh auth token
+
+tasks:
+  act:cleanup:
+    cmds:
+      - sh -c 'docker ps -a --filter "name=act-" --format "{{.ID}}" | xargs docker rm -f'
+
+  trigger-workflow:
+    desc: Trigger github actions workflow using ACT
+    cmds:
+      - |
+        act workflow_dispatch \
+          --container-architecture linux/amd64 \
+          -s GITHUB_TOKEN="{{.GITHUB_TOKEN}}" \
+          -s CI_POSTGRES_PASSWORD="secret" \
+          -s CI_JWT_ACCESS_SECRET="secret" \
+          -s CI_JWT_REFRESH_SECRET="secret" \
+          -s CI_JWT_UTIL_SECRET="secret" \
+          -e {{.PWD}}/event.json \
+          -P ubuntu-24.04=catthehacker/ubuntu:act-22.04 \
+          --directory ../../.. \
+          -W .github/workflows/ci.yml

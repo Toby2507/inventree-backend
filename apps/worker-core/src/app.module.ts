@@ -4,6 +4,10 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { DatabaseModule } from '@app/database';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), ScheduleModule.forRoot(), DatabaseModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: process.env.NODE_ENV === 'test' }),
+    ScheduleModule.forRoot(),
+    DatabaseModule,
+  ],
 })
 export class AppModule {}

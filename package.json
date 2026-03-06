@@ -15,6 +15,7 @@
     "docker:prod:up": "docker compose up --build -d",
     "docker:prod:down": "docker compose down",
     "docker:prod:restart": "docker compose restart",
+    "migrate:run": "ts-node --require tsconfig-paths/register -e \"require('@app/database').MigrationService\"",
     "migrate:create": "tsx scripts/create-migrations.ts",
     "lint": "eslint \"{apps,libs}/**/*.ts\" --fix",
     "test": "jest",

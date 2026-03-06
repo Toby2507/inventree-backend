@@ -8,10 +8,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const MIGRATIONS_DIR = path.resolve(
-  __dirname,
-  '../libs/database/src/migrations',
-);
+const MIGRATIONS_DIR = path.resolve(__dirname, '../libs/database/src/migrations');
 
 const MIGRATION_TEMPLATE = `import { Kysely, sql } from 'kysely';
 
@@ -71,6 +68,11 @@ function createMigration(name: string): void {
 
   console.log(`✅ Migration created: ${fileName}`);
   console.log(`   Path: ${filePath}`);
+  console.log('');
+  console.log('⚠️  Remember to register this migration in:');
+  console.log('   libs/database/src/migration.service.ts');
+  console.log(`   import * as ${name} from './migrations/${fileName.replace('.ts', '')}';`);
+  console.log(`   Add to migrations object: '${fileName.replace('.ts', '')}': ${name}`);
 }
 
 // Entry point

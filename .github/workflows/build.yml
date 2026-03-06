@@ -22,3 +22,15 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Build ${{ matrix.app }}
         run: pnpm nest build ${{ matrix.app }}
+  
+  all-builds-passed:
+    runs-on: ubuntu-24.04
+    needs: [build]
+    if: always()
+    steps:
+      - name: Check all builds passed
+        run: |
+          if [[ "${{ needs.build.result }}" == "failure" ]]; then
+            exit 1
+          fi
+          exit 0

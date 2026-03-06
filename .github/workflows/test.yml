@@ -108,3 +108,17 @@ jobs:
         run: pnpm migrate:run
       - name: End-to-End tests
         run: pnpm test:e2e
+
+  all-tests-passed:
+    runs-on: ubuntu-24.04
+    needs: [run-unit-tests, run-integration-tests, run-e2e-tests]
+    if: always()
+    steps:
+      - name: Check all tests passed
+        run: |
+          if [[ "${{ needs.run-unit-tests.result }}" == "failure" || \
+                "${{ needs.run-integration-tests.result }}" == "failure" || \
+                "${{ needs.run-e2e-tests.result }}" == "failure" ]]; then
+            exit 1
+          fi
+          exit 0

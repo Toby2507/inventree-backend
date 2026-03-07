@@ -9,6 +9,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     CREATE EXTENSION IF NOT EXISTS postgis;
     CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
     CREATE EXTENSION IF NOT EXISTS pg_trgm;
+    CREATE EXTENSION IF NOT EXISTS ltree;
 
     -- Schemas
     CREATE SCHEMA IF NOT EXISTS operational;

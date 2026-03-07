@@ -6,6 +6,7 @@ import * as businesses from './1772878475764_businesses';
 import * as stores from './1772880658096_stores';
 import * as store_members from './1772882903764_store_members';
 import * as store_invitations from './1772884905872_store_invitations';
+import * as store_settings from './1772898757433_store_settings';
 
 export const migrations: Record<string, Migration> = {
   '1772871100254_extensions_and_schemas': extensions_and_schemas,
@@ -15,4 +16,5 @@ export const migrations: Record<string, Migration> = {
   '1772880658096_stores': stores,
   '1772882903764_store_members': store_members,
   '1772884905872_store_invitations': store_invitations,
+  '1772898757433_store_settings': store_settings,
 };

@@ -40,7 +40,7 @@ CREATE INDEX idx_users_phone
 CREATE TRIGGER trg_set_users_updated_at
 BEFORE UPDATE ON operational.users
 FOR EACH ROW
-EXECUTE FUNCTION set_updated_at();
+EXECUTE FUNCTION operational.set_updated_at();
     `,
     )
     .execute(db);

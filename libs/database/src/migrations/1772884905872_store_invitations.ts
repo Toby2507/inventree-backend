@@ -53,7 +53,7 @@ CREATE INDEX idx_store_invitations_expires
 CREATE TRIGGER trg_set_store_invitations_updated_at
 BEFORE UPDATE ON operational.store_invitations
 FOR EACH ROW
-EXECUTE FUNCTION set_updated_at();
+EXECUTE FUNCTION operational.set_updated_at();
 
 -- RLS: tenant-scoped by app.current_store_id (your standard).
 ALTER TABLE operational.store_invitations ENABLE ROW LEVEL SECURITY;

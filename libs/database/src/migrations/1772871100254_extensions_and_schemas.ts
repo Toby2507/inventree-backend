@@ -16,7 +16,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     CREATE SCHEMA IF NOT EXISTS analytics;
 
     -- Reusable updated_at trigger function
-    CREATE OR REPLACE FUNCTION set_updated_at()
+    CREATE OR REPLACE FUNCTION operational.set_updated_at()
     RETURNS TRIGGER AS $$
     BEGIN
       NEW.updated_at = NOW();

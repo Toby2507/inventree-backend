@@ -24,7 +24,7 @@ CREATE TABLE operational.businesses (
   postal_code TEXT,
   address_extra JSONB,
   geo_location GEOGRAPHY(POINT, 4326),
-  
+
   -- Defaults reflect primary target market (Nigeria)
   default_currency CHAR(3) NOT NULL DEFAULT 'NGN',
   default_timezone TEXT NOT NULL DEFAULT 'Africa/Lagos',
@@ -59,7 +59,7 @@ CREATE INDEX idx_businesses_geo_location
 CREATE TRIGGER trg_set_businesses_updated_at
 BEFORE UPDATE ON operational.businesses
 FOR EACH ROW
-EXECUTE FUNCTION set_updated_at();
+EXECUTE FUNCTION operational.set_updated_at();
       `,
     )
     .execute(db);

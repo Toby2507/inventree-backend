@@ -57,7 +57,7 @@ CREATE INDEX idx_store_members_user
 CREATE TRIGGER trg_set_store_members_updated_at
 BEFORE UPDATE ON operational.store_members
 FOR EACH ROW
-EXECUTE FUNCTION set_updated_at();
+EXECUTE FUNCTION operational.set_updated_at();
 
 -- RLS: tenant-scoped by app.current_store_id (your standard).
 ALTER TABLE operational.store_members ENABLE ROW LEVEL SECURITY;

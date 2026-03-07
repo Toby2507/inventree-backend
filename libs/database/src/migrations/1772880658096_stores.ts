@@ -64,7 +64,7 @@ CREATE INDEX idx_stores_geo_location
 CREATE TRIGGER trg_set_stores_updated_at
 BEFORE UPDATE ON operational.stores
 FOR EACH ROW
-EXECUTE FUNCTION set_updated_at();
+EXECUTE FUNCTION operational.set_updated_at();
 
 -- Circular reference resolved: businesses.primary_store_id added after stores exists
 -- NOTE: primary_store_id must reference a store belonging to this business.

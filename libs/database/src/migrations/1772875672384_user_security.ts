@@ -71,7 +71,7 @@ EXECUTE FUNCTION operational.cascade_user_soft_delete();
 CREATE TRIGGER trg_set_user_security_updated_at
 BEFORE UPDATE ON operational.user_security
 FOR EACH ROW
-EXECUTE FUNCTION set_updated_at();
+EXECUTE FUNCTION operational.set_updated_at();
       `,
     )
     .execute(db);

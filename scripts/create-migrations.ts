@@ -71,8 +71,9 @@ function createMigration(name: string): void {
   console.log('');
   console.log('⚠️  Remember to register this migration in:');
   console.log('   libs/database/src/migration.service.ts');
-  console.log(`   import * as ${name} from './migrations/${fileName.replace('.ts', '')}';`);
-  console.log(`   Add to migrations object: '${fileName.replace('.ts', '')}': ${name}`);
+  console.log(`   import * as ${name} from './${fileName.replace('.ts', '')}';`);
+  console.log(`   Add to migrations object: `);
+  console.log(`   '${fileName.replace('.ts', '')}': ${name},`);
 }
 
 // Entry point

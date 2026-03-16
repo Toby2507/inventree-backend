@@ -53,7 +53,7 @@ export async function down(db: Kysely<any>): Promise<void> {
   await sql
     .raw(
       `
-
+DROP TABLE operational.product_variant_option_assignments;
       `,
     )
     .execute(db);

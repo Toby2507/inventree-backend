@@ -25,6 +25,20 @@ import * as product_variants from './1773143689984_product_variants';
 import * as product_variant_option_assignments from './1773262438471_product_variant_option_assignments';
 import * as product_uoms from './1773304595401_product_uoms';
 import * as product_media from './1773335839126_product_media';
+import * as inventory_movements from './1773612100586_inventory_movements';
+import * as inventory_items from './1773613455342_inventory_items';
+import * as inventory_lots from './1773614468238_inventory_lots';
+import * as inventory_lot_movements from './1773614944127_inventory_lot_movements';
+import * as inventory_lot_items from './1773615484426_inventory_lot_items';
+import * as inventory_serials from './1773616870341_inventory_serials';
+import * as inventory_serial_movements from './1773617979656_inventory_serial_movements';
+import * as inventory_stocktakes from './1773618669794_inventory_stocktakes';
+import * as inventory_stocktake_lines from './1773620741202_inventory_stocktake_lines';
+import * as inventory_transfers from './1773622434857_inventory_transfers';
+import * as inventory_transfer_lines from './1773623744680_inventory_transfer_lines';
+import * as inventory_adjustment_reasons from './1773657918602_inventory_adjustment_reasons';
+import * as inventory_adjustments from './1773658491710_inventory_adjustments';
+import * as inventory_adjustment_lines from './1773662385285_inventory_adjustment_lines';
 
 export const migrations: Record<string, Migration> = {
   '1772871100254_extensions_and_schemas': extensions_and_schemas,
@@ -56,4 +70,19 @@ export const migrations: Record<string, Migration> = {
   '1773262438471_product_variant_option_assignments': product_variant_option_assignments,
   '1773304595401_product_uoms': product_uoms,
   '1773335839126_product_media': product_media,
+  // Inventory
+  '1773612100586_inventory_movements': inventory_movements,
+  '1773613455342_inventory_items': inventory_items,
+  '1773614468238_inventory_lots': inventory_lots,
+  '1773614944127_inventory_lot_movements': inventory_lot_movements,
+  '1773615484426_inventory_lot_items': inventory_lot_items,
+  '1773616870341_inventory_serials': inventory_serials,
+  '1773617979656_inventory_serial_movements': inventory_serial_movements,
+  '1773618669794_inventory_stocktakes': inventory_stocktakes,
+  '1773620741202_inventory_stocktake_lines': inventory_stocktake_lines,
+  '1773622434857_inventory_transfers': inventory_transfers,
+  '1773623744680_inventory_transfer_lines': inventory_transfer_lines,
+  '1773657918602_inventory_adjustment_reasons': inventory_adjustment_reasons,
+  '1773658491710_inventory_adjustments': inventory_adjustments,
+  '1773662385285_inventory_adjustment_lines': inventory_adjustment_lines,
 };

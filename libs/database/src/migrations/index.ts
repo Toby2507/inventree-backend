@@ -39,17 +39,17 @@ import * as inventory_transfer_lines from './1773623744680_inventory_transfer_li
 import * as inventory_adjustment_reasons from './1773657918602_inventory_adjustment_reasons';
 import * as inventory_adjustments from './1773658491710_inventory_adjustments';
 import * as inventory_adjustment_lines from './1773662385285_inventory_adjustment_lines';
+import * as store_discounts from './1773667084340_store_discounts';
+import * as store_discount_conditions from './1773667352676_store_discount_conditions';
 
 export const migrations: Record<string, Migration> = {
   '1772871100254_extensions_and_schemas': extensions_and_schemas,
-  // IAM
   '1772874126615_users': users,
   '1772875672384_user_security': user_security,
   '1772878475764_businesses': businesses,
   '1772880658096_stores': stores,
   '1772882903764_store_members': store_members,
   '1772884905872_store_invitations': store_invitations,
-  // Store Configs
   '1772898757433_store_settings': store_settings,
   '1772901312381_store_number_sequences': store_number_sequences,
   '1772919634410_store_receipt_settings': store_receipt_settings,
@@ -58,7 +58,6 @@ export const migrations: Record<string, Migration> = {
   '1772975074516_tax_rates': tax_rates,
   '1773006518323_tax_class_rates': tax_class_rates,
   '1773007571709_store_order_tax_rates': store_order_tax_rates,
-  // Product Catalog
   '1773051884404_store_categories': store_categories,
   '1773052705445_store_uoms': store_uoms,
   '1773054251372_media_assets': media_assets,
@@ -70,7 +69,6 @@ export const migrations: Record<string, Migration> = {
   '1773262438471_product_variant_option_assignments': product_variant_option_assignments,
   '1773304595401_product_uoms': product_uoms,
   '1773335839126_product_media': product_media,
-  // Inventory
   '1773612100586_inventory_movements': inventory_movements,
   '1773613455342_inventory_items': inventory_items,
   '1773614468238_inventory_lots': inventory_lots,
@@ -85,4 +83,6 @@ export const migrations: Record<string, Migration> = {
   '1773657918602_inventory_adjustment_reasons': inventory_adjustment_reasons,
   '1773658491710_inventory_adjustments': inventory_adjustments,
   '1773662385285_inventory_adjustment_lines': inventory_adjustment_lines,
+  '1773667084340_store_discounts': store_discounts,
+  '1773667352676_store_discount_conditions': store_discount_conditions,
 };

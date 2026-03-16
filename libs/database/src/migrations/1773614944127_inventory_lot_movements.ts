@@ -46,12 +46,10 @@ CREATE POLICY tenant_isolation_inventory_lot_movements_ins ON operational.invent
 
 -- Explicitly deny UPDATE and DELETE at RLS level to enforce ledger immutability
 CREATE POLICY deny_update_inventory_lot_movements ON operational.inventory_lot_movements
-  FOR UPDATE
-  USING (FALSE);
+  FOR UPDATE USING (FALSE);
 
 CREATE POLICY deny_delete_inventory_lot_movements ON operational.inventory_lot_movements
-  FOR DELETE
-  USING (FALSE);
+  FOR DELETE USING (FALSE);
       `,
     )
     .execute(db);

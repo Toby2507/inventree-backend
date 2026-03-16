@@ -41,6 +41,11 @@ import * as inventory_adjustments from './1773658491710_inventory_adjustments';
 import * as inventory_adjustment_lines from './1773662385285_inventory_adjustment_lines';
 import * as store_discounts from './1773667084340_store_discounts';
 import * as store_discount_conditions from './1773667352676_store_discount_conditions';
+import * as pos_terminals from './1773668945342_pos_terminals';
+import * as pos_sessions from './1773669891590_pos_sessions';
+import * as pos_transactions from './1773678347034_pos_transactions';
+import * as pos_transaction_lines from './1773680571232_pos_transaction_lines';
+import * as pos_payment_intents from './1773681843455_pos_payment_intents';
 
 export const migrations: Record<string, Migration> = {
   '1772871100254_extensions_and_schemas': extensions_and_schemas,
@@ -85,4 +90,9 @@ export const migrations: Record<string, Migration> = {
   '1773662385285_inventory_adjustment_lines': inventory_adjustment_lines,
   '1773667084340_store_discounts': store_discounts,
   '1773667352676_store_discount_conditions': store_discount_conditions,
+  '1773668945342_pos_terminals': pos_terminals,
+  '1773669891590_pos_sessions': pos_sessions,
+  '1773678347034_pos_transactions': pos_transactions,
+  '1773680571232_pos_transaction_lines': pos_transaction_lines,
+  '1773681843455_pos_payment_intents': pos_payment_intents,
 };

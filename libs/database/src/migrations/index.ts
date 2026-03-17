@@ -46,6 +46,13 @@ import * as pos_sessions from './1773669891590_pos_sessions';
 import * as pos_transactions from './1773678347034_pos_transactions';
 import * as pos_transaction_lines from './1773680571232_pos_transaction_lines';
 import * as pos_payment_intents from './1773681843455_pos_payment_intents';
+import * as store_suppliers from './1773692158987_store_suppliers';
+import * as purchase_orders from './1773693143543_purchase_orders';
+import * as purchase_order_lines from './1773694125849_purchase_order_lines';
+import * as purchase_receipts from './1773696857464_purchase_receipts';
+import * as purchase_receipt_lines from './1773697444507_purchase_receipt_lines';
+import * as supplier_returns from './1773698108799_supplier_returns';
+import * as supplier_return_lines from './1773739807416_supplier_return_lines';
 
 export const migrations: Record<string, Migration> = {
   '1772871100254_extensions_and_schemas': extensions_and_schemas,
@@ -95,4 +102,11 @@ export const migrations: Record<string, Migration> = {
   '1773678347034_pos_transactions': pos_transactions,
   '1773680571232_pos_transaction_lines': pos_transaction_lines,
   '1773681843455_pos_payment_intents': pos_payment_intents,
+  '1773692158987_store_suppliers': store_suppliers,
+  '1773693143543_purchase_orders': purchase_orders,
+  '1773694125849_purchase_order_lines': purchase_order_lines,
+  '1773696857464_purchase_receipts': purchase_receipts,
+  '1773697444507_purchase_receipt_lines': purchase_receipt_lines,
+  '1773698108799_supplier_returns': supplier_returns,
+  '1773739807416_supplier_return_lines': supplier_return_lines,
 };

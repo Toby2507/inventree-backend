@@ -53,6 +53,9 @@ import * as purchase_receipts from './1773696857464_purchase_receipts';
 import * as purchase_receipt_lines from './1773697444507_purchase_receipt_lines';
 import * as supplier_returns from './1773698108799_supplier_returns';
 import * as supplier_return_lines from './1773739807416_supplier_return_lines';
+import * as notifications from './1774035073526_notifications';
+import * as notification_recipients from './1774055808219_notification_recipients';
+import * as notification_deliveries from './1774056252435_notification_deliveries';
 
 export const migrations: Record<string, Migration> = {
   '1772871100254_extensions_and_schemas': extensions_and_schemas,
@@ -109,4 +112,7 @@ export const migrations: Record<string, Migration> = {
   '1773697444507_purchase_receipt_lines': purchase_receipt_lines,
   '1773698108799_supplier_returns': supplier_returns,
   '1773739807416_supplier_return_lines': supplier_return_lines,
+  '1774035073526_notifications': notifications,
+  '1774055808219_notification_recipients': notification_recipients,
+  '1774056252435_notification_deliveries': notification_deliveries,
 };

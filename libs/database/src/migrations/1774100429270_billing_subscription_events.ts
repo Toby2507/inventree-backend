@@ -11,6 +11,7 @@ CREATE TABLE operational.billing_subscription_events (
   actor_store_member_id UUID REFERENCES operational.store_members(id) ON DELETE SET NULL,
   invoice_id UUID REFERENCES operational.billing_invoices(id) ON DELETE SET NULL,
   payment_id UUID REFERENCES operational.billing_payments(id) ON DELETE SET NULL,
+  plan_id UUID REFERENCES operational.billing_plans(id) ON DELETE SET NULL,
 
   event_type TEXT NOT NULL,
 

@@ -63,6 +63,10 @@ import * as billing_subscriptions from './1774090526283_billing_subscriptions';
 import * as billing_invoices from './1774098784637_billing_invoices';
 import * as billing_payments from './1774099746762_billing_payments';
 import * as billing_subscription_events from './1774100429270_billing_subscription_events';
+import * as outbox_events from './1774107002423_outbox_events';
+import * as audit_logs from './1774113379901_audit_logs';
+import * as report_definitions from './1774114743904_report_definitions';
+import * as report_runs from './1774122864674_report_runs';
 
 export const migrations: Record<string, Migration> = {
   '1772871100254_extensions_and_schemas': extensions_and_schemas,
@@ -129,4 +133,8 @@ export const migrations: Record<string, Migration> = {
   '1774098784637_billing_invoices': billing_invoices,
   '1774099746762_billing_payments': billing_payments,
   '1774100429270_billing_subscription_events': billing_subscription_events,
+  '1774107002423_outbox_events': outbox_events,
+  '1774113379901_audit_logs': audit_logs,
+  '1774114743904_report_definitions': report_definitions,
+  '1774122864674_report_runs': report_runs,
 };

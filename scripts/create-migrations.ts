@@ -13,11 +13,23 @@ const MIGRATIONS_DIR = path.resolve(__dirname, '../libs/database/src/migrations'
 const MIGRATION_TEMPLATE = `import { Kysely, sql } from 'kysely';
 
 export async function up(db: Kysely<any>): Promise<void> {
-  
+  await sql
+    .raw(
+      \`
+
+      \`,
+    )
+    .execute(db);
 }
 
 export async function down(db: Kysely<any>): Promise<void> {
-  
+  await sql
+    .raw(
+      \`
+
+      \`,
+    )
+    .execute(db);
 }
 `;
 
@@ -70,9 +82,10 @@ function createMigration(name: string): void {
   console.log(`   Path: ${filePath}`);
   console.log('');
   console.log('⚠️  Remember to register this migration in:');
-  console.log('   libs/database/src/migration.service.ts');
-  console.log(`   import * as ${name} from './migrations/${fileName.replace('.ts', '')}';`);
-  console.log(`   Add to migrations object: '${fileName.replace('.ts', '')}': ${name}`);
+  console.log('   libs/database/src/migrations/index.ts');
+  console.log(`   import * as ${name} from './${fileName.replace('.ts', '')}';`);
+  console.log(`   Add to migrations object: `);
+  console.log(`   '${fileName.replace('.ts', '')}': ${name},`);
 }
 
 // Entry point

@@ -56,6 +56,13 @@ import * as supplier_return_lines from './1773739807416_supplier_return_lines';
 import * as notifications from './1774035073526_notifications';
 import * as notification_recipients from './1774055808219_notification_recipients';
 import * as notification_deliveries from './1774056252435_notification_deliveries';
+import * as billing_customers from './1774081840105_billing_customers';
+import * as billing_plans from './1774087779062_billing_plans';
+import * as billing_payment_methods from './1774089165639_billing_payment_methods';
+import * as billing_subscriptions from './1774090526283_billing_subscriptions';
+import * as billing_invoices from './1774098784637_billing_invoices';
+import * as billing_payments from './1774099746762_billing_payments';
+import * as billing_subscription_events from './1774100429270_billing_subscription_events';
 
 export const migrations: Record<string, Migration> = {
   '1772871100254_extensions_and_schemas': extensions_and_schemas,
@@ -115,4 +122,11 @@ export const migrations: Record<string, Migration> = {
   '1774035073526_notifications': notifications,
   '1774055808219_notification_recipients': notification_recipients,
   '1774056252435_notification_deliveries': notification_deliveries,
+  '1774081840105_billing_customers': billing_customers,
+  '1774087779062_billing_plans': billing_plans,
+  '1774089165639_billing_payment_methods': billing_payment_methods,
+  '1774090526283_billing_subscriptions': billing_subscriptions,
+  '1774098784637_billing_invoices': billing_invoices,
+  '1774099746762_billing_payments': billing_payments,
+  '1774100429270_billing_subscription_events': billing_subscription_events,
 };

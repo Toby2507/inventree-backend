@@ -67,6 +67,9 @@ import * as outbox_events from './1774107002423_outbox_events';
 import * as audit_logs from './1774113379901_audit_logs';
 import * as report_definitions from './1774114743904_report_definitions';
 import * as report_runs from './1774122864674_report_runs';
+import * as fact_sales from './1774124176810_fact_sales';
+import * as product_trend_snapshots from './1774125841794_product_trend_snapshots';
+import * as inventory_recommendations from './1774172838057_inventory_recommendations';
 
 export const migrations: Record<string, Migration> = {
   '1772871100254_extensions_and_schemas': extensions_and_schemas,
@@ -137,4 +140,7 @@ export const migrations: Record<string, Migration> = {
   '1774113379901_audit_logs': audit_logs,
   '1774114743904_report_definitions': report_definitions,
   '1774122864674_report_runs': report_runs,
+  '1774124176810_fact_sales': fact_sales,
+  '1774125841794_product_trend_snapshots': product_trend_snapshots,
+  '1774172838057_inventory_recommendations': inventory_recommendations,
 };

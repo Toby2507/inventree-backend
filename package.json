@@ -6,9 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "db:codegen:operational": "kysely-codegen --url $DATABASE_URL --schema operational --out-file libs/database/src/operational.types.ts",
-    "db:codegen:analytics": "kysely-codegen --url $ANALYTICS_DATABASE_URL --schema analytics --out-file libs/database/src/analytics.types.ts",
-    "db:codegen": "pnpm db:codegen:operational && pnpm db:codegen:analytics",
+    "db:codegen": "sh scripts/codegen.sh",
     "docker:dev:up": "docker compose -f compose.dev.yml up --build",
     "docker:dev:down": "docker compose -f compose.dev.yml down",
     "docker:dev:reset": "docker compose -f compose.dev.yml down -v",
@@ -60,6 +58,7 @@
     "@types/supertest": "^7.2.0",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^10.0.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",

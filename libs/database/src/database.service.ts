@@ -1,8 +1,8 @@
-import { Injectable, OnApplicationBootstrap, OnApplicationShutdown, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Kysely, PostgresDialect } from 'kysely';
 import { Pool } from 'pg';
-import { OperationalDB, AnalyticsDB } from './db.types';
+import { AnalyticsDB, OperationalDB } from './db.schema.types';
 
 @Injectable()
 export class DatabaseService implements OnApplicationBootstrap, OnApplicationShutdown {

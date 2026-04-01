@@ -162,11 +162,22 @@ module.exports = {
       displayName: 'libs-int',
       ...baseProjectConfig,
       testMatch: ['<rootDir>/libs/**/test/**/*.int.spec.ts'],
+      testPathIgnorePatterns: ['/node_modules/', '/dist/', '\\.migration\\.int\\.spec\\.ts$'],
     },
     {
       displayName: 'libs-e2e',
       ...baseProjectConfig,
       testMatch: ['<rootDir>/libs/**/test/**/*.e2e.spec.ts'],
+    },
+    // =====================
+    // LIBS — MIGRATION (isolated DB, separate lifecycle)
+    // =====================
+    {
+      displayName: 'libs-migration-int',
+      ...baseProjectConfig,
+      testMatch: ['<rootDir>/libs/**/test/**/*.migration.int.spec.ts'],
+      globalSetup: '<rootDir>/jest/migration-global-setup.ts',
+      globalTeardown: '<rootDir>/jest/migration-global-teardown.ts',
     },
   ],
 };

@@ -64,8 +64,22 @@ jobs:
         run: grep -v -E '^[[:space:]]*(#|$)' .github/env/ci.env >> $GITHUB_ENV
       - name: Run migrations
         run: pnpm migrate:ci
+      - name: Create migration test database
+        run: |
+          psql "postgresql://inventree:${{ secrets.CI_POSTGRES_PASSWORD }}@localhost:5432/postgres" \
+            -c "CREATE DATABASE integration_migration_db;" \
+            -c "GRANT ALL PRIVILEGES ON DATABASE integration_migration_db TO inventree;"
+          psql "postgresql://inventree:${{ secrets.CI_POSTGRES_PASSWORD }}@localhost:5432/integration_migration_db" \
+            -c "CREATE EXTENSION IF NOT EXISTS citext;" \
+            -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;" \
+            -c "CREATE EXTENSION IF NOT EXISTS ltree;" \
+            -c "CREATE EXTENSION IF NOT EXISTS postgis;"
       - name: Integration tests for ${{ matrix.service }}
-        run: pnpm test:project ${{ matrix.service }}-int
+        run: |
+          if [[ "${{ matrix.service }}" == "libs" ]] then
+            pnpm test:project libs-int libs-migration-int
+          fi
+            pnpm test:project ${{ matrix.service }}-int
   
   run-e2e-tests:
     runs-on: ubuntu-24.04

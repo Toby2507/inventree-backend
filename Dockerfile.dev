@@ -2,7 +2,7 @@ FROM node:24-alpine
 WORKDIR /app
 # Enable pnpm via Corepack
 RUN corepack enable
-#Copy only manifests first for better caching
+# Copy only manifests first for better caching
 COPY package.json pnpm-lock.yaml ./
 # Install all dependencies (including dev)
 RUN pnpm install --frozen-lockfile

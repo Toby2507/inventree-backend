@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { DatabaseService } from './database.service';
 import { Kysely, sql, Transaction } from 'kysely';
-import { AnalyticsDB, OperationalDB } from './db.types';
+import { DatabaseService } from './database.service';
+import { AnalyticsDB, OperationalDB } from './db.schema.types';
 import { storeContextStorage } from './store-context';
 
 @Injectable()

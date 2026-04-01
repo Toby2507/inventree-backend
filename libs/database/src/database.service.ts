@@ -1,8 +1,7 @@
-import { Injectable, OnApplicationBootstrap, OnApplicationShutdown, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { Kysely, PostgresDialect } from 'kysely';
 import { Pool } from 'pg';
-import { OperationalDB, AnalyticsDB } from './db.types';
+import { AnalyticsDB, OperationalDB } from './db.schema.types';
 
 @Injectable()
 export class DatabaseService implements OnApplicationBootstrap, OnApplicationShutdown {
@@ -10,17 +9,15 @@ export class DatabaseService implements OnApplicationBootstrap, OnApplicationShu
   private _operational!: Kysely<OperationalDB>;
   private _analytics!: Kysely<AnalyticsDB>;
 
-  constructor(private readonly config: ConfigService) {}
-
   async onApplicationBootstrap(): Promise<void> {
     this._operational = new Kysely<OperationalDB>({
       dialect: new PostgresDialect({
         pool: new Pool({
-          host: this.config.getOrThrow<string>('DB_HOST'),
-          port: this.config.get<number>('DB_PORT') ?? 5432,
-          database: this.config.getOrThrow<string>('DB_NAME'),
-          user: this.config.getOrThrow<string>('DB_USER'),
-          password: this.config.getOrThrow<string>('DB_PASSWORD'),
+          host: process.env.DB_HOST,
+          port: Number(process.env.DB_PORT) || 5432,
+          database: process.env.DB_NAME,
+          user: process.env.DB_USER,
+          password: process.env.DB_PASSWORD,
           max: 20, // handles concurrent API requests
           idleTimeoutMillis: 30_000,
           connectionTimeoutMillis: 5_000,
@@ -30,11 +27,11 @@ export class DatabaseService implements OnApplicationBootstrap, OnApplicationShu
     this._analytics = new Kysely<AnalyticsDB>({
       dialect: new PostgresDialect({
         pool: new Pool({
-          host: this.config.getOrThrow<string>('ANALYTICS_DB_HOST'),
-          port: this.config.get<number>('ANALYTICS_DB_PORT') ?? 5432,
-          database: this.config.getOrThrow<string>('ANALYTICS_DB_NAME'),
-          user: this.config.getOrThrow<string>('ANALYTICS_DB_USER'),
-          password: this.config.getOrThrow<string>('ANALYTICS_DB_PASSWORD'),
+          host: process.env.ANALYTICS_DB_HOST,
+          port: Number(process.env.ANALYTICS_DB_PORT) || 5432,
+          database: process.env.ANALYTICS_DB_NAME,
+          user: process.env.ANALYTICS_DB_USER,
+          password: process.env.ANALYTICS_DB_PASSWORD,
           max: 5, // fewer connections — queries are long-running
           idleTimeoutMillis: 60_000, // longer idle timeout for slow queries
           connectionTimeoutMillis: 10_000,

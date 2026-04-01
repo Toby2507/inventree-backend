@@ -4,7 +4,8 @@ import * as fs from 'fs';
 import { installExtensions, recreateTestDB } from '@app/testing';
 
 const envFile = '.env.test';
-if (fs.existsSync(envFile)) dotenv.config({ path: envFile });
+// .env.test is only used for local development — CI sets env vars directly. We want to avoid accidentally loading .env.test in CI, but also want to allow it to override .env in local dev if present.
+if (fs.existsSync(envFile) && fs.existsSync('.env')) dotenv.config({ path: envFile });
 
 const MIGRATION_TEST_DB = 'integration_migration_db';
 

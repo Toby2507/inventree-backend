@@ -5,7 +5,7 @@ import * as fs from 'fs';
 
 // Load environment variables from .env.test if it exists
 const envFile = '.env.test';
-if (fs.existsSync(envFile)) dotenv.config({ path: envFile });
+if (fs.existsSync(envFile) && fs.existsSync('.env')) dotenv.config({ path: envFile });
 
 // Configuration for test database setup
 const TEST_DB = 'integration_db';

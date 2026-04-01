@@ -2,6 +2,8 @@ const baseProjectConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest/setup-after-env.ts'],
   transform: { '^.+\\.(t|j)s$': 'ts-jest' },
   testEnvironment: 'node',
+  globalSetup: '<rootDir>/jest/global-setup.ts',
+  globalTeardown: '<rootDir>/jest/global-teardown.ts',
   moduleNameMapper: {
     '^@app/database(|/.*)$': '<rootDir>/libs/database/src$1',
     '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src$1',
@@ -15,8 +17,6 @@ module.exports = {
   rootDir: '.',
   passWithNoTests: true,
   transform: { '^.+\\.(t|j)s$': 'ts-jest' },
-  globalSetup: '<rootDir>/jest/global-setup.ts',
-  globalTeardown: '<rootDir>/jest/global-teardown.ts',
   setupFilesAfterEnv: ['<rootDir>/jest/setup-after-env.ts'],
   collectCoverageFrom: [
     'apps/**/*.{ts,js}',
@@ -55,6 +55,8 @@ module.exports = {
       displayName: 'api-unit',
       ...baseProjectConfig,
       testMatch: ['<rootDir>/apps/api/src/**/*.spec.ts'],
+      globalSetup: undefined,
+      globalTeardown: undefined,
     },
     {
       displayName: 'api-int',
@@ -73,6 +75,8 @@ module.exports = {
       displayName: 'outbox-processor-unit',
       ...baseProjectConfig,
       testMatch: ['<rootDir>/apps/outbox-processor/src/**/*.spec.ts'],
+      globalSetup: undefined,
+      globalTeardown: undefined,
     },
     {
       displayName: 'outbox-processor-int',
@@ -91,6 +95,8 @@ module.exports = {
       displayName: 'worker-core-unit',
       ...baseProjectConfig,
       testMatch: ['<rootDir>/apps/worker-core/src/**/*.spec.ts'],
+      globalSetup: undefined,
+      globalTeardown: undefined,
     },
     {
       displayName: 'worker-core-int',
@@ -109,6 +115,8 @@ module.exports = {
       displayName: 'intelligence-worker-unit',
       ...baseProjectConfig,
       testMatch: ['<rootDir>/apps/intelligence-worker/src/**/*.spec.ts'],
+      globalSetup: undefined,
+      globalTeardown: undefined,
     },
     {
       displayName: 'intelligence-worker-int',
@@ -127,6 +135,8 @@ module.exports = {
       displayName: 'report-worker-unit',
       ...baseProjectConfig,
       testMatch: ['<rootDir>/apps/report-worker/src/**/*.spec.ts'],
+      globalSetup: undefined,
+      globalTeardown: undefined,
     },
     {
       displayName: 'report-worker-int',
@@ -145,6 +155,8 @@ module.exports = {
       displayName: 'libs-unit',
       ...baseProjectConfig,
       testMatch: ['<rootDir>/libs/**/src/**/*.spec.ts'],
+      globalSetup: undefined,
+      globalTeardown: undefined,
     },
     {
       displayName: 'libs-int',

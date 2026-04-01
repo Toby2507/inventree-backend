@@ -13,7 +13,7 @@ module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   passWithNoTests: true,
-  testMatch: ['<rootDir>/apps/**/*.spec.ts', '<rootDir>/libs/**/*.spec.ts'],
+  // testMatch: ['<rootDir>/apps/**/*.spec.ts', '<rootDir>/libs/**/*.spec.ts'],
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
@@ -49,35 +49,113 @@ module.exports = {
     },
   },
   projects: [
+    // =====================
+    // API
+    // =====================
     {
-      displayName: 'api',
+      displayName: 'api-unit',
       ...baseProjectConfig,
-      testMatch: ['<rootDir>/apps/api/**/*.spec.ts'],
+      testMatch: ['<rootDir>/apps/api/src/**/*.spec.ts'],
     },
     {
-      displayName: 'outbox-processor',
+      displayName: 'api-int',
       ...baseProjectConfig,
-      testMatch: ['<rootDir>/apps/outbox-processor/**/*.spec.ts'],
+      testMatch: ['<rootDir>/apps/api/test/**/*.int.spec.ts'],
     },
     {
-      displayName: 'worker-core',
+      displayName: 'api-e2e',
       ...baseProjectConfig,
-      testMatch: ['<rootDir>/apps/worker-core/**/*.spec.ts'],
+      testMatch: ['<rootDir>/apps/api/test/**/*.e2e.spec.ts'],
+    },
+    // =====================
+    // OUTBOX PROCESSOR
+    // =====================
+    {
+      displayName: 'outbox-processor-unit',
+      ...baseProjectConfig,
+      testMatch: ['<rootDir>/apps/outbox-processor/src/**/*.spec.ts'],
     },
     {
-      displayName: 'intelligence-worker',
+      displayName: 'outbox-processor-int',
       ...baseProjectConfig,
-      testMatch: ['<rootDir>/apps/intelligence-worker/**/*.spec.ts'],
+      testMatch: ['<rootDir>/apps/outbox-processor/test/**/*.int.spec.ts'],
     },
     {
-      displayName: 'report-worker',
+      displayName: 'outbox-processor-e2e',
       ...baseProjectConfig,
-      testMatch: ['<rootDir>/apps/report-worker/**/*.spec.ts'],
+      testMatch: ['<rootDir>/apps/outbox-processor/test/**/*.e2e.spec.ts'],
+    },
+    // =====================
+    // WORKER CORE
+    // =====================
+    {
+      displayName: 'worker-core-unit',
+      ...baseProjectConfig,
+      testMatch: ['<rootDir>/apps/worker-core/src/**/*.spec.ts'],
     },
     {
-      displayName: 'libs',
+      displayName: 'worker-core-int',
       ...baseProjectConfig,
-      testMatch: ['<rootDir>/libs/**/*.spec.ts'],
+      testMatch: ['<rootDir>/apps/worker-core/test/**/*.int.spec.ts'],
+    },
+    {
+      displayName: 'worker-core-e2e',
+      ...baseProjectConfig,
+      testMatch: ['<rootDir>/apps/worker-core/test/**/*.e2e.spec.ts'],
+    },
+    // =====================
+    // INTELLIGENCE WORKER
+    // =====================
+    {
+      displayName: 'intelligence-worker-unit',
+      ...baseProjectConfig,
+      testMatch: ['<rootDir>/apps/intelligence-worker/src/**/*.spec.ts'],
+    },
+    {
+      displayName: 'intelligence-worker-int',
+      ...baseProjectConfig,
+      testMatch: ['<rootDir>/apps/intelligence-worker/test/**/*.int.spec.ts'],
+    },
+    {
+      displayName: 'intelligence-worker-e2e',
+      ...baseProjectConfig,
+      testMatch: ['<rootDir>/apps/intelligence-worker/test/**/*.e2e.spec.ts'],
+    },
+    // =====================
+    // REPORT WORKER
+    // =====================
+    {
+      displayName: 'report-worker-unit',
+      ...baseProjectConfig,
+      testMatch: ['<rootDir>/apps/report-worker/src/**/*.spec.ts'],
+    },
+    {
+      displayName: 'report-worker-int',
+      ...baseProjectConfig,
+      testMatch: ['<rootDir>/apps/report-worker/test/**/*.int.spec.ts'],
+    },
+    {
+      displayName: 'report-worker-e2e',
+      ...baseProjectConfig,
+      testMatch: ['<rootDir>/apps/report-worker/test/**/*.e2e.spec.ts'],
+    },
+    // =====================
+    // LIBS
+    // =====================
+    {
+      displayName: 'libs-unit',
+      ...baseProjectConfig,
+      testMatch: ['<rootDir>/libs/**/src/**/*.spec.ts'],
+    },
+    {
+      displayName: 'libs-int',
+      ...baseProjectConfig,
+      testMatch: ['<rootDir>/libs/**/test/**/*.int.spec.ts'],
+    },
+    {
+      displayName: 'libs-e2e',
+      ...baseProjectConfig,
+      testMatch: ['<rootDir>/libs/**/test/**/*.e2e.spec.ts'],
     },
   ],
 };

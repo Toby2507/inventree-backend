@@ -1,17 +1,7 @@
-import {
-  getStoreContext,
-  getOptionalStoreContext,
-  storeContextStorage,
-  StoreContext,
-} from './store-context';
+import { storeContextFaker } from '@app/testing';
+import { getOptionalStoreContext, getStoreContext, storeContextStorage } from './store-context';
 
-const mockContext: StoreContext = {
-  storeId: 'store-abc',
-  businessId: 'biz-abc',
-  userId: 'user-abc',
-  storeMemberId: 'member-abc',
-  role: 'owner',
-};
+const mockContext = storeContextFaker.generate();
 
 describe('StoreContext', () => {
   describe('getStoreContext', () => {
@@ -33,7 +23,6 @@ describe('StoreContext', () => {
         // inner context visible here
         expect(getStoreContext()).toEqual(mockContext);
       });
-
       // outer scope — context should be gone
       expect(() => getStoreContext()).toThrow();
       done();

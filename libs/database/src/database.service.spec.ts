@@ -53,7 +53,6 @@ describe('DatabaseService', () => {
   describe('onApplicationBootstrap', () => {
     it('initialises both pools and verifies connections', async () => {
       await service.onApplicationBootstrap();
-
       expect(service.operational).toBeDefined();
       expect(service.analytics).toBeDefined();
       expect(mockExecute).toHaveBeenCalledTimes(2);
@@ -61,7 +60,6 @@ describe('DatabaseService', () => {
 
     it('throws and propagates when operational connection fails', async () => {
       mockExecute.mockRejectedValueOnce(new Error('ECONNREFUSED'));
-
       await expect(service.onApplicationBootstrap()).rejects.toThrow('ECONNREFUSED');
     });
   });
@@ -70,7 +68,6 @@ describe('DatabaseService', () => {
     it('destroys both pools', async () => {
       await service.onApplicationBootstrap();
       await service.onApplicationShutdown();
-
       expect(mockDestroy).toHaveBeenCalledTimes(2);
     });
   });

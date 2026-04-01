@@ -3,9 +3,10 @@ const baseProjectConfig = {
   transform: { '^.+\\.(t|j)s$': 'ts-jest' },
   testEnvironment: 'node',
   moduleNameMapper: {
-    '^@app/database(|/.*)$': '<rootDir>/libs/database/src/$1',
-    '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src/$1',
-    '^@app/common(|/.*)$': '<rootDir>/libs/common/src/$1',
+    '^@app/database(|/.*)$': '<rootDir>/libs/database/src$1',
+    '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src$1',
+    '^@app/common(|/.*)$': '<rootDir>/libs/common/src$1',
+    '^@app/testing(|/.*)$': '<rootDir>/libs/testing/src$1',
   },
 };
 
@@ -13,10 +14,7 @@ module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   passWithNoTests: true,
-  // testMatch: ['<rootDir>/apps/**/*.spec.ts', '<rootDir>/libs/**/*.spec.ts'],
-  transform: {
-    '^.+\\.(t|j)s$': 'ts-jest',
-  },
+  transform: { '^.+\\.(t|j)s$': 'ts-jest' },
   globalSetup: '<rootDir>/jest/global-setup.ts',
   globalTeardown: '<rootDir>/jest/global-teardown.ts',
   setupFilesAfterEnv: ['<rootDir>/jest/setup-after-env.ts'],
@@ -39,9 +37,10 @@ module.exports = {
   testEnvironment: 'node',
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   moduleNameMapper: {
-    '^@app/database(|/.*)$': '<rootDir>/libs/database/src/$1',
-    '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src/$1',
-    '^@app/common(|/.*)$': '<rootDir>/libs/common/src/$1',
+    '^@app/database(|/.*)$': '<rootDir>/libs/database/src$1',
+    '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src$1',
+    '^@app/common(|/.*)$': '<rootDir>/libs/common/src$1',
+    '^@app/testing(|/.*)$': '<rootDir>/libs/testing/src$1',
   },
   globals: {
     'ts-jest': {

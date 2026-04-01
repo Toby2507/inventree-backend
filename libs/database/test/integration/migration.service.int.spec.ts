@@ -1,4 +1,3 @@
-import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { MigrationModule } from '../../src/migration.module';
 import { MigrationService } from '../../src/migration.service';
@@ -9,9 +8,8 @@ describe('MigrationService (integration)', () => {
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot({ isGlobal: true }), MigrationModule],
+      imports: [MigrationModule],
     }).compile();
-
     await module.init();
     service = module.get(MigrationService);
   });

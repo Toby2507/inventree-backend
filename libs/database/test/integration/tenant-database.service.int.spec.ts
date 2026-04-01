@@ -1,17 +1,11 @@
-import { ConfigModule } from '@nestjs/config';
+import { storeContextFaker } from '@app/testing';
 import { Test, TestingModule } from '@nestjs/testing';
 import { sql } from 'kysely';
 import { DatabaseModule } from '../../src/database.module';
-import { StoreContext, storeContextStorage } from '../../src/store-context';
+import { storeContextStorage } from '../../src/store-context';
 import { TenantDatabaseService } from '../../src/tenant-database.service';
 
-const storeContext: StoreContext = {
-  storeId: 'test-store-id',
-  businessId: 'test-biz-id',
-  userId: 'test-user-id',
-  storeMemberId: 'test-member-id',
-  role: 'owner',
-};
+const storeContext = storeContextFaker.generate();
 
 describe('TenantDatabaseService (integration)', () => {
   let module: TestingModule;
@@ -19,9 +13,8 @@ describe('TenantDatabaseService (integration)', () => {
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot({ isGlobal: true }), DatabaseModule],
+      imports: [DatabaseModule],
     }).compile();
-
     await module.init();
     service = module.get(TenantDatabaseService);
   });
@@ -45,7 +38,6 @@ describe('TenantDatabaseService (integration)', () => {
           `.execute(trx);
           return rows[0];
         });
-
         expect(result?.store_id).toBe(storeContext.storeId);
       });
     });
@@ -54,7 +46,6 @@ describe('TenantDatabaseService (integration)', () => {
       await storeContextStorage.run(storeContext, async () => {
         await service.runInTenantContext(async () => undefined);
       });
-
       // Outside the tenant context, setting should not carry over to a new connection
       const result = await service.runAsSystem(async (trx) => {
         const { rows } = await sql<{ store_id: string }>`
@@ -62,7 +53,6 @@ describe('TenantDatabaseService (integration)', () => {
         `.execute(trx);
         return rows[0];
       });
-
       // SET LOCAL scopes the setting to the transaction — it must be null/empty outside
       expect(result?.store_id ?? '').toBe('');
     });
@@ -81,7 +71,6 @@ describe('TenantDatabaseService (integration)', () => {
         `.execute(trx);
         return rows[0];
       });
-
       expect(result?.store_id ?? '').toBe('');
     });
   });

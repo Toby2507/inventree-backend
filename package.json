@@ -20,7 +20,7 @@
     "lint": "eslint \"{apps,libs}/**/*.ts\" --fix",
     "test": "jest",
     "test:unit": "jest --selectProjects api-unit outbox-processor-unit worker-core-unit intelligence-worker-unit report-worker-unit libs-unit",
-    "test:int": "jest --selectProjects api-int outbox-processor-int worker-core-int intelligence-worker-int report-worker-int libs-int",
+    "test:int": "jest --selectProjects api-int outbox-processor-int worker-core-int intelligence-worker-int report-worker-int libs-int libs-migration-int",
     "test:e2e": "jest --selectProjects api-e2e outbox-processor-e2e worker-core-e2e intelligence-worker-e2e report-worker-e2e libs-e2e",
     "test:project": "jest --selectProjects",
     "test:watch": "jest --watch",

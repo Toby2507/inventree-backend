@@ -80,7 +80,8 @@ export async function down(db: Kysely<any>): Promise<void> {
   await sql
     .raw(
       `
-
+DROP TABLE IF EXISTS analytics.inventory_recommendations;
+DROP TYPE IF EXISTS analytics.recommendation_status;
       `,
     )
     .execute(db);

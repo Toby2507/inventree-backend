@@ -2,14 +2,22 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MigrationModule } from '../../src/migration.module';
 import { MigrationService } from '../../src/migration.service';
 
+const MIGRATION_DB = 'integration_migration_db';
+
 describe('MigrationService (integration)', () => {
   let module: TestingModule;
   let service: MigrationService;
 
   beforeAll(async () => {
+    // Point both pools at the isolated migration DB before NestJS initialises.
+    // DatabaseService reads process.env directly — this must happen before module.init().
+    process.env['DB_NAME'] = MIGRATION_DB;
+    process.env['ANALYTICS_DB_NAME'] = MIGRATION_DB;
+
     module = await Test.createTestingModule({
       imports: [MigrationModule],
     }).compile();
+
     await module.init();
     service = module.get(MigrationService);
   });
@@ -28,7 +36,10 @@ describe('MigrationService (integration)', () => {
   });
 
   it('migrateDown runs without error when no migrations exist', async () => {
-    // With an empty migrations set, down is a no-op — should not throw
     await expect(service.migrateDown()).resolves.not.toThrow();
+  });
+
+  it('migrateToLatest re-applies after a rollback', async () => {
+    await expect(service.migrateToLatest()).resolves.not.toThrow();
   });
 });

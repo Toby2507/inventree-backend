@@ -25,6 +25,7 @@
       "@app/domain/*": ["./libs/domain/src/*"],
       "@app/common": ["./libs/common/src/index"],
       "@app/common/*": ["./libs/common/src/*"]
-    }
+    },
+    "types": ["node", "jest"]
   }
 }

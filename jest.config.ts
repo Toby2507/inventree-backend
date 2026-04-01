@@ -1,3 +1,14 @@
+const baseProjectConfig = {
+  setupFilesAfterEnv: ['<rootDir>/jest/setup-after-env.ts'],
+  transform: { '^.+\\.(t|j)s$': 'ts-jest' },
+  testEnvironment: 'node',
+  moduleNameMapper: {
+    '^@app/database(|/.*)$': '<rootDir>/libs/database/src/$1',
+    '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src/$1',
+    '^@app/common(|/.*)$': '<rootDir>/libs/common/src/$1',
+  },
+};
+
 module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
@@ -6,6 +17,9 @@ module.exports = {
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
+  globalSetup: '<rootDir>/jest/global-setup.ts',
+  globalTeardown: '<rootDir>/jest/global-teardown.ts',
+  setupFilesAfterEnv: ['<rootDir>/jest/setup-after-env.ts'],
   collectCoverageFrom: [
     'apps/**/*.{ts,js}',
     'libs/**/*.{ts,js}',
@@ -37,69 +51,33 @@ module.exports = {
   projects: [
     {
       displayName: 'api',
+      ...baseProjectConfig,
       testMatch: ['<rootDir>/apps/api/**/*.spec.ts'],
-      moduleNameMapper: {
-        '^@app/database(|/.*)$': '<rootDir>/libs/database/src/$1',
-        '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src/$1',
-        '^@app/common(|/.*)$': '<rootDir>/libs/common/src/$1',
-      },
-      transform: { '^.+\\.(t|j)s$': 'ts-jest' },
-      testEnvironment: 'node',
     },
     {
       displayName: 'outbox-processor',
+      ...baseProjectConfig,
       testMatch: ['<rootDir>/apps/outbox-processor/**/*.spec.ts'],
-      moduleNameMapper: {
-        '^@app/database(|/.*)$': '<rootDir>/libs/database/src/$1',
-        '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src/$1',
-        '^@app/common(|/.*)$': '<rootDir>/libs/common/src/$1',
-      },
-      transform: { '^.+\\.(t|j)s$': 'ts-jest' },
-      testEnvironment: 'node',
     },
     {
       displayName: 'worker-core',
+      ...baseProjectConfig,
       testMatch: ['<rootDir>/apps/worker-core/**/*.spec.ts'],
-      moduleNameMapper: {
-        '^@app/database(|/.*)$': '<rootDir>/libs/database/src/$1',
-        '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src/$1',
-        '^@app/common(|/.*)$': '<rootDir>/libs/common/src/$1',
-      },
-      transform: { '^.+\\.(t|j)s$': 'ts-jest' },
-      testEnvironment: 'node',
     },
     {
       displayName: 'intelligence-worker',
+      ...baseProjectConfig,
       testMatch: ['<rootDir>/apps/intelligence-worker/**/*.spec.ts'],
-      moduleNameMapper: {
-        '^@app/database(|/.*)$': '<rootDir>/libs/database/src/$1',
-        '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src/$1',
-        '^@app/common(|/.*)$': '<rootDir>/libs/common/src/$1',
-      },
-      transform: { '^.+\\.(t|j)s$': 'ts-jest' },
-      testEnvironment: 'node',
     },
     {
       displayName: 'report-worker',
+      ...baseProjectConfig,
       testMatch: ['<rootDir>/apps/report-worker/**/*.spec.ts'],
-      moduleNameMapper: {
-        '^@app/database(|/.*)$': '<rootDir>/libs/database/src/$1',
-        '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src/$1',
-        '^@app/common(|/.*)$': '<rootDir>/libs/common/src/$1',
-      },
-      transform: { '^.+\\.(t|j)s$': 'ts-jest' },
-      testEnvironment: 'node',
     },
     {
       displayName: 'libs',
+      ...baseProjectConfig,
       testMatch: ['<rootDir>/libs/**/*.spec.ts'],
-      moduleNameMapper: {
-        '^@app/database(|/.*)$': '<rootDir>/libs/database/src/$1',
-        '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src/$1',
-        '^@app/common(|/.*)$': '<rootDir>/libs/common/src/$1',
-      },
-      transform: { '^.+\\.(t|j)s$': 'ts-jest' },
-      testEnvironment: 'node',
     },
   ],
 };

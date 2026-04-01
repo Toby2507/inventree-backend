@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "db:codegen": "sh scripts/codegen.sh",
-    "docker:dev:up": "docker compose -f compose.dev.yml up --build",
+    "docker:dev:up": "docker compose -f compose.dev.yml up --build -d",
     "docker:dev:down": "docker compose -f compose.dev.yml down",
     "docker:dev:reset": "docker compose -f compose.dev.yml down -v",
     "docker:prod:up": "docker compose up --build -d",

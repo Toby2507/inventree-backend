@@ -42,7 +42,14 @@ Conventional Commits. Scope = bounded context or infrastructure concern.
 identity        store-config    catalog         inventory
 pos             purchasing      notifications   billing
 database        analytics       ci              config
+platform        core            deps            security
 ```
+
+`database` — migrations, Kysely, connection pooling  
+`platform` — outbox, audit, eventing, media, mailing, reporting infrastructure  
+`core` — shared kernel (base entities, value objects, domain event base types)
+`deps` — dependency updates  
+`security` — security patches and updates
 
 **Layered scopes (optional, for granular history):**
 

@@ -18,6 +18,7 @@
     "migrate:run": "docker compose -f compose.dev.yml run --rm migrator",
     "migrate:test": "docker compose -f compose.dev.yml down -v db && docker compose -f compose.dev.yml run --rm migrator",
     "lint": "eslint \"{apps,libs}/**/*.ts\" --fix",
+    "prepare": "husky",
     "test": "jest",
     "test:unit": "jest --selectProjects api-unit outbox-processor-unit worker-core-unit intelligence-worker-unit report-worker-unit libs-unit",
     "test:int": "jest --selectProjects api-int outbox-processor-int worker-core-int intelligence-worker-int report-worker-int libs-int libs-migration-int",

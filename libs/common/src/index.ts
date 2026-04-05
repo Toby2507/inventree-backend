@@ -1,2 +1,2 @@
-// Exceptions
-export { DomainException } from './exceptions/domain.exception';
+export * from './exceptions';
+export * from './bases';

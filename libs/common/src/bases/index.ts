@@ -1,3 +1,3 @@
-export { AggregateRoot } from './aggregate-root.base';
-export { BaseDomainEvent } from './domain-event.base';
-export { BaseEntity } from './entity.base';
+export * from './aggregate-root.base';
+export * from './domain-event.base';
+export * from './entity.base';

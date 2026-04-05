@@ -2,22 +2,28 @@
 
 ## File Naming
 
-| Artifact             | Convention                       | Example                               |
-| -------------------- | -------------------------------- | ------------------------------------- |
-| All files            | kebab-case                       | `complete-transaction.handler.ts`     |
-| Migrations           | `<timestamp>_<snake_name>.ts`    | `1741234567890_users.ts`              |
-| Entity               | `<name>.entity.ts`               | `transaction.entity.ts`               |
-| Value object         | `<name>.vo.ts`                   | `money.vo.ts`                         |
-| Domain event         | `<subject-past-tense>.event.ts`  | `transaction-completed.event.ts`      |
-| Repository interface | `<name>.repository.interface.ts` | `transaction.repository.interface.ts` |
-| Repository impl      | `kysely-<name>.repository.ts`    | `kysely-transaction.repository.ts`    |
-| Command              | `<verb-subject>.command.ts`      | `complete-transaction.command.ts`     |
-| Command handler      | `<verb-subject>.handler.ts`      | `complete-transaction.handler.ts`     |
-| Query                | `<get-subject>.query.ts`         | `get-transaction.query.ts`            |
-| Query handler        | `<get-subject>.handler.ts`       | `get-transaction.handler.ts`          |
-| Read model           | `<subject>.read-model.ts`        | `transaction.read-model.ts`           |
-| ACL port             | `<subject>.port.ts`              | `product-catalog.port.ts`             |
-| ACL adapter          | `<context>-<subject>.adapter.ts` | `pos-product-catalog.adapter.ts`      |
+| Artifact               | Convention                          | Example                                   |
+| ---------------------- | ----------------------------------- | ----------------------------------------- |
+| All files              | kebab-case                          | `complete-transaction.handler.ts`         |
+| Migrations             | `<timestamp>_<snake_name>.ts`       | `1741234567890_users.ts`                  |
+| Entity                 | `<name>.entity.ts`                  | `transaction.entity.ts`                   |
+| Aggregate Root         | `<name>.aggregate.ts`               | `transaction.aggregate.ts`                |
+| Value object           | `<name>.value-object.ts`            | `money.value-object.ts`                   |
+| Domain event           | `<subject-past-tense>.event.ts`     | `transaction-completed.event.ts`          |
+| Domain service         | `<action>-<subject>.service.ts`     | `calculate-inventory.service.ts`          |
+| Repository interface   | `<name>.repository.ts`              | `transaction.repository.ts`               |
+| Repository impl        | `<name>.<tech>.repository.ts`       | `transaction.kysely.repository.ts`        |
+| Command                | `<verb-subject>.command.ts`         | `complete-transaction.command.ts`         |
+| Command handler        | `<verb-subject>.command-handler.ts` | `complete-transaction.command-handler.ts` |
+| Query                  | `<verb-subject>.query.ts`           | `find-transaction.query.ts`               |
+| Query handler          | `<verb-subject>.query-handler.ts`   | `find-transaction.query-handler.ts`       |
+| Read model             | `<subject>.read-model.ts`           | `transaction.read-model.ts`               |
+| ACL port               | `<subject>.port.ts`                 | `product-catalog.port.ts`                 |
+| ACL adapter            | `<subject>.<context>.adapter.ts`    | `product-catalog.pos.adapter.ts`          |
+| Resolver               | `<subject>.resolver.ts`             | `product-catalog.resolver.ts`             |
+| Policy / Specification | `<rule>.policy.ts`                  | `transaction-completion.policy.ts`        |
+| Context module         | `<context>.module.ts`               | `pos.module.ts`                           |
+| Domain module          | `<context>.domain.module.ts`        | `pos.domain.module.ts`                    |
 
 ---
 
@@ -73,8 +79,9 @@ export class Transaction {
 **Rules:**
 
 - Domain objects have zero NestJS decorators, zero Kysely imports.
-- Guard methods (private, throw domain exceptions) before every state change.
-- `toSnapshot()` required on every entity — used by repositories and outbox.
+- Guard methods throw `DomainException` subtypes before every state change — never `HttpException`.
+- `toSnapshot()` is required on every entity — used by repositories and outbox and enforced by BaseEntity in `libs/common/src/bases`.
+- Static `create()` and `reconstitute()` are required.
 
 ---
 
@@ -113,20 +120,43 @@ export interface TransactionReadModel {
 
 ---
 
-## Repository Interface (domain/ports/)
+## Repository Interface (`domain/ports/repositories/`)
 
 ```typescript
-// Owned by the domain context, implemented in libs/database
+// Owned by the domain context, implemented in infrastructure/repositories/
 export interface TransactionRepository {
   findById(id: string): Promise<Transaction | null>;
   save(transaction: Transaction): Promise<void>;
 }
+
+export const TRANSACTION_REPOSITORY = Symbol('TRANSACTION_REPOSITORY');
 ```
 
-Injection token = `SCREAMING_SNAKE_CASE` constant defined alongside the interface:
+## ACL Port (`domain/ports/acl/`)
 
 ```typescript
-export const TRANSACTION_REPOSITORY = Symbol('TRANSACTION_REPOSITORY');
+// Defines what the consuming context needs — implemented by the owning context
+export interface ProductCatalogPort {
+  findVariantById(id: string): Promise<ProductVariantDto | null>;
+}
+
+export const PRODUCT_CATALOG_PORT = Symbol('PRODUCT_CATALOG_PORT');
+```
+
+## Resolver (`infrastructure/resolvers/`)
+
+Direct Kysely read for inter-context data queries where no business rule is enforced:
+
+```typescript
+// No port, no adapter — just a query
+@Injectable()
+export class ProductCatalogResolver {
+  constructor(private readonly db: TenantDatabaseService) {}
+
+  async findVariantById(id: string): Promise<ProductVariantDto | null> {
+    // direct Kysely query
+  }
+}
 ```
 
 ---
@@ -182,3 +212,23 @@ inventory.stock.low
 purchase.order.approved
 store.member.invited
 ```
+
+## Domain Exception Structure
+
+All domain exceptions extend `DomainException` from `libs/common/src/exceptions`. Never extend
+`HttpException` — the domain layer has zero HTTP awareness.
+
+```typescript
+import { DomainException } from '@app/common';
+
+export class TransactionAlreadyCompletedException extends DomainException {
+  readonly code = 'TRANSACTION_ALREADY_COMPLETED';
+
+  constructor() {
+    super('Transaction is already completed');
+  }
+}
+```
+
+`DomainExceptionFilter` in `libs/common` catches these at the HTTP boundary and maps
+`code` → `HttpStatus` via `mapCodeToStatus`.

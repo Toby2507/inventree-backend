@@ -17,7 +17,7 @@ const TYPES = [
 const BASE_SCOPES = [
   // Bounded Contexts
   'identity',
-  'store-config',
+  'store',
   'catalog',
   'inventory',
   'pos',

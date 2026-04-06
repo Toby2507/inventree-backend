@@ -1,1 +1,1 @@
-export * from './arguments-host.mock';
+export * from './nest.mock';

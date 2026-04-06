@@ -1,4 +1,4 @@
-import { ArgumentsHost, ExecutionContext } from '@nestjs/common';
+import { ArgumentsHost, CallHandler, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 interface HostMocks {
@@ -10,6 +10,10 @@ interface ContextMocks {
   context: ExecutionContext;
   mockGetHandler: jest.Mock;
   mockGetClass: jest.Mock;
+}
+interface CallHandlerMocks {
+  callHandler: CallHandler;
+  mockHandle: jest.Mock;
 }
 
 export const makeHost = (): HostMocks => {
@@ -38,4 +42,14 @@ export const makeReflector = () => {
   return {
     getAllAndOverride: jest.fn(),
   } as unknown as jest.Mocked<Reflector>;
+};
+
+export const makeCallHandler = (): CallHandlerMocks => {
+  const mockHandle = jest.fn();
+  return {
+    callHandler: {
+      handle: mockHandle,
+    },
+    mockHandle,
+  };
 };

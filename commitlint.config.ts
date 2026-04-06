@@ -17,7 +17,7 @@ const TYPES = [
 const BASE_SCOPES = [
   // Bounded Contexts
   'identity',
-  'store-config',
+  'store',
   'catalog',
   'inventory',
   'pos',
@@ -46,7 +46,7 @@ const config: UserConfig = {
     'scope-case': [0], // disabled — validated by custom rule below
     'scope-enum': [0], // disabled — validated by custom rule below
     'scope-empty': [0], // scope optional e.g. `ci: ...`
-    'subject-case': [2, 'always', 'lower-case'],
+    'subject-case': [0], // disabled — validated by custom rule below
     'subject-full-stop': [2, 'never', '.'],
     'subject-max-length': [2, 'always', 72],
     'subject-empty': [2, 'never'],
@@ -67,6 +67,12 @@ const config: UserConfig = {
           const vague = ['wip', 'fix bug', 'update files', 'add stuff', 'changes', 'misc'];
           const match = vague.some((v) => subject?.toLowerCase().trim() === v);
           return [!match, `subject '${subject}' is too vague — be specific`];
+        },
+        'subject-first-char-lowercase': ({ subject }) => {
+          if (!subject) return [true];
+          const firstChar = subject.trim()[0];
+          const isLowerCase = firstChar === firstChar.toLowerCase();
+          return [isLowerCase, 'first character of subject must be lower-case'];
         },
       },
     },

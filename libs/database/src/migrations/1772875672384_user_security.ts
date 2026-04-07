@@ -5,7 +5,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .raw(
       `
 CREATE TYPE operational.mfa_type AS ENUM ('email', 'totp');
-CREATE TYPE operational.mfa_status AS ENUM ('inactive', 'active', 'pending');
+CREATE TYPE operational.mfa_status AS ENUM ('pending', 'enabled', 'disabled');
 
 CREATE TABLE operational.user_security (
   user_id UUID PRIMARY KEY REFERENCES operational.users(id) ON DELETE CASCADE,
@@ -34,23 +34,17 @@ CREATE TABLE operational.user_security (
   CONSTRAINT ux_user_security_user UNIQUE (user_id),
   -- Consistency checks for MFA fields
   CONSTRAINT chk_mfa_fields_consistent CHECK (
-    (mfa_status = 'inactive' AND mfa_enabled_at IS NULL)
+    (mfa_status = 'disabled' AND mfa_enabled_at IS NULL)
     OR
     (mfa_status = 'pending' AND mfa_enabled_at IS NULL)
     OR
-    (mfa_status = 'active' AND mfa_enabled_at IS NOT NULL)
+    (mfa_status = 'enabled' AND mfa_enabled_at IS NOT NULL)
   )
 );
 
 -- Indexes
-CREATE INDEX idx_user_security_lockout
-  ON operational.user_security (lockout_until)
-  WHERE deleted_at IS NULL AND lockout_until IS NOT NULL;
-
-CREATE INDEX idx_user_security_mfa_enabled
-  ON operational.user_security (mfa_enabled)
-  WHERE mfa_enabled = TRUE;
-
+-- No additional indexes needed for now since user_id is PK 
+-- and we don't have queries filtering by other fields yet
 
 -- Trigger to cascade soft-delete to related user_security row
 CREATE OR REPLACE FUNCTION operational.cascade_user_soft_delete()
@@ -88,6 +82,7 @@ DROP TRIGGER IF EXISTS trg_cascade_user_soft_delete ON operational.users;
 DROP FUNCTION IF EXISTS operational.cascade_user_soft_delete;
 DROP TABLE IF EXISTS operational.user_security;
 DROP TYPE IF EXISTS operational.mfa_type;
+DROP TYPE IF EXISTS operational.mfa_status;
       `,
     )
     .execute(db);

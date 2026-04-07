@@ -5,6 +5,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .raw(
       `
 CREATE TYPE operational.mfa_type AS ENUM ('email', 'totp');
+CREATE TYPE operational.mfa_status AS ENUM ('inactive', 'active', 'pending');
 
 CREATE TABLE operational.user_security (
   user_id UUID PRIMARY KEY REFERENCES operational.users(id) ON DELETE CASCADE,
@@ -19,7 +20,7 @@ CREATE TABLE operational.user_security (
   last_password_change_at TIMESTAMPTZ, -- set on password set/rotate
 
   -- MFA: single configuration per user (nullable = MFA not enabled)
-  mfa_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+  mfa_status operational.mfa_status NOT NULL DEFAULT 'disabled',
   mfa_type operational.mfa_type,
   mfa_secret_ciphertext BYTEA,   -- encrypted TOTP secret (never store plaintext)
   mfa_secret_kid TEXT,           -- key identifier used for encryption (supports key rotation)
@@ -33,9 +34,11 @@ CREATE TABLE operational.user_security (
   CONSTRAINT ux_user_security_user UNIQUE (user_id),
   -- Consistency checks for MFA fields
   CONSTRAINT chk_mfa_fields_consistent CHECK (
-    (mfa_enabled = FALSE AND mfa_type IS NULL AND mfa_secret_ciphertext IS NULL AND mfa_secret_kid IS NULL AND mfa_enabled_at IS NULL)
+    (mfa_status = 'inactive' AND mfa_enabled_at IS NULL)
     OR
-    (mfa_enabled = TRUE  AND mfa_type IS NOT NULL AND mfa_secret_ciphertext IS NOT NULL AND mfa_secret_kid IS NOT NULL AND mfa_enabled_at IS NOT NULL)
+    (mfa_status = 'pending' AND mfa_enabled_at IS NULL)
+    OR
+    (mfa_status = 'active' AND mfa_enabled_at IS NOT NULL)
   )
 );
 

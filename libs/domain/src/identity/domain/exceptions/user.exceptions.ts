@@ -27,38 +27,3 @@ export class UserAccountLockedException extends DomainException {
     super(`Account is locked until ${until.toISOString()}`);
   }
 }
-
-export class InvalidCredentialsException extends DomainException {
-  readonly code = 'INVALID_CREDENTIALS';
-  constructor() {
-    super('Invalid email or password');
-  }
-}
-
-export class EmailNotVerifiedException extends DomainException {
-  readonly code = 'EMAIL_NOT_VERIFIED';
-  constructor() {
-    super('Email address has not been verified');
-  }
-}
-
-export class EmailAlreadyVerifiedException extends DomainException {
-  readonly code = 'EMAIL_ALREADY_VERIFIED';
-  constructor() {
-    super('Email address is already verified');
-  }
-}
-
-export class MfaAlreadyEnabledException extends DomainException {
-  readonly code = 'MFA_ALREADY_ENABLED';
-  constructor() {
-    super('MFA is already enabled for this account');
-  }
-}
-
-export class MfaNotEnabledException extends DomainException {
-  readonly code = 'MFA_NOT_ENABLED';
-  constructor() {
-    super('MFA is not enabled for this account');
-  }
-}

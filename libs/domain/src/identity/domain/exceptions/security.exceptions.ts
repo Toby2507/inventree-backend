@@ -41,3 +41,17 @@ export class MfaSetupInProgressException extends DomainException {
     super('An MFA setup is already in progress for this account');
   }
 }
+
+export class EmailNotVerifiedException extends DomainException {
+  readonly code = 'EMAIL_NOT_VERIFIED';
+  constructor() {
+    super('Email address has not been verified');
+  }
+}
+
+export class EmailAlreadyVerifiedException extends DomainException {
+  readonly code = 'EMAIL_ALREADY_VERIFIED';
+  constructor() {
+    super('Email address is already verified');
+  }
+}

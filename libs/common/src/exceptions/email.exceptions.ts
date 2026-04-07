@@ -20,17 +20,3 @@ export class EmailMaxLengthExceededException extends DomainException {
     super(`Email address cannot exceed ${maxLength} characters`);
   }
 }
-
-export class EmailNotVerifiedException extends DomainException {
-  readonly code = 'EMAIL_NOT_VERIFIED';
-  constructor() {
-    super('Email address has not been verified');
-  }
-}
-
-export class EmailAlreadyVerifiedException extends DomainException {
-  readonly code = 'EMAIL_ALREADY_VERIFIED';
-  constructor() {
-    super('Email address is already verified');
-  }
-}

@@ -3,13 +3,13 @@ import {
   EmailInvalidException,
   EmailMaxLengthExceededException,
 } from '../exceptions';
-import { Email } from './email.value-object';
+import { Email } from './email.vo';
 
 const VALID_EMAIL = 'test@example.com';
 const VALID_EMAIL_UPPER_CASE = 'TEST@EXAMPLE.COM';
 
 describe('Email Value Object', () => {
-  describe('create', () => {
+  describe('create()', () => {
     it('should create a valid email unchanged', () => {
       const email = Email.create(VALID_EMAIL);
       expect(email.value).toBe(VALID_EMAIL);
@@ -34,14 +34,20 @@ describe('Email Value Object', () => {
     });
   });
 
-  describe('reconstitute', () => {
-    it('reconstitute should create an email without validation but with trimming and lowercasing', () => {
-      const email = Email.reconstitute('  TEST@EXAMPLE.COM ');
-      expect(email.value).toBe('test@example.com');
+  describe('reconstitute()', () => {
+    it('reconstitute should create an email without validation and updating input', () => {
+      const email = Email.reconstitute(VALID_EMAIL);
+      expect(email.value).toBe(VALID_EMAIL);
+    });
+
+    it('should not normalize or validate input', () => {
+      const raw = '  Test@Example.com ';
+      const email = Email.reconstitute(raw);
+      expect(email.value).toBe(raw); // exact value preserved
     });
   });
 
-  describe('equals', () => {
+  describe('equals()', () => {
     it('should return true when emails are equal', () => {
       const email1 = Email.create(VALID_EMAIL);
       const email2 = Email.create(VALID_EMAIL_UPPER_CASE);
@@ -60,18 +66,18 @@ describe('Email Value Object', () => {
     });
   });
 
-  describe('toString', () => {
-    it('toString should return the email value', () => {
+  describe('toString()', () => {
+    it('should return the email value', () => {
       const email = Email.create(VALID_EMAIL);
       expect(email.toString()).toBe(VALID_EMAIL);
     });
 
-    it('toString should return the same as value getter', () => {
+    it('should return the same as value getter', () => {
       const email = Email.create(VALID_EMAIL);
       expect(email.toString()).toBe(email.value);
     });
 
-    it('toString should work in string contexts', () => {
+    it('should work in string contexts', () => {
       const email = Email.create(VALID_EMAIL);
       expect(`Email: ${email}`).toBe(`Email: ${VALID_EMAIL}`);
     });

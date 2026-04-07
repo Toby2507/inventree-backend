@@ -1,1 +1,2 @@
-export * from './email.value-object';
+export * from './email.vo';
+export * from './phone.vo';

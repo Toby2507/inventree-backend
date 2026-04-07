@@ -17,14 +17,13 @@ export class Email {
   }
 
   static reconstitute(value: string): Email {
-    return new Email(value.toLowerCase().trim());
+    return new Email(value);
   }
 
   private static validate(value: string): void {
     if (!value) throw new EmailCannotBeEmptyException();
-    if (value.length > Email.MAX_LENGTH)
-      throw new EmailMaxLengthExceededException(Email.MAX_LENGTH);
-    if (!Email.EMAIL_REGEX.test(value)) throw new EmailInvalidException(value);
+    if (value.length > this.MAX_LENGTH) throw new EmailMaxLengthExceededException(this.MAX_LENGTH);
+    if (!this.EMAIL_REGEX.test(value)) throw new EmailInvalidException(value);
   }
 
   get value(): string {

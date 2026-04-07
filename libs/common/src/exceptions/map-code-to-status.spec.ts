@@ -2,6 +2,12 @@ import { HttpStatus } from '@nestjs/common';
 import { mapCodeToStatus } from './map-code-to-status';
 
 describe('mapCodeToStatus', () => {
+  describe('INVALID substring -> 400', () => {
+    it.each(['INVALID_INPUT', 'EMAIL_INVALID', 'INVALID_DISCOUNT_SCOPE'])('%s', (code) => {
+      expect(mapCodeToStatus(code)).toBe(HttpStatus.BAD_REQUEST);
+    });
+  });
+
   describe('_NOT_FOUND suffix → 404', () => {
     it.each([
       'PRODUCT_NOT_FOUND',
@@ -41,7 +47,6 @@ describe('mapCodeToStatus', () => {
       'TRANSACTION_ALREADY_VOIDED',
       'INSUFFICIENT_STOCK',
       'SESSION_NOT_OPEN',
-      'INVALID_DISCOUNT_SCOPE',
       'STOCKTAKE_NOT_IN_PROGRESS',
       'PURCHASE_ORDER_NOT_APPROVABLE',
       'COMPLETELY_UNKNOWN_CODE',

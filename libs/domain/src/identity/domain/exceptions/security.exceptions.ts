@@ -55,3 +55,17 @@ export class EmailAlreadyVerifiedException extends DomainException {
     super('Email address is already verified');
   }
 }
+
+export class PhoneAlreadyVerifiedException extends DomainException {
+  readonly code = 'PHONE_ALREADY_VERIFIED';
+  constructor() {
+    super('Phone number is already verified');
+  }
+}
+
+export class PhoneNotProvidedException extends DomainException {
+  readonly code = 'PHONE_NOT_PROVIDED';
+  constructor() {
+    super('No phone number provided for this account');
+  }
+}

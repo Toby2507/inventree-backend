@@ -1,11 +1,11 @@
-import { BaseEntity } from '@app/common';
+import { BaseEntity, DomainEvent } from '@app/common';
+import { UserLockedOutEvent } from '../events';
 import {
   MfaAlreadyEnabledException,
   MfaNotEnabledException,
   MfaSecretRequiredException,
   MfaSetupInProgressException,
   MfaSetupNotInProgressException,
-  UserAccountLockedException,
 } from '../exceptions';
 
 export type MfaType = 'email' | 'totp';
@@ -95,22 +95,27 @@ export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
     return this._lockoutUntil !== null && this._lockoutUntil > now;
   }
 
-  lockoutExpiresAt(): Date | null {
-    return this._lockoutUntil;
-  }
-
   // ==== Behavioral methods ==============
-  recordFailedLogin(now: Date = new Date()): void {
+  recordFailedLogin(now: Date = new Date()): DomainEvent[] {
     this._lastLoginAttemptedAt = now;
+    const events: DomainEvent[] = [];
     // Don't increment attempts if already locked out
-    if (this.isLockedOut()) throw new UserAccountLockedException(this._lockoutUntil!);
+    if (this.isLockedOut()) return events;
     this._failedLoginAttempts += 1;
-
     if (this._failedLoginAttempts >= this.MAX_FAILED_ATTEMPTS) {
       this._lockoutUntil = new Date(now.getTime() + this.LOCKOUT_DURATION_MS);
       this._lockoutReason = 'Too many failed login attempts';
-      throw new UserAccountLockedException(this._lockoutUntil);
+      events.push(
+        new UserLockedOutEvent({
+          userId: this._userId,
+          occurredAt: now,
+          lockoutUntil: this._lockoutUntil,
+          reason: this._lockoutReason,
+          failedAttempts: this._failedLoginAttempts,
+        }),
+      );
     }
+    return events;
   }
 
   recordSuccessfulLogin(now: Date = new Date()): void {
@@ -191,5 +196,8 @@ export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
   }
   get mfaType(): MfaType | null {
     return this._mfaType;
+  }
+  get lockoutUntil(): Date | null {
+    return this._lockoutUntil;
   }
 }

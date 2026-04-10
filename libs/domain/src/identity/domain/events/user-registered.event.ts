@@ -1,4 +1,4 @@
-import { BaseDomainEvent } from '@app/common';
+import { DomainEvent } from '@app/common';
 
 export interface UserRegisteredPayload {
   userId: string;
@@ -8,7 +8,7 @@ export interface UserRegisteredPayload {
   registeredAt: Date;
 }
 
-export class UserRegisteredEvent extends BaseDomainEvent {
+export class UserRegisteredEvent extends DomainEvent {
   readonly eventType = 'identity.user.registered';
   readonly aggregateType = 'user';
 

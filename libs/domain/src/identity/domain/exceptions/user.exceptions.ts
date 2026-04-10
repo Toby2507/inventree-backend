@@ -27,3 +27,12 @@ export class UserAccountLockedException extends DomainException {
     super(`Account is locked until ${until.toISOString()}`);
   }
 }
+
+export class UserPendingException extends DomainException {
+  readonly code = 'USER_PENDING';
+  constructor() {
+    super(
+      'This account is pending verification, please check your email for verification instructions',
+    );
+  }
+}

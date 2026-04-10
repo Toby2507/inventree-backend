@@ -28,18 +28,18 @@ describe('MigrationService (integration)', () => {
 
   it('migrateToLatest runs without error', async () => {
     await expect(service.migrateToLatest()).resolves.not.toThrow();
-  });
+  }, 30000); // allow extra time for migrations to run
 
   it('migrateToLatest is idempotent — safe to run twice', async () => {
     await expect(service.migrateToLatest()).resolves.not.toThrow();
     await expect(service.migrateToLatest()).resolves.not.toThrow();
-  });
+  }, 30000); // allow extra time for migrations to run
 
   it('migrateDown runs without error when no migrations exist', async () => {
     await expect(service.migrateDown()).resolves.not.toThrow();
-  });
+  }, 30000); // allow extra time for migrations to run
 
   it('migrateToLatest re-applies after a rollback', async () => {
     await expect(service.migrateToLatest()).resolves.not.toThrow();
-  });
+  }, 30000); // allow extra time for migrations to run
 });

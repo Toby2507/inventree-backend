@@ -1,4 +1,4 @@
-import { BaseDomainEvent } from './domain-event.base';
+import { DomainEvent } from './domain-event.base';
 import { BaseEntity } from './entity.base';
 
 /**
@@ -65,7 +65,7 @@ import { BaseEntity } from './entity.base';
  * ### What a domain event looks like
  *
  * ```typescript
- * export class TransactionCompletedEvent extends BaseDomainEvent {
+ * export class TransactionCompletedEvent extends DomainEvent {
  *   readonly eventType = 'pos.transaction.completed';
  *   readonly aggregateType = 'pos_transaction';
  *
@@ -76,13 +76,13 @@ import { BaseEntity } from './entity.base';
  * ```
  */
 export abstract class AggregateRoot<TSnapshot> extends BaseEntity<TSnapshot> {
-  private readonly _domainEvents: BaseDomainEvent[] = [];
+  private readonly _domainEvents: DomainEvent[] = [];
 
-  protected addDomainEvent(event: BaseDomainEvent): void {
+  protected addDomainEvent(event: DomainEvent): void {
     this._domainEvents.push(event);
   }
 
-  pullDomainEvents(): BaseDomainEvent[] {
+  pullDomainEvents(): DomainEvent[] {
     const events = [...this._domainEvents];
     this._domainEvents.length = 0;
     return events;

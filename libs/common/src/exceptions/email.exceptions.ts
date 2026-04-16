@@ -1,4 +1,4 @@
-import { DomainException } from '@app/common';
+import { DomainException } from './domain.exception';
 
 export class EmailCannotBeEmptyException extends DomainException {
   readonly code = 'EMAIL_INVALID';

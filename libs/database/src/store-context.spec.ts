@@ -1,7 +1,7 @@
-import { storeContextFaker } from '@app/testing';
+import { fsStoreContext } from '@app/testing';
 import { getOptionalStoreContext, getStoreContext, storeContextStorage } from './store-context';
 
-const mockContext = storeContextFaker.generate();
+const mockContext = fsStoreContext.generate();
 
 describe('StoreContext', () => {
   describe('getStoreContext', () => {

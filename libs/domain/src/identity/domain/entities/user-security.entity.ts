@@ -64,7 +64,7 @@ export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
     this._mfaLastUsedAt = props.mfaLastUsedAt;
   }
 
-  // ==== Factory methods ==============
+  // ==== FACTORY ==============
   static create(props: CreateUserSecurityProps): UserSecurity {
     return new UserSecurity(props.userId, {
       failedLoginAttempts: 0,
@@ -86,16 +86,7 @@ export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
     return new UserSecurity(userId, rest);
   }
 
-  // ==== State check methods ==============
-  isMfaEnabled(): boolean {
-    return this._mfaStatus === 'enabled';
-  }
-
-  isLockedOut(now: Date = new Date()): boolean {
-    return this._lockoutUntil !== null && this._lockoutUntil > now;
-  }
-
-  // ==== Behavioral methods ==============
+  // ==== COMMANDS ==============
   recordFailedLogin(now: Date = new Date()): DomainEvent[] {
     this._lastLoginAttemptedAt = now;
     const events: DomainEvent[] = [];
@@ -119,35 +110,28 @@ export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
   }
 
   recordSuccessfulLogin(now: Date = new Date()): void {
-    this._failedLoginAttempts = 0;
     this._lastLoginAttemptedAt = now;
-    this._lockoutUntil = null;
-    this._lockoutReason = null;
-  }
-
-  unlock(): void {
-    this._failedLoginAttempts = 0;
-    this._lockoutUntil = null;
-    this._lockoutReason = null;
+    this.unlock();
   }
 
   recordPasswordChange(now: Date = new Date()): void {
     this._lastPasswordChangeAt = now;
-    this.unlock(); // Clear any lockout state on password change
+    this.unlock();
   }
 
-  startMfaSetup(type: MfaType, secretCiphertext: Buffer, kid: string): void {
+  startMfaSetup(type: MfaType, secretCiphertext?: Buffer, kid?: string): void {
     if (this.isMfaEnabled()) throw new MfaAlreadyEnabledException();
     if (this._mfaStatus === 'pending') throw new MfaSetupInProgressException();
-    if (type !== 'email' && (!secretCiphertext || !kid)) throw new MfaSecretRequiredException();
     this._mfaStatus = 'pending';
     this._mfaType = type;
-    if (type === 'email') return this.completeMfaSetup(); // No secret needed for email MFA
+    if (type === 'email') return this.completeMfaSetup();
+    if (!secretCiphertext || !kid) throw new MfaSecretRequiredException();
     this._mfaSecretCiphertext = secretCiphertext;
     this._mfaSecretKid = kid;
   }
 
   completeMfaSetup(): void {
+    if (this.isMfaEnabled()) throw new MfaAlreadyEnabledException();
     if (this._mfaStatus !== 'pending') throw new MfaSetupNotInProgressException();
     this._mfaStatus = 'enabled';
     this._mfaEnabledAt = new Date();
@@ -167,6 +151,40 @@ export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
     this._mfaLastUsedAt = now;
   }
 
+  // ==== PREDICATES ==============
+  isMfaEnabled(): boolean {
+    return this._mfaStatus === 'enabled';
+  }
+
+  isLockedOut(now: Date = new Date()): boolean {
+    return this._lockoutUntil !== null && this._lockoutUntil > now;
+  }
+
+  // ==== GETTERS ==============
+  get userId(): string {
+    return this._userId;
+  }
+  get failedLoginAttempts(): number {
+    return this._failedLoginAttempts;
+  }
+  get mfaStatus(): MfaStatus {
+    return this._mfaStatus;
+  }
+  get mfaType(): MfaType | null {
+    return this._mfaType;
+  }
+  get lockoutUntil(): Date | null {
+    return this._lockoutUntil;
+  }
+
+  // ==== HELPERS ==============
+  private unlock(): void {
+    this._failedLoginAttempts = 0;
+    this._lockoutUntil = null;
+    this._lockoutReason = null;
+  }
+
+  // ==== SERIALIZATION ==============
   toSnapshot(): UserSecuritySnapshot {
     return {
       userId: this._userId,
@@ -182,22 +200,5 @@ export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
       mfaEnabledAt: this._mfaEnabledAt,
       mfaLastUsedAt: this._mfaLastUsedAt,
     };
-  }
-
-  // ==== Getters ==============
-  get userId(): string {
-    return this._userId;
-  }
-  get failedLoginAttempts(): number {
-    return this._failedLoginAttempts;
-  }
-  get mfaStatus(): MfaStatus {
-    return this._mfaStatus;
-  }
-  get mfaType(): MfaType | null {
-    return this._mfaType;
-  }
-  get lockoutUntil(): Date | null {
-    return this._lockoutUntil;
   }
 }

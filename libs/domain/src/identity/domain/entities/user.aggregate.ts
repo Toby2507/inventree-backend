@@ -88,7 +88,7 @@ export class User extends AggregateRoot<UserSnapshot> {
     this._security = props.security;
   }
 
-  // ==== Factory methods ==============
+  // ==== FACTORY ==============
   static create(props: CreateUserProps): User {
     const now = new Date();
     const user = new User(props.id, {
@@ -129,12 +129,7 @@ export class User extends AggregateRoot<UserSnapshot> {
     });
   }
 
-  // ==== State check methods ==============
-  isActive(): boolean {
-    return this._status === 'active' && this._deletedAt === null;
-  }
-
-  // ==== Behavioral methods ==============
+  // ==== COMMANDS ==============
   verifyEmail(now: Date = new Date()): void {
     if (this._emailVerifiedAt !== null) throw new EmailAlreadyVerifiedException();
     this._emailVerifiedAt = now;
@@ -210,7 +205,7 @@ export class User extends AggregateRoot<UserSnapshot> {
     this._security.recordSuccessfulLogin(now);
   }
 
-  enableMfa(type: MfaType, secretCiphertext: Buffer, kid: string): void {
+  startMfaSetup(type: MfaType, secretCiphertext: Buffer, kid: string): void {
     this._security.startMfaSetup(type, secretCiphertext, kid);
   }
 
@@ -226,26 +221,8 @@ export class User extends AggregateRoot<UserSnapshot> {
     this._deletedAt = now;
   }
 
-  toSnapshot(): UserSnapshot {
-    return {
-      id: this._id,
-      email: this._email.value,
-      emailVerifiedAt: this._emailVerifiedAt,
-      phone: this._phone?.value ?? null,
-      phoneVerifiedAt: this._phoneVerifiedAt,
-      firstName: this._firstName,
-      lastName: this._lastName,
-      displayName: this._displayName,
-      status: this._status,
-      passwordHash: this._passwordHash,
-      createdAt: this._createdAt,
-      deletedAt: this._deletedAt,
-      security: this._security.toSnapshot(),
-    };
-  }
-
-  // ==== Guards ==============
-  canAuthenticate(now: Date = new Date()): void {
+  // ==== INVARIANTS ==============
+  ensureCanAuthenticate(now: Date = new Date()): void {
     if (this._status === 'pending') throw new UserPendingException();
     if (this._status === 'disabled') throw new UserDisabledException();
     if (this._security.isLockedOut(now)) {
@@ -253,7 +230,12 @@ export class User extends AggregateRoot<UserSnapshot> {
     }
   }
 
-  // ==== Getters ==============
+  // ==== PREDICATES ==============
+  isActive(): boolean {
+    return this._status === 'active' && this._deletedAt === null;
+  }
+
+  // ==== GETTERS ==============
   get id(): string {
     return this._id;
   }
@@ -277,5 +259,24 @@ export class User extends AggregateRoot<UserSnapshot> {
   }
   get isEmailVerified(): boolean {
     return this._emailVerifiedAt !== null;
+  }
+
+  // ==== SERIALIZATION ==============
+  toSnapshot(): UserSnapshot {
+    return {
+      id: this._id,
+      email: this._email.value,
+      emailVerifiedAt: this._emailVerifiedAt,
+      phone: this._phone?.value ?? null,
+      phoneVerifiedAt: this._phoneVerifiedAt,
+      firstName: this._firstName,
+      lastName: this._lastName,
+      displayName: this._displayName,
+      status: this._status,
+      passwordHash: this._passwordHash,
+      createdAt: this._createdAt,
+      deletedAt: this._deletedAt,
+      security: this._security.toSnapshot(),
+    };
   }
 }

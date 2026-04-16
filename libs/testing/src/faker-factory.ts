@@ -2,14 +2,14 @@ import { EntityConstructor } from '@app/common';
 
 export function createFaker<T>(generator: () => T) {
   return {
-    generate(): T {
-      return generator();
-    },
-    generateWithOverrides(overrides: Partial<T>): T {
+    generate(overrides: Partial<T> = {}): T {
       return { ...generator(), ...overrides };
     },
-    generateMany(count: number): T[] {
-      return Array.from({ length: count }, () => generator());
+    generateMany(count: number, overrides: Partial<T> | ((index: number) => Partial<T>) = {}): T[] {
+      return Array.from({ length: count }, (_, i) => {
+        const resolvedOverrides = typeof overrides === 'function' ? overrides(i) : overrides;
+        return { ...generator(), ...resolvedOverrides };
+      });
     },
   };
 }

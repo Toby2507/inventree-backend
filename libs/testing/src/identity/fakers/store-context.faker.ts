@@ -2,7 +2,7 @@ import { StoreContext } from '@app/database';
 import { faker } from '@faker-js/faker';
 import { createFaker } from '../../faker-factory';
 
-export const storeContextFaker = createFaker<StoreContext>(() => ({
+export const fsStoreContext = createFaker<StoreContext>(() => ({
   storeId: faker.string.uuid(),
   businessId: faker.string.uuid(),
   userId: faker.string.uuid(),
@@ -10,7 +10,7 @@ export const storeContextFaker = createFaker<StoreContext>(() => ({
   role: faker.helpers.arrayElement(['owner', 'manager', 'staff']),
 }));
 
-export const jwtPayloadFaker = createFaker(() => ({
+export const fsJwtPayload = createFaker(() => ({
   sub: faker.string.uuid(),
   storeId: faker.string.uuid(),
   businessId: faker.string.uuid(),

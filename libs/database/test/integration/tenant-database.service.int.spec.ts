@@ -1,11 +1,11 @@
-import { storeContextFaker } from '@app/testing';
+import { fsStoreContext } from '@app/testing';
 import { Test, TestingModule } from '@nestjs/testing';
 import { sql } from 'kysely';
 import { DatabaseModule } from '../../src/database.module';
 import { storeContextStorage } from '../../src/store-context';
 import { TenantDatabaseService } from '../../src/tenant-database.service';
 
-const storeContext = storeContextFaker.generate();
+const storeContext = fsStoreContext.generate();
 
 describe('TenantDatabaseService (integration)', () => {
   let module: TestingModule;

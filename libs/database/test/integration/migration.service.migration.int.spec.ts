@@ -4,6 +4,7 @@ import { MigrationService } from '../../src/migration.service';
 
 const MIGRATION_DB = 'integration_migration_db';
 
+jest.setTimeout(30000); // Migrations can take longer than the default 5s Jest timeout, especially on CI. Adjust as needed.
 describe('MigrationService (integration)', () => {
   let module: TestingModule;
   let service: MigrationService;
@@ -27,19 +28,21 @@ describe('MigrationService (integration)', () => {
   });
 
   it('migrateToLatest runs without error', async () => {
-    await expect(service.migrateToLatest()).resolves.not.toThrow();
+    await service.migrateToLatest();
   });
 
   it('migrateToLatest is idempotent — safe to run twice', async () => {
-    await expect(service.migrateToLatest()).resolves.not.toThrow();
-    await expect(service.migrateToLatest()).resolves.not.toThrow();
+    await service.migrateToLatest();
+    await service.migrateToLatest();
   });
 
-  it('migrateDown runs without error when no migrations exist', async () => {
-    await expect(service.migrateDown()).resolves.not.toThrow();
+  it('migrateDown runs without error', async () => {
+    await service.migrateDown();
   });
 
   it('migrateToLatest re-applies after a rollback', async () => {
-    await expect(service.migrateToLatest()).resolves.not.toThrow();
+    await service.migrateToLatest();
+    await service.migrateDown();
+    await service.migrateToLatest();
   });
 });

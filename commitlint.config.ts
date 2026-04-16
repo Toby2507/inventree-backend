@@ -28,7 +28,8 @@ const BASE_SCOPES = [
   // Infrastructure
   'database', // migrations, kysely, connection pooling
   'platform', // outbox, audit, eventing, media, mailing, reporting
-  'core', // shared kernel — base entities, VOs, domain event base types
+  'common', // shared kernel — base entities, VOs, domain event base types
+  'testing', // test utilities, fakers, testcontainers setup
   // Tooling
   'ci', // github actions, pipelines, release automation
   'config', // linting, formatting, commitlint, editorconfig

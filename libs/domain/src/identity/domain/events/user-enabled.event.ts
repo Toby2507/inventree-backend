@@ -2,7 +2,6 @@ import { DomainEvent } from '@app/common';
 
 export interface UserEnabledPayload {
   userId: string;
-  occuredAt: Date;
   reason?: string;
 }
 

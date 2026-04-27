@@ -2,7 +2,6 @@ import { DomainEvent } from '@app/common';
 
 export interface UserLockedOutPayload {
   userId: string;
-  occurredAt: Date;
   lockoutUntil: Date;
   reason: string;
   failedAttempts: number;

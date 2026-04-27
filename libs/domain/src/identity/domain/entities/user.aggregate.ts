@@ -7,8 +7,6 @@ import {
   UserSuspendedEvent,
 } from '../events';
 import {
-  EmailAlreadyVerifiedException,
-  PhoneAlreadyVerifiedException,
   PhoneNotProvidedException,
   UserAccountLockedException,
   UserDisabledException,
@@ -41,7 +39,6 @@ export interface CreateUserProps {
   firstName?: string;
   lastName?: string;
   displayName?: string;
-  phone?: string;
 }
 
 export interface UpdateUserProfileProps {
@@ -131,7 +128,7 @@ export class User extends AggregateRoot<UserSnapshot> {
 
   // ==== COMMANDS ==============
   verifyEmail(now: Date = new Date()): void {
-    if (this._emailVerifiedAt !== null) throw new EmailAlreadyVerifiedException();
+    if (this._emailVerifiedAt !== null) return; // idempotent - already verified
     this._emailVerifiedAt = now;
     this.addDomainEvent(
       new UserEmailVerifiedEvent({
@@ -144,7 +141,7 @@ export class User extends AggregateRoot<UserSnapshot> {
 
   verifyPhone(now: Date = new Date()): void {
     if (!this._phone) throw new PhoneNotProvidedException();
-    if (this._phoneVerifiedAt !== null) throw new PhoneAlreadyVerifiedException();
+    if (this._phoneVerifiedAt !== null) return; // idempotent - already verified
     this._phoneVerifiedAt = now;
   }
 
@@ -259,6 +256,9 @@ export class User extends AggregateRoot<UserSnapshot> {
   }
   get isEmailVerified(): boolean {
     return this._emailVerifiedAt !== null;
+  }
+  get isPhoneVerified(): boolean {
+    return this._phoneVerifiedAt !== null;
   }
 
   // ==== SERIALIZATION ==============

@@ -7,31 +7,12 @@ import {
   MfaSetupInProgressException,
   MfaSetupNotInProgressException,
 } from '../exceptions';
-import { UserSecurity, UserSecuritySnapshot } from './user-security.entity';
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-const makeSnapshot = (overrides: Partial<UserSecuritySnapshot> = {}): UserSecuritySnapshot => ({
-  userId: USER_ID,
-  failedLoginAttempts: 0,
-  lastLoginAttemptedAt: null,
-  lockoutUntil: null,
-  lockoutReason: null,
-  lastPasswordChangeAt: null,
-  mfaStatus: 'disabled',
-  mfaType: null,
-  mfaSecretCiphertext: null,
-  mfaSecretKid: null,
-  mfaEnabledAt: null,
-  mfaLastUsedAt: null,
-  ...overrides,
-});
+import { UserSecurity } from './user-security.entity';
 
 const USER_ID = 'user-uuid-001';
 const SECRET = Buffer.from('totp-secret');
 const KID = 'key-v1';
 
-// Exhaust attempts without triggering lockout (stops one short)
 const recordFailures = (security: UserSecurity, count: number, now?: Date) => {
   for (let i = 0; i < count; i++) security.recordFailedLogin(now);
 };
@@ -302,7 +283,7 @@ describe('UserSecurity Domain Entity', () => {
     describe('when MFA is enabled', () => {
       it('disables MFA and clears configuration', () => {
         const security = UserSecurity.reconstitute(
-          makeSnapshot({
+          fsUserSecurity.generate({
             mfaStatus: 'enabled',
             mfaType: 'totp',
             mfaSecretCiphertext: SECRET,
@@ -328,7 +309,7 @@ describe('UserSecurity Domain Entity', () => {
     });
 
     it('updates mfaLastUsedAt', () => {
-      const security = UserSecurity.reconstitute(makeSnapshot({ mfaStatus: 'enabled' }));
+      const security = UserSecurity.reconstitute(fsUserSecurity.generate({ mfaStatus: 'enabled' }));
       const now = new Date('2026-04-01T00:00:00Z');
       security.recordMfaUsed(now);
       expect(security.toSnapshot().mfaLastUsedAt).toEqual(now);

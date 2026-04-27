@@ -1,5 +1,5 @@
 import { feUserSecurity, fsUserSecurity } from '@app/testing';
-import { UserLockedOutEvent } from '../events';
+import { UserLockedOutEvent, UserLoggedInEvent } from '../events';
 import {
   MfaAlreadyEnabledException,
   MfaNotEnabledException,
@@ -115,7 +115,6 @@ describe('UserSecurity Domain Entity', () => {
       const event = events[0] as UserLockedOutEvent;
       expect(event.payload.userId).toBe(security.userId);
       expect(event.payload.failedAttempts).toBe(10);
-      expect(event.payload.occurredAt).toEqual(now);
       expect(event.payload.lockoutUntil.getTime()).toBe(now.getTime() + 30 * 60 * 1000);
     });
 
@@ -150,6 +149,12 @@ describe('UserSecurity Domain Entity', () => {
       expect(security.isLockedOut()).toBe(false);
       expect(security.failedLoginAttempts).toBe(0);
       expect(security.toSnapshot().lockoutReason).toBeNull();
+    });
+
+    it('should return a UserLoggedInEvent when login is successful', () => {
+      const security = feUserSecurity.generate();
+      const events = security.recordSuccessfulLogin();
+      expect(events).toEqual(expect.arrayContaining([expect.any(UserLoggedInEvent)]));
     });
   });
 

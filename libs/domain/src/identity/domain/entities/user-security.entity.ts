@@ -1,5 +1,5 @@
 import { BaseEntity, DomainEvent } from '@app/common';
-import { UserLockedOutEvent } from '../events';
+import { UserLockedOutEvent, UserLoggedInEvent } from '../events';
 import {
   MfaAlreadyEnabledException,
   MfaNotEnabledException,
@@ -99,7 +99,6 @@ export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
       events.push(
         new UserLockedOutEvent({
           userId: this._userId,
-          occurredAt: now,
           lockoutUntil: this._lockoutUntil,
           reason: this._lockoutReason,
           failedAttempts: this._failedLoginAttempts,
@@ -109,9 +108,14 @@ export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
     return events;
   }
 
-  recordSuccessfulLogin(now: Date = new Date()): void {
+  recordSuccessfulLogin(now: Date = new Date()): DomainEvent[] {
     this._lastLoginAttemptedAt = now;
     this.unlock();
+    return [
+      new UserLoggedInEvent({
+        userId: this._userId,
+      }),
+    ];
   }
 
   recordPasswordChange(now: Date = new Date()): void {

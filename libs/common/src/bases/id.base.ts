@@ -1,7 +1,7 @@
 import { validate as isUUID } from 'uuid';
 import { InvalidUUIDException, UUIDCannotBeEmptyException } from '../exceptions';
 
-export abstract class BaseId {
+export abstract class BaseID {
   protected constructor(protected readonly _value: string) {
     const normalized = _value.trim();
     this.validate(normalized);
@@ -11,7 +11,7 @@ export abstract class BaseId {
   protected abstract validate(value: string): void;
 }
 
-export abstract class BaseUUID extends BaseId {
+export abstract class BaseUUID extends BaseID {
   protected constructor(value: string) {
     super(value);
   }

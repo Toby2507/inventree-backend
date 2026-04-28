@@ -2,10 +2,10 @@ import { validate as isUUID } from 'uuid';
 import { InvalidUUIDException, UUIDCannotBeEmptyException } from '../exceptions';
 
 export abstract class BaseId {
-  protected constructor(protected readonly value: string) {
-    const normalized = value.trim();
+  protected constructor(protected readonly _value: string) {
+    const normalized = _value.trim();
     this.validate(normalized);
-    this.value = normalized;
+    this._value = normalized;
   }
 
   protected abstract validate(value: string): void;
@@ -21,11 +21,15 @@ export abstract class BaseUUID extends BaseId {
     if (!isUUID(value)) throw new InvalidUUIDException();
   }
 
+  get value(): string {
+    return this._value;
+  }
+
   toString(): string {
-    return this.value;
+    return this._value;
   }
 
   equals(other: this): boolean {
-    return this.constructor === other.constructor && this.value === other.value;
+    return this.constructor === other.constructor && this._value === other._value;
   }
 }

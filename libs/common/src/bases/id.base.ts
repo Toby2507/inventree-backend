@@ -29,7 +29,7 @@ export abstract class BaseUUID extends BaseID {
     return this._value;
   }
 
-  equals(other: this): boolean {
-    return this.constructor === other.constructor && this._value === other._value;
+  equals(other?: this): boolean {
+    return !!other && this.constructor === other.constructor && this._value === other._value;
   }
 }

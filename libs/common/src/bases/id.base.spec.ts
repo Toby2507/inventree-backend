@@ -66,5 +66,10 @@ describe('BaseUUID Abstract Value Objec', () => {
       const id2 = new TestID2(validUUID);
       expect(id1.equals(id2)).toBe(false);
     });
+
+    it('should return false when comparing to undefined', () => {
+      const id = new TestID(validUUID);
+      expect(id.equals(undefined)).toBe(false);
+    });
   });
 });

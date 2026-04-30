@@ -1,12 +1,5 @@
 import { DomainException } from '@app/common';
 
-export class InvalidCredentialsException extends DomainException {
-  readonly code = 'INVALID_CREDENTIALS';
-  constructor() {
-    super('Invalid email or password');
-  }
-}
-
 export class MfaAlreadyEnabledException extends DomainException {
   readonly code = 'MFA_ALREADY_ENABLED';
   constructor() {
@@ -39,27 +32,6 @@ export class MfaSetupInProgressException extends DomainException {
   readonly code = 'MFA_SETUP_IN_PROGRESS';
   constructor() {
     super('An MFA setup is already in progress for this account');
-  }
-}
-
-export class EmailNotVerifiedException extends DomainException {
-  readonly code = 'EMAIL_NOT_VERIFIED';
-  constructor() {
-    super('Email address has not been verified');
-  }
-}
-
-export class EmailAlreadyVerifiedException extends DomainException {
-  readonly code = 'EMAIL_ALREADY_VERIFIED';
-  constructor() {
-    super('Email address is already verified');
-  }
-}
-
-export class PhoneAlreadyVerifiedException extends DomainException {
-  readonly code = 'PHONE_ALREADY_VERIFIED';
-  constructor() {
-    super('Phone number is already verified');
   }
 }
 

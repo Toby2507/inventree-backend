@@ -1,38 +1,63 @@
 import { DomainException } from '@app/common';
+import { UserStatus } from '../entities';
 
-export class UserAlreadyExistsException extends DomainException {
-  readonly code = 'USER_ALREADY_EXISTS';
-  constructor(email: string) {
-    super(`A user with email ${email} already exists`);
-  }
-}
-
-export class UserNotFoundException extends DomainException {
-  readonly code = 'USER_NOT_FOUND';
-  constructor() {
-    super('User not found');
-  }
-}
-
-export class UserDisabledException extends DomainException {
-  readonly code = 'USER_DISABLED';
-  constructor() {
-    super('This account has been disabled');
-  }
-}
-
-export class UserAccountLockedException extends DomainException {
-  readonly code = 'USER_ACCOUNT_LOCKED';
-  constructor(until: Date) {
-    super(`Account is locked until ${until.toISOString()}`);
-  }
-}
-
-export class UserPendingException extends DomainException {
-  readonly code = 'USER_PENDING';
+export class UserCannotAuthenticateException extends DomainException {
+  readonly code = 'UNAUTHENTICABLE_USER_FORBIDDEN';
   constructor() {
     super(
-      'This account is pending verification, please check your email for verification instructions',
+      'This account cannot be authenticated, likely due to pending verification or account lockout',
     );
+  }
+}
+
+export class UserNotActiveException extends DomainException {
+  readonly code = 'INACTIVE_USER_FORBIDDEN';
+  constructor() {
+    super('This account is not active or has been deleted');
+  }
+}
+
+export class InvalidUserStatusTransitionException extends DomainException {
+  readonly code = 'INVALID_USER_STATUS_TRANSITION';
+  constructor(
+    public readonly from: UserStatus,
+    public readonly to: UserStatus,
+  ) {
+    super(`Invalid user status transition from "${from}" to "${to}"`);
+  }
+}
+
+export class PasswordHashCannotBeEmptyException extends DomainException {
+  readonly code = 'PASSWORD_HASH_INVALID';
+  constructor() {
+    super('Password hash cannot be empty');
+  }
+}
+
+export class PasswordHashInvalidException extends DomainException {
+  readonly code = 'PASSWORD_HASH_INVALID';
+  constructor() {
+    super('Value does not appear to be a valid password hash');
+  }
+}
+
+export class PersonNameCannotBeEmptyException extends DomainException {
+  readonly code = 'PERSON_NAME_INVALID';
+  constructor() {
+    super('Name cannot be empty');
+  }
+}
+
+export class PersonNameMaxLengthExceededException extends DomainException {
+  readonly code = 'PERSON_NAME_INVALID';
+  constructor(max: number) {
+    super(`Name must not exceed ${max} characters`);
+  }
+}
+
+export class PersonNameInvalidException extends DomainException {
+  readonly code = 'PERSON_NAME_INVALID';
+  constructor(value: string) {
+    super('Name contains invalid characters', { value });
   }
 }

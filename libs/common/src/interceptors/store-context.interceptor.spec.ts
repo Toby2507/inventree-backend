@@ -1,9 +1,9 @@
 import { storeContextStorage } from '@app/database';
-import { jwtPayloadFaker, makeCallHandler, makeContext } from '@app/testing';
+import { fsJwtPayload, makeCallHandler, makeContext } from '@app/testing';
 import { Observable, firstValueFrom, of } from 'rxjs';
 import { StoreContextInterceptor } from './store-context.interceptor';
 
-const validPayload = jwtPayloadFaker.generate();
+const validPayload = fsJwtPayload.generate();
 
 describe('StoreContextInterceptor', () => {
   let interceptor: StoreContextInterceptor;

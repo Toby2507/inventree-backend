@@ -4,7 +4,7 @@ export async function up(db: Kysely<any>): Promise<void> {
   await sql
     .raw(
       `
-CREATE TYPE operational.user_status AS ENUM ('active', 'disabled');
+CREATE TYPE operational.user_status AS ENUM ('active', 'suspended', 'pending', 'disabled');
 
 CREATE TABLE operational.users (
   id UUID PRIMARY KEY DEFAULT uuidv7(),
@@ -15,7 +15,7 @@ CREATE TABLE operational.users (
   first_name TEXT,
   last_name  TEXT,
   display_name TEXT,
-  status operational.user_status NOT NULL DEFAULT 'active',
+  status operational.user_status NOT NULL DEFAULT 'pending',
   password_hash TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ,

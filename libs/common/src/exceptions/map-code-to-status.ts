@@ -6,7 +6,7 @@ import { HttpStatus } from '@nestjs/common';
  * for automatic mapping to work correctly.
  *
  * Suffix rules (evaluated in order):
- *   - *_INVALID        → 400 Bad Request
+ *   - *INVALID*        → 400 Bad Request
  *   - *_NOT_FOUND      → 404 Not Found
  *   - *_ALREADY_EXISTS → 409 Conflict
  *   - *_UNAUTHORIZED   → 401 Unauthorized
@@ -20,7 +20,7 @@ import { HttpStatus } from '@nestjs/common';
  * than hardcoding individual codes — keep this function convention-driven.
  */
 export function mapCodeToStatus(code: string): HttpStatus {
-  if (code.endsWith('_INVALID')) return HttpStatus.BAD_REQUEST;
+  if (code.includes('INVALID')) return HttpStatus.BAD_REQUEST;
   if (code.endsWith('_NOT_FOUND')) return HttpStatus.NOT_FOUND;
   if (code.endsWith('_ALREADY_EXISTS')) return HttpStatus.CONFLICT;
   if (code.endsWith('_UNAUTHORIZED')) return HttpStatus.UNAUTHORIZED;

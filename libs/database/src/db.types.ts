@@ -134,6 +134,8 @@ export type OperationalLocationType =
   | 'virtual'
   | 'zone';
 
+export type OperationalMfaStatus = 'disabled' | 'enabled' | 'pending';
+
 export type OperationalMfaType = 'email' | 'totp';
 
 export type OperationalNotificationAudienceType = 'member' | 'member_list' | 'role' | 'store';
@@ -263,7 +265,7 @@ export type OperationalTaxBase =
 
 export type OperationalTaxScope = 'line_item' | 'order' | 'shipping';
 
-export type OperationalUserStatus = 'active' | 'disabled';
+export type OperationalUserStatus = 'active' | 'disabled' | 'pending' | 'suspended';
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
@@ -1651,11 +1653,11 @@ export interface OperationalUserSecurity {
   last_password_change_at: Timestamp | null;
   lockout_reason: string | null;
   lockout_until: Timestamp | null;
-  mfa_enabled: Generated<boolean>;
   mfa_enabled_at: Timestamp | null;
   mfa_last_used_at: Timestamp | null;
   mfa_secret_ciphertext: Buffer | null;
   mfa_secret_kid: string | null;
+  mfa_status: Generated<OperationalMfaStatus>;
   mfa_type: OperationalMfaType | null;
   updated_at: Timestamp | null;
   user_id: string;

@@ -21,8 +21,8 @@
     "paths": {
       "@app/database": ["./libs/database/src/index"],
       "@app/database/*": ["./libs/database/src/*"],
-      "@app/domain": ["./libs/domain/src/index"],
-      "@app/domain/*": ["./libs/domain/src/*"],
+      "@app/contexts": ["./libs/contexts/src/index"],
+      "@app/contexts/*": ["./libs/contexts/src/*"],
       "@app/common": ["./libs/common/src/index"],
       "@app/common/*": ["./libs/common/src/*"],
       "@app/testing": ["./libs/testing/src/index"],

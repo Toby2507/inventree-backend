@@ -1,4 +1,4 @@
-import { CreateUserProps, User, UserSnapshot } from '@app/domain/identity';
+import { CreateUserProps, User, UserSnapshot } from '@app/contexts/identity/domain/user/aggregates';
 import { faker } from '@faker-js/faker';
 import { createEntityFaker, createFaker } from '../../faker-factory';
 import { fsUserSecurity } from './user-security.faker';

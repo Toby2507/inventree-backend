@@ -3,7 +3,7 @@
   "compilerOptions": {
     "declaration": true,
     "root": "src",
-    "outDir": "../../dist/libs/domain"
+    "outDir": "../../dist/libs/contexts"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test"]

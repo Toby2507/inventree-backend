@@ -73,13 +73,13 @@
         "tsConfigPath": "libs/database/tsconfig.lib.json"
       }
     },
-    "domain": {
+    "contexts": {
       "type": "library",
-      "root": "libs/domain",
+      "root": "libs/contexts",
       "entryFile": "index",
-      "sourceRoot": "libs/domain/src",
+      "sourceRoot": "libs/contexts/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/domain/tsconfig.lib.json"
+        "tsConfigPath": "libs/contexts/tsconfig.lib.json"
       }
     },
     "common": {

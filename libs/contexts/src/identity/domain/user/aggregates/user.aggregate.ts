@@ -1,4 +1,5 @@
 import { AggregateRoot, Email, PhoneNumber } from '@app/common';
+import { MfaType, UserSecurity, UserSecuritySnapshot } from '../entities';
 import {
   AuthenticationBlockedEvent,
   UserDisabledEvent,
@@ -14,7 +15,6 @@ import {
   UserNotActiveException,
 } from '../exceptions';
 import { PasswordHash, PersonName, UserID } from '../value-objects';
-import { MfaType, UserSecurity, UserSecuritySnapshot } from './user-security.entity';
 
 type AuthenticationCheck =
   | { allowed: true }

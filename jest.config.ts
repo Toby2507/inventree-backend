@@ -6,7 +6,7 @@ const baseProjectConfig = {
   globalTeardown: '<rootDir>/jest/global-teardown.ts',
   moduleNameMapper: {
     '^@app/database(|/.*)$': '<rootDir>/libs/database/src$1',
-    '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src$1',
+    '^@app/contexts(|/.*)$': '<rootDir>/libs/contexts/src$1',
     '^@app/common(|/.*)$': '<rootDir>/libs/common/src$1',
     '^@app/testing(|/.*)$': '<rootDir>/libs/testing/src$1',
   },
@@ -38,7 +38,7 @@ module.exports = {
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   moduleNameMapper: {
     '^@app/database(|/.*)$': '<rootDir>/libs/database/src$1',
-    '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src$1',
+    '^@app/contexts(|/.*)$': '<rootDir>/libs/contexts/src$1',
     '^@app/common(|/.*)$': '<rootDir>/libs/common/src$1',
     '^@app/testing(|/.*)$': '<rootDir>/libs/testing/src$1',
   },

@@ -11,7 +11,6 @@ export async function up(db: Kysely<any>): Promise<void> {
 CREATE TABLE operational.store_suppliers (
   id UUID PRIMARY KEY DEFAULT uuidv7(),
   store_id UUID NOT NULL REFERENCES operational.stores(id) ON DELETE CASCADE,
-  created_by_store_member_id UUID REFERENCES operational.store_members(id) ON DELETE SET NULL,
 
   name TEXT NOT NULL,
   normalized_name TEXT NOT NULL,

@@ -10,7 +10,6 @@ export async function up(db: Kysely<any>): Promise<void> {
 CREATE TABLE operational.store_categories (
   id UUID PRIMARY KEY DEFAULT uuidv7(),
   store_id UUID NOT NULL REFERENCES operational.stores(id) ON DELETE CASCADE,
-  created_by_store_member_id UUID REFERENCES operational.store_members(id) ON DELETE SET NULL,
   -- Hard delete of parent blocked by RESTRICT.
   -- Soft-deleting a parent with active children must be prevented at application layer.
   parent_category_id UUID REFERENCES operational.store_categories(id) ON DELETE RESTRICT,

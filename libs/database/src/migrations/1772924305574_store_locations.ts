@@ -36,7 +36,6 @@ CREATE TYPE operational.location_type AS ENUM (
 CREATE TABLE operational.store_locations (
   id UUID PRIMARY KEY DEFAULT uuidv7(),
   store_id UUID NOT NULL REFERENCES operational.stores(id) ON DELETE CASCADE,
-  created_by_store_member_id UUID REFERENCES operational.store_members(id) ON DELETE SET NULL,
   -- Hard delete of parent blocked by RESTRICT.
   -- Soft-deleting a parent with active children must be prevented at application layer.
   parent_location_id UUID REFERENCES operational.store_locations(id) ON DELETE RESTRICT,

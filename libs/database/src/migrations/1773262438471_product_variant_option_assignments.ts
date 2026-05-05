@@ -12,12 +12,12 @@ export async function up(db: Kysely<any>): Promise<void> {
 CREATE TABLE operational.product_variant_option_assignments (
   store_id UUID NOT NULL REFERENCES operational.stores(id) ON DELETE CASCADE,
   product_variant_id UUID NOT NULL REFERENCES operational.product_variants(id) ON DELETE CASCADE,
-  store_variant_option_id UUID NOT NULL REFERENCES operational.store_variant_options(id) ON DELETE RESTRICT,
+  product_variant_option_id UUID NOT NULL REFERENCES operational.product_variant_options(id) ON DELETE RESTRICT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-  PRIMARY KEY (store_id, product_variant_id, store_variant_option_id)
+  PRIMARY KEY (store_id, product_variant_id, product_variant_option_id)
 
-  -- NOTE: store_variant_option_id must belong to the same store as the variant.
+  -- NOTE: product_variant_option_id must belong to the same store as the variant.
   -- Enforced at application layer in AssignVariantOptionUseCase.
   -- NOTE: only one option per variant group per variant is allowed.
   -- e.g., a variant cannot be both "Red" and "Blue" from the same Color group.
@@ -32,7 +32,7 @@ CREATE INDEX idx_variant_option_assignments_variant
 -- Reverse lookup: find all variants that have a specific option
 -- e.g., "all variants with option Black"
 CREATE INDEX idx_variant_option_assignments_option
-  ON operational.product_variant_option_assignments (store_id, store_variant_option_id);
+  ON operational.product_variant_option_assignments (store_id, product_variant_option_id);
 
 -- RLS: (tenant-scoped)
 ALTER TABLE operational.product_variant_option_assignments ENABLE ROW LEVEL SECURITY;

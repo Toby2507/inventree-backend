@@ -11,7 +11,6 @@ export async function up(db: Kysely<any>): Promise<void> {
 CREATE TABLE operational.pos_terminals (
   id UUID PRIMARY KEY DEFAULT uuidv7(),
   store_id UUID NOT NULL REFERENCES operational.stores(id) ON DELETE CASCADE,
-  created_by_store_member_id UUID REFERENCES operational.store_members(id) ON DELETE SET NULL,
 
   terminal_code TEXT NOT NULL,           -- e.g., "T1", "FRONT-01"
   device_fingerprint TEXT NOT NULL,      -- stable fingerprint from client app

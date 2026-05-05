@@ -24,7 +24,7 @@ CREATE TABLE analytics.fact_sales (
 
   -- Tenant identity
   store_id UUID NOT NULL,
-  business_id UUID,                      -- optional if you want rollups by business later
+  business_id UUID,                      -- optional if we want rollups by business later
 
   -- POS lineage
   pos_transaction_id UUID NOT NULL,

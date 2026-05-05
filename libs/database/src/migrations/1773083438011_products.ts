@@ -18,7 +18,6 @@ CREATE TYPE operational.quantity_mode AS ENUM ('unit', 'weight', 'volume', 'leng
 CREATE TABLE operational.products (
   id UUID PRIMARY KEY DEFAULT uuidv7(),
   store_id UUID NOT NULL REFERENCES operational.stores(id) ON DELETE CASCADE,
-  created_by_store_member_id UUID REFERENCES operational.store_members(id) ON DELETE SET NULL,
   tax_class_id UUID REFERENCES operational.tax_classes(id) ON DELETE SET NULL,
   category_id UUID REFERENCES operational.store_categories(id) ON DELETE SET NULL,
   base_uom_id UUID REFERENCES operational.store_uoms(id) ON DELETE SET NULL,

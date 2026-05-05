@@ -12,7 +12,6 @@ CREATE TABLE operational.product_media (
   store_id UUID NOT NULL REFERENCES operational.stores(id) ON DELETE CASCADE,
   product_id UUID NOT NULL REFERENCES operational.products(id) ON DELETE CASCADE,
   media_asset_id UUID NOT NULL REFERENCES operational.media_assets(id) ON DELETE RESTRICT,
-  created_by_store_member_id UUID REFERENCES operational.store_members(id) ON DELETE SET NULL,
 
   sort_order INT, -- sort using ASC NULLS LAST to keep nulls at the end;
   is_primary BOOLEAN NOT NULL DEFAULT FALSE,

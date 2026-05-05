@@ -21,7 +21,6 @@ CREATE TYPE operational.discount_scope AS ENUM (
 CREATE TABLE operational.store_discounts (
   id UUID PRIMARY KEY DEFAULT uuidv7(),
   store_id UUID NOT NULL REFERENCES operational.stores(id) ON DELETE CASCADE,
-  created_by_store_member_id UUID REFERENCES operational.store_members(id) ON DELETE SET NULL,
   code TEXT NOT NULL,             -- stable code e.g. "SAVE10", "STAFF50"
   name TEXT NOT NULL,             -- display name e.g. "10% Off", "Staff Discount"
   normalized_name TEXT NOT NULL,

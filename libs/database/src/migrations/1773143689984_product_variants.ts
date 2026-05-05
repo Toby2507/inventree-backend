@@ -13,7 +13,6 @@ CREATE TABLE operational.product_variants (
   store_id UUID NOT NULL REFERENCES operational.stores(id) ON DELETE CASCADE,
   product_id UUID NOT NULL REFERENCES operational.products(id) ON DELETE CASCADE,
   barcode_registry_id UUID REFERENCES operational.barcode_registry(id) ON DELETE SET NULL,
-  created_by_store_member_id UUID REFERENCES operational.store_members(id) ON DELETE SET NULL,
 
   sku TEXT,
   barcode TEXT,

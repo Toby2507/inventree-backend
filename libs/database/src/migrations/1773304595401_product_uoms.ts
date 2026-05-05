@@ -16,7 +16,6 @@ CREATE TYPE operational.product_uom_usage AS ENUM ('sale', 'purchase', 'both');
 CREATE TABLE operational.product_uoms (
   id UUID PRIMARY KEY DEFAULT uuidv7(),
   store_id UUID NOT NULL REFERENCES operational.stores(id) ON DELETE CASCADE,
-  created_by_store_member_id UUID REFERENCES operational.store_members(id) ON DELETE SET NULL,
   product_id UUID NOT NULL REFERENCES operational.products(id) ON DELETE CASCADE,
   uom_id UUID NOT NULL REFERENCES operational.store_uoms(id) ON DELETE RESTRICT,
 

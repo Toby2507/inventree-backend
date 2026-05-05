@@ -26,28 +26,6 @@ CREATE TABLE operational.product_variants (
   unit_precision SMALLINT NOT NULL DEFAULT 0,
   pack_size TEXT,
 
-  -- Pricing
-  selling_price DECIMAL(19,4) NOT NULL,
-  min_selling_price DECIMAL(19,4),
-
-  -- Costing
-  cost_price DECIMAL(19,4),
-  cost_updated_at TIMESTAMPTZ,
-  -- Inherits from store_settings.stock_valuation_method if not overridden
-  stock_valuation_method operational.stock_valuation_method NOT NULL DEFAULT 'weighted_average',
-  -- Whether to auto-update cost_price on new inventory transactions
-  auto_update_cost BOOLEAN NOT NULL DEFAULT TRUE,
-
-  -- Inventory behavior
-  allow_negative_inventory BOOLEAN NOT NULL DEFAULT FALSE,
-  allow_discount BOOLEAN NOT NULL DEFAULT TRUE,
-  -- Stored as decimal fraction: 0.5 = 50%, 1.0 = 100%. NULL = inherits from store_settings
-  max_discount_percent DECIMAL(8,6),
-
-  -- Replenishment hints
-  reorder_point DECIMAL(19,4),
-  reorder_quantity DECIMAL(19,4),
-
   sort_order INT, -- sort using ASC NULLS LAST to keep nulls at the end.
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
 
@@ -60,28 +38,14 @@ CREATE TABLE operational.product_variants (
   deleted_at TIMESTAMPTZ,
 
   -- Constraints
+  CONSTRAINT ux_product_variants_store_id_id
+    UNIQUE (store_id, id),
   CONSTRAINT chk_product_variants_attributes_object
     CHECK (jsonb_typeof(attributes) = 'object'),
   CONSTRAINT chk_product_variants_metadata_object
     CHECK (jsonb_typeof(metadata) = 'object'),
-  CONSTRAINT chk_product_variants_prices_nonnegative
-    CHECK (
-      selling_price >= 0
-      AND (cost_price IS NULL OR cost_price >= 0)
-      AND (min_selling_price IS NULL OR min_selling_price >= 0)
-    ),
-  CONSTRAINT chk_product_variants_discount_rate_valid
-    CHECK (
-      max_discount_percent IS NULL
-      OR (max_discount_percent >= 0 AND max_discount_percent <= 1)
-    ),
   CONSTRAINT chk_product_variants_unit_precision_valid
-    CHECK (unit_precision >= 0 AND unit_precision <= 6),
-  CONSTRAINT chk_product_variants_reorder_nonnegative
-    CHECK (
-      (reorder_point IS NULL OR reorder_point >= 0)
-      AND (reorder_quantity IS NULL OR reorder_quantity >= 0)
-    )
+    CHECK (unit_precision >= 0 AND unit_precision <= 6)
 );
 
 -- Indexes

@@ -8,7 +8,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 -- One row per store (store_id is both PK and tenant key).
 -- Keep "query-critical" settings as columns; keep low-stakes expansion as JSONB.
 
-CREATE TYPE operational.stock_valuation_method AS ENUM ('fifo', 'lifo', 'weighted_average', 'standard_cost');
+CREATE TYPE operational.stock_valuation_method AS ENUM ('fifo', 'weighted_average', 'standard_cost');
 
 CREATE TABLE operational.store_settings (
   store_id UUID PRIMARY KEY REFERENCES operational.stores(id),
@@ -31,6 +31,7 @@ CREATE TABLE operational.store_settings (
   -- Default costing method; individual products can override.
   -- Defaults to weighted_average — most universally accepted under IFRS.
   stock_valuation_method operational.stock_valuation_method NOT NULL DEFAULT 'weighted_average',
+  auto_update_cost BOOLEAN NOT NULL DEFAULT TRUE,
   low_stock_threshold INT NOT NULL DEFAULT 10,
   auto_reorder_enabled BOOLEAN NOT NULL DEFAULT TRUE,
   

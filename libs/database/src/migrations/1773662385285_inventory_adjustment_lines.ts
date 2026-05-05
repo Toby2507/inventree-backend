@@ -17,9 +17,9 @@ CREATE TABLE operational.inventory_adjustment_lines (
   location_id UUID REFERENCES operational.store_locations(id) ON DELETE SET NULL,
   reason_id UUID REFERENCES operational.inventory_adjustment_reasons(id) ON DELETE SET NULL,
   entered_uom_id UUID REFERENCES operational.store_uoms(id) ON DELETE SET NULL,
-  -- Optional lot allocation for lot-tracked products
+  -- Optional lot/serial allocation for lot/serial-tracked products
+  -- NOTE: id must belong to the same product_variant. Enforced at application layer.
   lot_id UUID REFERENCES operational.inventory_lots(id) ON DELETE RESTRICT,
-  -- Optional serial allocation for serial-tracked products  
   serial_id UUID REFERENCES operational.inventory_serials(id) ON DELETE RESTRICT,
 
 
@@ -49,10 +49,8 @@ CREATE TABLE operational.inventory_adjustment_lines (
     ),
   CONSTRAINT chk_inventory_adjustment_lines_value_nonnegative
     CHECK (unit_cost IS NULL OR unit_cost >= 0),
-  -- A line can reference a lot or a serial but not both
   CONSTRAINT chk_adjustment_lines_lot_serial_exclusive
     CHECK (lot_id IS NULL OR serial_id IS NULL),
-  -- line_value should equal quantity * unit_cost when both are set
   CONSTRAINT chk_adjustment_lines_value_consistency
     CHECK (
       line_value IS NULL

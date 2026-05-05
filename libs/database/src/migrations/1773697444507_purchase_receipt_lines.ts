@@ -15,9 +15,9 @@ CREATE TABLE operational.purchase_receipt_lines (
   purchase_receipt_id UUID NOT NULL REFERENCES operational.purchase_receipts(id) ON DELETE CASCADE,
   purchase_order_line_id UUID REFERENCES operational.purchase_order_lines(id) ON DELETE SET NULL,
   entered_uom_id UUID REFERENCES operational.store_uoms(id) ON DELETE SET NULL,
-  -- Optional lot for lot-tracked products (created or matched on receipt)
+  -- Optional lot/serial allocation for lot/serial-tracked products
+  -- NOTE: id must belong to the same product_variant. Enforced at application layer.
   lot_id UUID REFERENCES operational.inventory_lots(id) ON DELETE RESTRICT,
-  -- Optional serial for serial-tracked products (created on receipt)
   serial_id UUID REFERENCES operational.inventory_serials(id) ON DELETE RESTRICT,
   -- NULL = inherit from purchase_receipt.location_id
   -- NOT NULL = override for this specific line
@@ -30,7 +30,9 @@ CREATE TABLE operational.purchase_receipt_lines (
   line_subtotal DECIMAL(19,4) NOT NULL,
   discount_amount DECIMAL(19,4) NOT NULL DEFAULT 0,
   tax_amount DECIMAL(19,4) NOT NULL DEFAULT 0,
-  -- line_total = (unit_cost * quantity) - discount_amount + tax_amount
+  -- The portion of the header's shipping_amount/other_fees allocated to this line
+  allocated_landed_costs DECIMAL(19,4) NOT NULL DEFAULT 0,
+  -- line_total = (unit_cost * quantity) - discount_amount + tax_amount + allocated_landed_costs
   -- Computed and stored at line addition. Enforced at application layer
   line_total DECIMAL(19,4) NOT NULL,
 
@@ -57,7 +59,7 @@ CREATE TABLE operational.purchase_receipt_lines (
     ),
   CONSTRAINT chk_purchase_receipt_lines_money_nonnegative
     CHECK (
-      unit_cost >= 0 AND line_subtotal >= 0 AND discount_amount >= 0 AND tax_amount >= 0 AND line_total >= 0
+      unit_cost >= 0 AND line_subtotal >= 0 AND discount_amount >= 0 AND tax_amount >= 0 AND allocated_landed_costs >= 0 AND line_total >= 0
     ),
   -- A line can reference a lot or a serial but not both
   CONSTRAINT chk_receipt_lines_lot_serial_exclusive

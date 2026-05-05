@@ -13,11 +13,9 @@ CREATE TABLE operational.inventory_transfer_lines (
   product_variant_id UUID NOT NULL REFERENCES operational.product_variants(id) ON DELETE RESTRICT,
   from_location_id UUID NOT NULL REFERENCES operational.store_locations(id) ON DELETE RESTRICT,
   to_location_id UUID NOT NULL REFERENCES operational.store_locations(id) ON DELETE RESTRICT,
-  -- Optional lot allocation for lot-tracked products
-  -- NOTE: lot_id must belong to the same product_variant. Enforced at application layer.
+  -- Optional lot/serial allocation for lot/serial-tracked products
+  -- NOTE: id must belong to the same product_variant. Enforced at application layer.
   lot_id UUID REFERENCES operational.inventory_lots(id) ON DELETE RESTRICT,
-  -- Optional serial allocation for serial-tracked products
-  -- NOTE: serial_id must belong to the same product_variant. Enforced at application layer.
   serial_id UUID REFERENCES operational.inventory_serials(id) ON DELETE RESTRICT,
 
   quantity NUMERIC(19,6) NOT NULL,

@@ -13,6 +13,10 @@ CREATE TABLE operational.inventory_stocktake_lines (
   product_variant_id UUID NOT NULL REFERENCES operational.product_variants(id) ON DELETE RESTRICT,
   location_id UUID NOT NULL REFERENCES operational.store_locations(id) ON DELETE RESTRICT,
   stocktake_id UUID NOT NULL REFERENCES operational.inventory_stocktakes(id) ON DELETE CASCADE,
+  -- Optional lot/serial allocation for lot/serial-tracked products
+  -- NOTE: id must belong to the same product_variant. Enforced at application layer.
+  lot_id UUID REFERENCES operational.inventory_lots(id) ON DELETE RESTRICT,
+  serial_id UUID REFERENCES operational.inventory_serials(id) ON DELETE RESTRICT,
 
   expected_qty NUMERIC(19,6), -- snapshot from inventory_items at time of count (optional)
   -- Zero is valid: means product was counted and none were found.
@@ -27,8 +31,16 @@ CREATE TABLE operational.inventory_stocktake_lines (
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ,
 
+  -- Constraints
   CONSTRAINT chk_inventory_stocktake_lines_metadata_object
-    CHECK (jsonb_typeof(metadata) = 'object')
+    CHECK (jsonb_typeof(metadata) = 'object'),
+  CONSTRAINT chk_inventory_stocktake_lines_qty_nonnegative
+    CHECK (
+      (expected_qty IS NULL OR expected_qty >= 0)
+      AND (counted_qty IS NULL OR counted_qty >= 0)
+    ),
+  CONSTRAINT chk_inventory_stocktake_lines_lot_serial_exclusive
+    CHECK (lot_id IS NULL OR serial_id IS NULL)
 );
 
 -- Indexes

@@ -15,6 +15,11 @@ CREATE TABLE operational.pos_transaction_lines (
   product_variant_id UUID NOT NULL REFERENCES operational.product_variants(id) ON DELETE RESTRICT,
   discount_id UUID REFERENCES operational.store_discounts(id) ON DELETE SET NULL,
   entered_uom_id UUID REFERENCES operational.store_uoms(id) ON DELETE SET NULL,
+  location_id UUID REFERENCES operational.store_locations(id) ON DELETE SET NULL,
+  -- Optional lot/serial allocation for lot/serial-tracked products
+  -- NOTE: id must belong to the same product_variant. Enforced at application layer.
+  lot_id UUID REFERENCES operational.inventory_lots(id) ON DELETE RESTRICT,
+  serial_id UUID REFERENCES operational.inventory_serials(id) ON DELETE RESTRICT,
 
   quantity DECIMAL(19,6) NOT NULL, -- base quantity used for inventory deduction
   entered_quantity DECIMAL(19,6),
@@ -27,6 +32,11 @@ CREATE TABLE operational.pos_transaction_lines (
   -- Computed and stored at line addition. Enforced at application layer
   line_total DECIMAL(19,4) NOT NULL DEFAULT 0,
 
+  -- Cost snapshot for COGS calculation at time of sale. Updated at line addition and immutable thereafter.
+  -- For returns/refunds, we keep the original cost and quantity to accurately reverse COGS even if current cost/quantity changes.
+  unit_cost DECIMAL(19,4) NOT NULL DEFAULT 0,
+  total_cost DECIMAL(19,4) NOT NULL DEFAULT 0, -- unit_cost * quantity, stored to avoid recomputation during returns/refunds
+
   -- Snapshot of product descriptive fields for receipts even if product later changes
   product_name_snapshot TEXT NOT NULL,
   sku_snapshot TEXT,
@@ -38,6 +48,7 @@ CREATE TABLE operational.pos_transaction_lines (
   updated_at TIMESTAMPTZ,
   deleted_at TIMESTAMPTZ,
 
+  -- Constraints
   CONSTRAINT chk_pos_transaction_lines_metadata_object
     CHECK (jsonb_typeof(metadata) = 'object'),
   CONSTRAINT chk_pos_transaction_lines_qty_positive
@@ -50,7 +61,10 @@ CREATE TABLE operational.pos_transaction_lines (
   CONSTRAINT chk_pos_transaction_lines_money_nonnegative
     CHECK (
       unit_price >= 0 AND line_subtotal >= 0 AND discount_amount >= 0 AND tax_amount >= 0 AND line_total >= 0
-    )
+    ),
+  CONSTRAINT chk_pos_transaction_lines_lot_serial_exclusive
+    CHECK (lot_id IS NULL OR serial_id IS NULL)
+
 );
 
 -- Indexes

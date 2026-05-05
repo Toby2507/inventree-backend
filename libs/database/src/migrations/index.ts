@@ -70,6 +70,10 @@ import * as report_runs from './1774122864674_report_runs';
 import * as fact_sales from './1774124176810_fact_sales';
 import * as product_trend_snapshots from './1774125841794_product_trend_snapshots';
 import * as inventory_recommendations from './1774172838057_inventory_recommendations';
+import * as product_pricing from './1777996525503_product_pricing';
+import * as inventory_item_settings from './1778015283849_inventory_item_settings';
+import * as inventory_cost_snapshots from './1778019659207_inventory_cost_snapshots';
+import * as inventory_cost_layers from './1778020637048_inventory_cost_layers';
 
 export const migrations: Record<string, Migration> = {
   '1772871100254_extensions_and_schemas': extensions_and_schemas,
@@ -143,4 +147,8 @@ export const migrations: Record<string, Migration> = {
   '1774124176810_fact_sales': fact_sales,
   '1774125841794_product_trend_snapshots': product_trend_snapshots,
   '1774172838057_inventory_recommendations': inventory_recommendations,
+  '1777996525503_product_pricing': product_pricing,
+  '1778015283849_inventory_item_settings': inventory_item_settings,
+  '1778019659207_inventory_cost_snapshots': inventory_cost_snapshots,
+  '1778020637048_inventory_cost_layers': inventory_cost_layers,
 };

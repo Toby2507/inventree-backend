@@ -32,15 +32,17 @@ CREATE TABLE operational.pos_transactions (
 
   -- Monetary snapshot (stored to make completed txn immutable + reportable without recompute)
   currency_code CHAR(3) NOT NULL,              -- ISO-4217, from store settings at time of txn
-  subtotal_amount NUMERIC(19,4) NOT NULL DEFAULT 0,
-  discount_amount NUMERIC(19,4) NOT NULL DEFAULT 0,
-  tax_amount NUMERIC(19,4) NOT NULL DEFAULT 0,
+  subtotal_amount DECIMAL(19,4) NOT NULL DEFAULT 0,
+  discount_amount DECIMAL(19,4) NOT NULL DEFAULT 0,
+  tax_amount DECIMAL(19,4) NOT NULL DEFAULT 0,
   -- total_amount = subtotal_amount - discount_amount + tax_amount + rounding_adjustment_amount
   -- Computed and stored at completion. Enforced at application layer
-  total_amount NUMERIC(19,4) NOT NULL DEFAULT 0,
+  total_amount DECIMAL(19,4) NOT NULL DEFAULT 0,
+  -- Allows for instant Gross Profit reporting
+  total_cost_amount DECIMAL(19,4) NOT NULL DEFAULT 0,
 
   -- Rounding snapshot (cash rounding rules etc.)
-  rounding_adjustment_amount NUMERIC(19,4) NOT NULL DEFAULT 0, -- e.g., +0.05 / -0.05
+  rounding_adjustment_amount DECIMAL(19,4) NOT NULL DEFAULT 0, -- e.g., +0.05 / -0.05
 
   notes TEXT,
   metadata JSONB NOT NULL DEFAULT '{}'::jsonb,

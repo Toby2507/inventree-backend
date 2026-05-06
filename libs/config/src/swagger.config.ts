@@ -6,7 +6,7 @@ const DOCUMENTATION_URL_PATH = 'api/docs';
 
 export const setupSwagger = (app: INestApplication): OpenAPIObject => {
   const configService = app.get(ConfigService);
-  const appName = configService.get<string>('APP_NAME')!;
+  const appName = configService.get<string>('SYSTEM_NAME')!;
 
   const documentationOptions = new DocumentBuilder()
     .setTitle(appName)

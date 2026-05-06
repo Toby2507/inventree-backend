@@ -1,3 +1,4 @@
+import { setupSwagger } from '@app/config';
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -24,6 +25,8 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
+
+  setupSwagger(app);
 
   const configService = app.get(ConfigService);
   const port = configService.get('PORT') || 3000;

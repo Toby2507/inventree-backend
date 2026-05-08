@@ -33,8 +33,7 @@ export async function down(db: Kysely<any>): Promise<void> {
   await sql
     .raw(
       `
-DROP SCHEMA IF EXISTS analytics CASCADE;
-DROP SCHEMA IF EXISTS operational CASCADE;
+DROP FUNCTION IF EXISTS operational.set_updated_at;
   `,
     )
     .execute(db);

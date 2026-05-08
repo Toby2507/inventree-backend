@@ -1,5 +1,9 @@
-import { migrations } from '@app/database/migrations';
-import { Kysely, PostgresDialect, Migrator, sql } from 'kysely';
+import {
+  analyticsMigrations,
+  bootstrapMigrations,
+  operationalMigrations,
+} from '@app/database/migrations';
+import { Kysely, Migrator, PostgresDialect, sql } from 'kysely';
 import { Client, Pool } from 'pg';
 
 const SUPERUSER_CONFIG = {
@@ -53,7 +57,13 @@ export const runMigrations = async (dbName: string): Promise<void> => {
   try {
     const migrator = new Migrator({
       db,
-      provider: { getMigrations: async () => migrations },
+      provider: {
+        getMigrations: async () => ({
+          ...bootstrapMigrations,
+          ...operationalMigrations,
+          ...analyticsMigrations,
+        }),
+      },
     });
     console.log(`[Global Setup] Running migrations for ${dbName}...`);
     const { error } = await migrator.migrateToLatest();

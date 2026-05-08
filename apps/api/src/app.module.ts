@@ -2,11 +2,18 @@ import { validate } from '@app/config';
 import { DatabaseModule } from '@app/database';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { CqrsModule } from '@nestjs/cqrs';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true, validate }), DatabaseModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true, validate }),
+    CqrsModule.forRoot(),
+    // Globals
+    DatabaseModule,
+    // Modules
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -1,11 +1,11 @@
 import { OperationalDB } from '@app/database';
 import { Injectable } from '@nestjs/common';
-import { User, UserRepository } from '../../../domain';
+import { User, UserEmailAlreadyExistsException, UserRepository } from '../../../domain';
 import { UserMapper } from '../mappers';
 
 @Injectable()
 export class UserKyselyRepository implements UserRepository {
-  constructor(private readonly mapper: UserMapper) {}
+  private readonly mapper = new UserMapper();
 
   async existsByEmail(db: OperationalDB, email: string): Promise<boolean> {
     const result = await db
@@ -29,7 +29,8 @@ export class UserKyselyRepository implements UserRepository {
     try {
       await db.insertInto('users').values(userData).execute();
       await db.insertInto('user_security').values(security).execute();
-    } catch (error) {
+    } catch (error: any) {
+      if (error.code === '23505') throw new UserEmailAlreadyExistsException(userData.email);
       throw error;
     }
   }

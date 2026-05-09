@@ -1,1 +1,1 @@
-export * from './hashing.port';
+export { HASHING_PORT, HashingPort } from './hashing.port';

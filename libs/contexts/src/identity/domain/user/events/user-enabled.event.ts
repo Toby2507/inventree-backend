@@ -5,8 +5,10 @@ export interface UserEnabledPayload {
   reason?: string;
 }
 
-export class UserEnabledEvent extends DomainEvent {
-  readonly eventType = 'identity.user.enabled';
+export class UserEnabledEvent extends DomainEvent<UserEnabledPayload> {
+  static readonly EVENT_TYPE = 'identity.user.enabled';
+
+  readonly eventType = UserEnabledEvent.EVENT_TYPE;
   readonly aggregateType = 'user';
 
   constructor(public readonly payload: UserEnabledPayload) {

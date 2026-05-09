@@ -5,8 +5,10 @@ export interface UserSuspendedPayload {
   reason?: string;
 }
 
-export class UserSuspendedEvent extends DomainEvent {
-  readonly eventType = 'identity.user.suspended';
+export class UserSuspendedEvent extends DomainEvent<UserSuspendedPayload> {
+  static readonly EVENT_TYPE = 'identity.user.suspended';
+
+  readonly eventType = UserSuspendedEvent.EVENT_TYPE;
   readonly aggregateType = 'user';
 
   constructor(public readonly payload: UserSuspendedPayload) {

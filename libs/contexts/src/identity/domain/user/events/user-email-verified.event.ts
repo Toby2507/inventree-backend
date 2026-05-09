@@ -6,8 +6,10 @@ export interface UserEmailVerifiedPayload {
   verifiedAt: Date;
 }
 
-export class UserEmailVerifiedEvent extends DomainEvent {
-  readonly eventType = 'identity.user.email_verified';
+export class UserEmailVerifiedEvent extends DomainEvent<UserEmailVerifiedPayload> {
+  static readonly EVENT_TYPE = 'identity.user.email_verified';
+
+  readonly eventType = UserEmailVerifiedEvent.EVENT_TYPE;
   readonly aggregateType = 'user';
 
   constructor(public readonly payload: UserEmailVerifiedPayload) {

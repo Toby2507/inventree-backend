@@ -110,7 +110,7 @@ describe('UserSecurity Domain Entity', () => {
       expect(events).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            eventType: 'identity.user.locked_out',
+            eventType: UserLockedOutEvent.EVENT_TYPE,
             payload: expect.objectContaining({
               userId: security.userId,
               failedAttempts: 10,
@@ -166,7 +166,7 @@ describe('UserSecurity Domain Entity', () => {
       expect(events).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            eventType: 'identity.user.logged_in',
+            eventType: UserLoggedInEvent.EVENT_TYPE,
             payload: expect.objectContaining({
               userId: security.userId,
             }),

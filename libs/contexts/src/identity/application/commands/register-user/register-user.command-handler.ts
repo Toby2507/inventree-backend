@@ -1,3 +1,4 @@
+import { UUID_GENERATOR_PORT, UUIDGeneratorPort } from '@app/core';
 import { DatabaseContextService } from '@app/database';
 import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
@@ -15,12 +16,14 @@ export class RegisterUserCommandHandler implements ICommandHandler<RegisterUserC
   constructor(
     @Inject(HASHING_PORT) private readonly hashingPort: HashingPort,
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
+    @Inject(UUID_GENERATOR_PORT) private readonly idGenerator: UUIDGeneratorPort,
     private readonly db: DatabaseContextService,
   ) {}
 
   async execute(command: RegisterUserCommand): Promise<void> {
-    const { id, email, password, firstName, lastName, displayName } = command.props;
+    const { email, password, firstName, lastName, displayName } = command.props;
     await this.ensureUserCanRegister(email);
+    const id = this.idGenerator.generateV7();
     const passwordHash = await this.hashingPort.hash(password);
     const user = User.create({ id, email, passwordHash, firstName, lastName, displayName });
     await this.db.platformCommand(async (ctx) => {

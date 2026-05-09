@@ -6,14 +6,14 @@ import { AnalyticsDB, OperationalDB } from './db.schema.types';
 @Injectable()
 export class DatabaseProvider implements OnApplicationBootstrap, OnApplicationShutdown {
   private readonly logger = new Logger(DatabaseProvider.name);
-  private _operationalPrimary!: Kysely<OperationalDB>;
-  private _operationalReplica!: Kysely<OperationalDB>;
-  private _analyticsPrimary!: Kysely<AnalyticsDB>;
+  private _operationalPrimary!: OperationalDB;
+  private _operationalReplica!: OperationalDB;
+  private _analyticsPrimary!: AnalyticsDB;
 
-  private _analyticsRead!: Kysely<AnalyticsDB>;
-  private _analyticsWrite!: Kysely<AnalyticsDB>;
-  private _operationalRead!: Kysely<OperationalDB>;
-  private _operationalWrite!: Kysely<OperationalDB>;
+  private _analyticsRead!: AnalyticsDB;
+  private _analyticsWrite!: AnalyticsDB;
+  private _operationalRead!: OperationalDB;
+  private _operationalWrite!: OperationalDB;
 
   async onApplicationBootstrap(): Promise<void> {
     this._operationalPrimary = this.createDbInstance({
@@ -91,37 +91,37 @@ export class DatabaseProvider implements OnApplicationBootstrap, OnApplicationSh
     }
   }
 
-  get forBootstrapMigration(): Kysely<OperationalDB> {
+  get forBootstrapMigration(): OperationalDB {
     if (!this._operationalPrimary) throw new Error('Operational database not initialised');
     return this._operationalPrimary;
   }
 
-  get forOperationalMigration(): Kysely<OperationalDB> {
+  get forOperationalMigration(): OperationalDB {
     if (!this._operationalPrimary) throw new Error('Operational database not initialised');
     return this._operationalPrimary;
   }
 
-  get forAnalyticsMigration(): Kysely<AnalyticsDB> {
+  get forAnalyticsMigration(): AnalyticsDB {
     if (!this._analyticsPrimary) throw new Error('Analytics database not initialised');
     return this._analyticsPrimary;
   }
 
-  get analyticsRead(): Kysely<AnalyticsDB> {
+  get analyticsRead(): AnalyticsDB {
     if (!this._analyticsRead) throw new Error('Analytics database not initialised');
     return this._analyticsRead;
   }
 
-  get analyticsWrite(): Kysely<AnalyticsDB> {
+  get analyticsWrite(): AnalyticsDB {
     if (!this._analyticsWrite) throw new Error('Analytics database not initialised');
     return this._analyticsWrite;
   }
 
-  get operationalRead(): Kysely<OperationalDB> {
+  get operationalRead(): OperationalDB {
     if (!this._operationalRead) throw new Error('Operational database not initialised');
     return this._operationalRead;
   }
 
-  get operationalWrite(): Kysely<OperationalDB> {
+  get operationalWrite(): OperationalDB {
     if (!this._operationalWrite) throw new Error('Operational database not initialised');
     return this._operationalWrite;
   }

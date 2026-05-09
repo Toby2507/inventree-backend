@@ -4,9 +4,9 @@ import { DatabaseProvider } from './database.provider';
 import { analyticsMigrations, operationalMigrations } from './migrations';
 import { bootstrapMigrations } from './migrations/bootstrap';
 
-export type MigrationTarget = 'analytics' | 'bootstrap' | 'operational';
+type MigrationTarget = 'analytics' | 'bootstrap' | 'operational';
 
-export class StaticMigrationProvider implements MigrationProvider {
+class StaticMigrationProvider implements MigrationProvider {
   constructor(private readonly migrations: Record<string, Migration>) {}
 
   async getMigrations(): Promise<Record<string, Migration>> {

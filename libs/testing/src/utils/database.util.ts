@@ -146,12 +146,17 @@ export const dropDatabasesByPrefix = async (prefix: string): Promise<void> => {
   }
 };
 
-export const createTestContext = async () => {
+export interface TestContext<T = any> {
+  db: Kysely<T>;
+  rollback(): Promise<void>;
+}
+
+export const createTestContext = async (schema: string = 'operational'): Promise<TestContext> => {
   const db = createTestDb();
   const trx = await db.startTransaction().execute();
 
   return {
-    db: trx,
+    db: trx.withSchema(schema),
     async rollback() {
       await trx.rollback().execute();
       await db.destroy();

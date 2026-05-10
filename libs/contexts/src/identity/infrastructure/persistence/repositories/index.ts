@@ -1,1 +1,1 @@
-export * from './user.kysely.repository';
+export { UserKyselyRepository } from './user.kysely.repository';

@@ -1,5 +1,5 @@
 const baseProjectConfig = {
-  setupFilesAfterEnv: ['<rootDir>/jest/setup-after-env.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest/setup-after-env.ts', '<rootDir>/jest/setup-db.ts'],
   transform: { '^.+\\.(t|j)s$': 'ts-jest' },
   testEnvironment: 'node',
   globalSetup: '<rootDir>/jest/global-setup.ts',
@@ -19,7 +19,7 @@ module.exports = {
   rootDir: '.',
   passWithNoTests: true,
   transform: { '^.+\\.(t|j)s$': 'ts-jest' },
-  setupFilesAfterEnv: ['<rootDir>/jest/setup-after-env.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest/setup-after-env.ts', '<rootDir>/jest/setup-db.ts'],
   collectCoverageFrom: [
     'apps/**/*.{ts,js}',
     'libs/**/*.{ts,js}',

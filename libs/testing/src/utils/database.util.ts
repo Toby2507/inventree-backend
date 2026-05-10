@@ -3,7 +3,7 @@ import {
   bootstrapMigrations,
   operationalMigrations,
 } from '@app/database/migrations';
-import { Kysely, Migrator, PostgresDialect, sql } from 'kysely';
+import { Kysely, Migrator, PostgresDialect } from 'kysely';
 import { Client, Pool } from 'pg';
 
 const SUPERUSER_CONFIG = {
@@ -15,6 +15,14 @@ const SUPERUSER_CONFIG = {
 };
 const EXTENSIONS = ['citext', 'pg_trgm', 'ltree', 'pg_stat_statements', 'postgis'];
 
+export const DB_TEMPLATE_NAME = 'integration_template';
+
+export const getTestDbName = () => {
+  const workerId = process.env.JEST_WORKER_ID || '1';
+  return `integration_worker_${Number(workerId)}`;
+};
+
+// Setup functions
 export const recreateTestDB = async (name: string) => {
   const client = new Client(SUPERUSER_CONFIG);
   await client.connect();
@@ -31,13 +39,6 @@ export const installExtensions = async (dbName: string) => {
   const client = new Client({ ...SUPERUSER_CONFIG, database: dbName });
   await client.connect();
   for (const ext of EXTENSIONS) await client.query(`CREATE EXTENSION IF NOT EXISTS ${ext};`);
-  await client.end();
-};
-
-export const dropTestDB = async (name: string) => {
-  const client = new Client(SUPERUSER_CONFIG);
-  await client.connect();
-  await client.query(`DROP DATABASE IF EXISTS ${name};`);
   await client.end();
 };
 
@@ -77,27 +78,83 @@ export const runMigrations = async (dbName: string): Promise<void> => {
   }
 };
 
-/**
- * Truncates all tables in the given schemas with CASCADE + RESTART IDENTITY.
- * Use in afterEach/afterAll hooks to keep integration tests isolated.
- *
- * TRUNCATE is not subject to RLS — no store context required.
- * Kysely migration tracking tables live in `public` and are unaffected.
- */
-export const truncateTables = async (
-  db: Kysely<any>,
-  schemas: string[] = ['operational'],
-): Promise<void> => {
-  const { rows } = await sql<{ schemaname: string; tablename: string }>`
-    SELECT schemaname, tablename
-    FROM pg_tables
-    WHERE schemaname = ANY(${schemas}::text[])
-    ORDER BY schemaname, tablename
-  `.execute(db);
+// Helper Functions
+export const cloneDatabase = async (sourceDb: string, targetDb: string) => {
+  const client = new Client(SUPERUSER_CONFIG);
+  await client.connect();
+  try {
+    await client.query(`CREATE DATABASE ${targetDb} TEMPLATE ${sourceDb};`);
+  } catch (error: any) {
+    if (error.code !== '42P04') throw error;
+  } finally {
+    await client.end();
+  }
+};
 
-  if (!rows.length) return;
+export const createTestDb = <T = any>(): Kysely<T> => {
+  const dbName = getTestDbName();
+  return new Kysely<T>({
+    dialect: new PostgresDialect({
+      pool: new Pool({
+        host: process.env.PG_HOST ?? 'localhost',
+        port: Number(process.env.PG_PORT ?? 5432),
+        database: dbName,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        max: 10,
+      }),
+    }),
+  });
+};
 
-  const tableRefs = rows.map((r) => `"${r.schemaname}"."${r.tablename}"`).join(', ');
+export const dropTestDB = async (name: string) => {
+  const client = new Client(SUPERUSER_CONFIG);
+  await client.connect();
+  // Kill active connections
+  await client.query(
+    `
+    SELECT pg_terminate_backend(pid)
+    FROM pg_stat_activity
+    WHERE datname = $1
+      AND pid <> pg_backend_pid()
+    `,
+    [name],
+  );
+  // Drop DB
+  await client.query(`DROP DATABASE IF EXISTS ${name};`);
+  await client.end();
+};
 
-  await sql.raw(`TRUNCATE TABLE ${tableRefs} RESTART IDENTITY CASCADE`).execute(db);
+export const dropDatabasesByPrefix = async (prefix: string): Promise<void> => {
+  const client = new Client(SUPERUSER_CONFIG);
+  await client.connect();
+  try {
+    // Find matching databases
+    const { rows } = await client.query<{ datname: string }>(
+      `SELECT datname FROM pg_database WHERE datname LIKE $1`,
+      [`${prefix}%`],
+    );
+    for (const row of rows) {
+      const dbName = row.datname;
+      // Prevent accidental dangerous drops
+      if (!dbName.startsWith(prefix)) continue;
+      console.log(`[Global Teardown] Dropping ${dbName}`);
+      await dropTestDB(dbName);
+    }
+  } finally {
+    await client.end();
+  }
+};
+
+export const createTestContext = async () => {
+  const db = createTestDb();
+  const trx = await db.startTransaction().execute();
+
+  return {
+    db: trx,
+    async rollback() {
+      await trx.rollback().execute();
+      await db.destroy();
+    },
+  };
 };

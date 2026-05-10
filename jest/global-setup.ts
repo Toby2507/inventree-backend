@@ -1,5 +1,5 @@
 import 'tsconfig-paths/register';
-import { installExtensions, recreateTestDB, runMigrations } from '@app/testing';
+import { DB_TEMPLATE_NAME, installExtensions, recreateTestDB, runMigrations } from '@app/testing';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 
@@ -8,7 +8,7 @@ const envFile = '.env.test';
 if (fs.existsSync(envFile) && fs.existsSync('.env')) dotenv.config({ path: envFile });
 
 // Configuration for test database setup
-const TEST_DB = 'integration_db';
+const TEST_DB = DB_TEMPLATE_NAME;
 
 export default async () => {
   if (!process.env.PG_SUPERUSER) {
@@ -16,9 +16,9 @@ export default async () => {
     return;
   }
 
-  console.log('[Global Setup] Setting up test database...');
+  console.log('[Global Setup] Setting up test database template...');
   await recreateTestDB(TEST_DB);
   await installExtensions(TEST_DB);
   await runMigrations(TEST_DB);
-  console.log('[Global Setup] Test database setup complete');
+  console.log('[Global Setup] Test database template setup complete');
 };

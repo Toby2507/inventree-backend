@@ -1,7 +1,7 @@
 const baseProjectConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest/setup-after-env.ts', '<rootDir>/jest/setup-db.ts'],
   transform: { '^.+\\.(t|j)s$': 'ts-jest' },
-  testEnvironment: 'node',
+  testEnvironment: '<rootDir>/jest/custom-jest-environment.ts',
   globalSetup: '<rootDir>/jest/global-setup.ts',
   globalTeardown: '<rootDir>/jest/global-teardown.ts',
   moduleNameMapper: {
@@ -36,7 +36,7 @@ module.exports = {
     '!**/*.constants.ts',
   ],
   coverageDirectory: './coverage',
-  testEnvironment: 'node',
+  testEnvironment: '<rootDir>/jest/custom-jest-environment.ts',
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   moduleNameMapper: {
     '^@app/common(|/.*)$': '<rootDir>/libs/common/src$1',

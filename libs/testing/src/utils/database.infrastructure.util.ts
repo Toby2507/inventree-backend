@@ -30,6 +30,7 @@ export const getAdminConfig = () => {
 
 export const recreateTestDB = async (name: string) => {
   const config = getAdminConfig();
+  console.log(`[Global Setup] Recreating test database ${name}...`, config);
   const client = new Client(config);
   await client.connect();
 

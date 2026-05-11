@@ -6,6 +6,7 @@ import * as fs from 'fs';
 const envFile = '.env.test';
 // .env.test is only used for local development — CI sets env vars directly. We want to avoid accidentally loading .env.test in CI, but also want to allow it to override .env in local dev if present.
 if (fs.existsSync(envFile) && fs.existsSync('.env')) dotenv.config({ path: envFile });
+console.log('[Global Setup] Using environment variables:', process.env);
 
 const TEST_DB = DB_TEMPLATE_NAME;
 

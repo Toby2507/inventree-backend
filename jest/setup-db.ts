@@ -1,11 +1,11 @@
-import { cloneDatabase, getTestDbName } from '@app/testing';
+import { getTestDbName } from '@app/testing';
 
-const setupDatabase = async () => {
-  const testDbName = getTestDbName();
-  await cloneDatabase('integration_template', testDbName);
+const shouldSetupDatabase = (): boolean => {
+  const testPath = expect.getState().testPath ?? '';
+  return testPath.endsWith('.int.spec.ts') || testPath.endsWith('.e2e.spec.ts');
 };
 
-beforeAll(async () => {
+if (shouldSetupDatabase()) {
   process.env.DB_NAME = getTestDbName();
-  await setupDatabase();
-});
+  jest.setTimeout(30000); // Increase timeout for database setup, if needed
+}

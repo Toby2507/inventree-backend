@@ -31,7 +31,7 @@ describe('Argon2HashingAdapter (integration)', () => {
   it('should fail verification for tampered hash', async () => {
     const value = 'password123';
     const hash = await adapter.hash(value);
-    const tamperedHash = hash.slice(0, -1) + (hash.slice(-1) === 'a' ? 'b' : 'a'); // Change last character
+    const tamperedHash = hash.slice(0, -1) + Math.random().toString(36).slice(0, 3);
     const result = await adapter.compare(value, tamperedHash);
     expect(result).toBe(false);
   });

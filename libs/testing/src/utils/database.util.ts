@@ -84,6 +84,8 @@ export const cloneDatabase = async (sourceDb: string, targetDb: string) => {
   await client.connect();
   try {
     await client.query(`CREATE DATABASE ${targetDb} TEMPLATE ${sourceDb};`);
+    await client.query(`ALTER DATABASE ${targetDb} OWNER TO ${process.env.DB_USER};`);
+    await client.query(`GRANT ALL PRIVILEGES ON DATABASE ${targetDb} TO ${process.env.DB_USER};`);
   } catch (error: any) {
     if (error.code !== '42P04') throw error;
   } finally {

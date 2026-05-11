@@ -1,9 +1,10 @@
-import { Kysely, PostgresDialect } from 'kysely';
+import { ControlledTransaction, Kysely, PostgresDialect } from 'kysely';
 import { Client, Pool } from 'pg';
 import { getAdminConfig, getUserConfig } from './database.infrastructure.util';
 
 export interface TestContext<T = any> {
-  db: Kysely<T>;
+  begin(): Promise<Kysely<T>>;
+  dispose(): Promise<void>;
   rollback(): Promise<void>;
 }
 
@@ -16,13 +17,11 @@ export const cloneDatabase = async (sourceDb: string, targetDb: string) => {
   const config = getAdminConfig();
   const client = new Client(config);
   await client.connect();
-  console.log(`Cloning database ${sourceDb} to ${targetDb}...`);
   try {
     await client.query(`CREATE DATABASE ${targetDb} TEMPLATE ${sourceDb};`);
     await client.query(`ALTER DATABASE ${targetDb} OWNER TO ${process.env.DB_USER};`);
     await client.query(`GRANT ALL PRIVILEGES ON DATABASE ${targetDb} TO ${process.env.DB_USER};`);
   } catch (error: any) {
-    console.log(`Cloning database ${sourceDb} to ${targetDb} failed.`, error);
     if (error.code !== '42P04') throw error;
   } finally {
     await client.end();
@@ -39,15 +38,44 @@ export const createTestDb = <T = any>(): Kysely<T> => {
   });
 };
 
+/**
+ * Creates a reusable integration test context with:
+ * - one shared DB instance per test file
+ * - one rollbackable transaction per test
+ *
+ * @example ```
+ * beforeAll(async () => {
+ *   ctx = await createTestContext();
+ * });
+ * beforeEach(async () => {
+ *   db = await ctx.begin();
+ * });
+ * afterEach(async () => {
+ *   await ctx.rollback();
+ * });
+ * afterAll(async () => {
+ *   await ctx.dispose();
+ * });
+ * ```
+ */
 export const createTestContext = async (schema: string = 'operational'): Promise<TestContext> => {
-  const db = createTestDb();
-  const trx = await db.startTransaction().execute();
+  const dbInstance = createTestDb();
+  let trx: ControlledTransaction<any, []> | null = null;
 
-  return {
-    db: trx.withSchema(schema),
-    async rollback() {
-      await trx.rollback().execute();
-      await db.destroy();
-    },
+  const rollback = async () => {
+    if (!trx) return;
+    await trx.rollback().execute();
+    trx = null;
   };
+  const begin = async () => {
+    await rollback();
+    trx = await dbInstance.startTransaction().execute();
+    return trx.withSchema(schema);
+  };
+  const dispose = async () => {
+    await rollback();
+    await dbInstance.destroy();
+  };
+
+  return { begin, dispose, rollback };
 };

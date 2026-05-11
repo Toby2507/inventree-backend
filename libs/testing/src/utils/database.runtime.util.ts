@@ -9,7 +9,7 @@ export interface TestContext<T = any> {
 
 export const getTestDbName = () => {
   const workerId = process.env.JEST_WORKER_ID || '1';
-  return `integration_worker_${Number(workerId)}`;
+  return `test_worker_db_${Number(workerId)}`;
 };
 
 export const cloneDatabase = async (sourceDb: string, targetDb: string) => {

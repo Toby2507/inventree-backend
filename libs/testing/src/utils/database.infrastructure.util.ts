@@ -7,7 +7,8 @@ import { Kysely, Migrator, PostgresDialect } from 'kysely';
 import { Client, Pool } from 'pg';
 
 const EXTENSIONS = ['citext', 'pg_trgm', 'ltree', 'pg_stat_statements', 'postgis'];
-export const DB_TEMPLATE_NAME = 'integration_template';
+export const TEMPLATE_DB_NAME = 'test_db_template';
+export const MIGRATION_TEST_DB_NAME = 'test_migration_db';
 
 export const getSuperuserConfig = () => ({
   user: process.env.PG_SUPERUSER,
@@ -25,19 +26,11 @@ export const getUserConfig = () => ({
 });
 export const getAdminConfig = () => {
   if (process.env.PG_SUPERUSER && process.env.PG_PASSWORD) return getSuperuserConfig();
-  else getUserConfig();
+  else return getUserConfig();
 };
 
 export const recreateTestDB = async (name: string) => {
   const config = getAdminConfig();
-  const userConfig = getUserConfig();
-  const superuserConfig = getSuperuserConfig();
-  console.log(
-    `[Global Setup] Recreating test database ${name}...`,
-    config,
-    userConfig,
-    superuserConfig,
-  );
   const client = new Client(config);
   await client.connect();
 

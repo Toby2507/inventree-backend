@@ -1,5 +1,5 @@
 import 'tsconfig-paths/register';
-import { cloneDatabase, getTestDbName } from '@app/testing';
+import { cloneDatabase, getTestDbName, TEMPLATE_DB_NAME } from '@app/testing';
 import NodeEnvironment from 'jest-environment-node';
 
 export default class CustomEnvironment extends NodeEnvironment {
@@ -17,12 +17,16 @@ export default class CustomEnvironment extends NodeEnvironment {
   }
 
   private shouldSetupDatabase = (): boolean => {
-    return this.testPath.endsWith('.int.spec.ts') || this.testPath.endsWith('.e2e.spec.ts');
+    return (
+      !this.testPath.endsWith('migration.int.spec.ts') ||
+      this.testPath.endsWith('.int.spec.ts') ||
+      this.testPath.endsWith('.e2e.spec.ts')
+    );
   };
 
   private setupDatabase = async () => {
     const testDbName = getTestDbName();
     process.env.DB_NAME = testDbName;
-    await cloneDatabase('integration_template', testDbName);
+    await cloneDatabase(TEMPLATE_DB_NAME, testDbName);
   };
 }

@@ -1,8 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MigrationModule } from '../../src/migration.module';
 import { MigrationService } from '../../src/migration.service';
-
-const MIGRATION_DB = 'integration_migration_db';
+import { MIGRATION_TEST_DB_NAME } from '@app/testing';
 
 jest.setTimeout(30000); // Migrations can take longer than the default 5s Jest timeout, especially on CI. Adjust as needed.
 describe('MigrationService (integration)', () => {
@@ -12,7 +11,7 @@ describe('MigrationService (integration)', () => {
   beforeAll(async () => {
     // Point both pools at the isolated migration DB before NestJS initialises.
     // DatabaseService reads process.env directly — this must happen before module.init().
-    process.env['DB_NAME'] = MIGRATION_DB;
+    process.env['DB_NAME'] = MIGRATION_TEST_DB_NAME;
 
     module = await Test.createTestingModule({
       imports: [MigrationModule],

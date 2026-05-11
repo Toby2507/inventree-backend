@@ -10,11 +10,6 @@ if (fs.existsSync(envFile) && fs.existsSync('.env')) dotenv.config({ path: envFi
 const MIGRATION_TEST_DB = 'integration_migration_db';
 
 export default async (): Promise<void> => {
-  if (!process.env.PG_SUPERUSER) {
-    console.log('[Global Setup] CI environment detected — skipping migration DB setup');
-    return;
-  }
-
   console.log('[Global Setup] Setting up migration test database...');
   await recreateTestDB(MIGRATION_TEST_DB);
   await installExtensions(MIGRATION_TEST_DB);

@@ -7,15 +7,9 @@ const envFile = '.env.test';
 // .env.test is only used for local development — CI sets env vars directly. We want to avoid accidentally loading .env.test in CI, but also want to allow it to override .env in local dev if present.
 if (fs.existsSync(envFile) && fs.existsSync('.env')) dotenv.config({ path: envFile });
 
-// Configuration for test database setup
 const TEST_DB = DB_TEMPLATE_NAME;
 
 export default async () => {
-  if (!process.env.PG_SUPERUSER) {
-    console.log('[Global Setup] CI environment detected — skipping DB setup');
-    return;
-  }
-
   console.log('[Global Setup] Setting up test database template...');
   await recreateTestDB(TEST_DB);
   await installExtensions(TEST_DB);

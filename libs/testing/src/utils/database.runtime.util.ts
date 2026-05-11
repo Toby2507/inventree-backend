@@ -16,11 +16,13 @@ export const cloneDatabase = async (sourceDb: string, targetDb: string) => {
   const config = getAdminConfig();
   const client = new Client(config);
   await client.connect();
+  console.log(`Cloning database ${sourceDb} to ${targetDb}...`);
   try {
     await client.query(`CREATE DATABASE ${targetDb} TEMPLATE ${sourceDb};`);
     await client.query(`ALTER DATABASE ${targetDb} OWNER TO ${process.env.DB_USER};`);
     await client.query(`GRANT ALL PRIVILEGES ON DATABASE ${targetDb} TO ${process.env.DB_USER};`);
   } catch (error: any) {
+    console.log(`Cloning database ${sourceDb} to ${targetDb} failed.`, error);
     if (error.code !== '42P04') throw error;
   } finally {
     await client.end();

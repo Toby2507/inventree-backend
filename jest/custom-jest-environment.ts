@@ -18,15 +18,13 @@ export default class CustomEnvironment extends NodeEnvironment {
 
   private shouldSetupDatabase = (): boolean => {
     return (
-      !this.testPath.endsWith('migration.int.spec.ts') ||
-      this.testPath.endsWith('.int.spec.ts') ||
-      this.testPath.endsWith('.e2e.spec.ts')
+      (this.testPath.endsWith('.int.spec.ts') || this.testPath.endsWith('.e2e.spec.ts')) &&
+      !this.testPath.endsWith('migration.int.spec.ts')
     );
   };
 
   private setupDatabase = async () => {
     const testDbName = getTestDbName();
-    process.env.DB_NAME = testDbName;
     await cloneDatabase(TEMPLATE_DB_NAME, testDbName);
   };
 }

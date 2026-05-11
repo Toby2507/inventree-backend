@@ -22,7 +22,7 @@ const BASE_SCOPES = [
   'inventory',
   'pos',
   'purchasing',
-  'notifications',
+  'notification',
   'billing',
   'analytics',
   // Infrastructure
@@ -50,9 +50,10 @@ const config: UserConfig = {
     'scope-empty': [0], // scope optional e.g. `ci: ...`
     'subject-case': [0], // disabled — validated by custom rule below
     'subject-full-stop': [2, 'never', '.'],
-    'subject-max-length': [2, 'always', 72],
+    'subject-max-length': [2, 'always', 100],
     'subject-empty': [2, 'never'],
-    'body-max-line-length': [2, 'always', 72],
+    'body-max-line-length': [2, 'always', 100],
+    'header-max-length': [2, 'always', 140],
   },
   plugins: [
     {

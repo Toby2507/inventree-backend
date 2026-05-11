@@ -52,8 +52,9 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
+      POSTGRES_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD }}
+      REDIS_PASSWORD: ${{ secrets.CI_REDIS_PASSWORD }}
       DB_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD }}
-      ANALYTICS_DB_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD }}
       JWT_ACCESS_SECRET: ${{ secrets.CI_JWT_ACCESS_SECRET }}
       JWT_REFRESH_SECRET: ${{ secrets.CI_JWT_REFRESH_SECRET }}
       JWT_UTIL_SECRET: ${{ secrets.CI_JWT_UTIL_SECRET }}
@@ -108,8 +109,9 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
+      POSTGRES_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD }}
+      REDIS_PASSWORD: ${{ secrets.CI_REDIS_PASSWORD }}
       DB_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD }}
-      ANALYTICS_DB_PASSWORD: ${{ secrets.CI_POSTGRES_PASSWORD }}
       JWT_ACCESS_SECRET: ${{ secrets.CI_JWT_ACCESS_SECRET }}
       JWT_REFRESH_SECRET: ${{ secrets.CI_JWT_REFRESH_SECRET }}
       JWT_UTIL_SECRET: ${{ secrets.CI_JWT_UTIL_SECRET }}

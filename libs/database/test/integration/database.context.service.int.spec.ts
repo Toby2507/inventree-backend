@@ -1,4 +1,4 @@
-import { DatabaseContextService } from '@app/database';
+import { DatabaseContextService } from '@app/database/database.context.service';
 import { faker, fsStoreContext } from '@app/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';

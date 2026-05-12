@@ -1,1 +1,1 @@
-export * from './nest.mock';
+export * from './generators.mocks';

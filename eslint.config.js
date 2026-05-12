@@ -41,7 +41,7 @@ module.exports = defineConfig([
   },
   globalIgnores(['**/.eslintrc.js']),
   {
-    files: ['libs/testing/**'],
+    files: ['libs/testing/**', '**/test/**/*.spec.ts'],
     rules: {
       'no-restricted-imports': 'off',
     },

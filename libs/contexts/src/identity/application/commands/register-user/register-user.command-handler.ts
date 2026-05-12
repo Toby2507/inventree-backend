@@ -1,0 +1,41 @@
+import { UUID_GENERATOR_PORT, UUIDGeneratorPort } from '@app/core';
+import { DATABASE_CONTEXT, DatabaseContextPort } from '@app/database';
+import { Inject } from '@nestjs/common';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import {
+  User,
+  USER_REPOSITORY,
+  UserEmailAlreadyExistsException,
+  UserRepository,
+} from '../../../domain';
+import { HASHING_PORT, HashingPort } from '../../ports';
+import { RegisterUserCommand } from './register-user.command';
+
+@CommandHandler(RegisterUserCommand)
+export class RegisterUserCommandHandler implements ICommandHandler<RegisterUserCommand> {
+  constructor(
+    @Inject(HASHING_PORT) private readonly hashingPort: HashingPort,
+    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
+    @Inject(UUID_GENERATOR_PORT) private readonly idGenerator: UUIDGeneratorPort,
+    @Inject(DATABASE_CONTEXT) private readonly db: DatabaseContextPort,
+  ) {}
+
+  async execute(command: RegisterUserCommand): Promise<void> {
+    const { email, password, firstName, lastName, displayName } = command.props;
+    await this.ensureUserCanRegister(email);
+    const id = this.idGenerator.generateV7();
+    const passwordHash = await this.hashingPort.hash(password);
+    const user = User.create({ id, email, passwordHash, firstName, lastName, displayName });
+    await this.db.platformCommand(async (ctx) => {
+      await this.userRepository.create(ctx.operational, user);
+      // TODO: pull domain events and publish them to the outbox
+    });
+  }
+
+  private async ensureUserCanRegister(email: string): Promise<void> {
+    const inUse = await this.db.platformQuery((ctx) =>
+      this.userRepository.existsByEmail(ctx.operational, email),
+    );
+    if (inUse) throw new UserEmailAlreadyExistsException(email);
+  }
+}

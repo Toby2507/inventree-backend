@@ -70,7 +70,7 @@ describe('User Aggregate Root', () => {
       expect(events).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            eventType: 'identity.user.registered',
+            eventType: UserRegisteredEvent.EVENT_TYPE,
             payload: expect.objectContaining({
               userId: user.id.value,
               email: user.email.value,
@@ -157,7 +157,7 @@ describe('User Aggregate Root', () => {
         expect(events).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              eventType: 'identity.user.email_verified',
+              eventType: UserEmailVerifiedEvent.EVENT_TYPE,
               payload: expect.objectContaining({
                 userId: user.id.value,
                 email: user.email.value,
@@ -190,7 +190,7 @@ describe('User Aggregate Root', () => {
         expect(events).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              eventType: 'identity.user.enabled',
+              eventType: UserEnabledEvent.EVENT_TYPE,
               payload: expect.objectContaining({
                 userId: user.id.value,
                 reason: 'User email successfully verified.',
@@ -351,7 +351,7 @@ describe('User Aggregate Root', () => {
         expect(events).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              eventType: 'identity.user.disabled',
+              eventType: UserDisabledEvent.EVENT_TYPE,
               payload: expect.objectContaining({
                 userId: user.id.value,
                 reason: 'terms of service violation',
@@ -417,7 +417,7 @@ describe('User Aggregate Root', () => {
         expect(events).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              eventType: 'identity.user.enabled',
+              eventType: UserEnabledEvent.EVENT_TYPE,
               payload: expect.objectContaining({
                 userId: user.id.value,
                 reason: 'user email verified',
@@ -483,7 +483,7 @@ describe('User Aggregate Root', () => {
         expect(events).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              eventType: 'identity.user.suspended',
+              eventType: UserSuspendedEvent.EVENT_TYPE,
               payload: expect.objectContaining({
                 userId: user.id.value,
                 reason: 'user account on probation by store admin',
@@ -569,7 +569,7 @@ describe('User Aggregate Root', () => {
         expect(events).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              eventType: 'identity.user.authentication_blocked',
+              eventType: AuthenticationBlockedEvent.EVENT_TYPE,
               payload: expect.objectContaining({
                 userId: user.id.value,
                 reason: 'account_disabled',
@@ -631,7 +631,7 @@ describe('User Aggregate Root', () => {
         expect(events).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              eventType: 'identity.user.authentication_blocked',
+              eventType: AuthenticationBlockedEvent.EVENT_TYPE,
               payload: expect.objectContaining({
                 userId: user.id.value,
                 reason: 'account_disabled',

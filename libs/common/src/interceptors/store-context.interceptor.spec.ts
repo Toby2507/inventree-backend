@@ -1,5 +1,5 @@
 import { storeContextStorage } from '@app/database';
-import { fsJwtPayload, makeCallHandler, makeContext } from '@app/testing';
+import { fsJwtPayload, makeCallHandlerMock, makeContextMock } from '@app/testing';
 import { Observable, firstValueFrom, of } from 'rxjs';
 import { StoreContextInterceptor } from './store-context.interceptor';
 
@@ -16,8 +16,8 @@ describe('StoreContextInterceptor', () => {
     { label: 'undefined (public route)', user: undefined },
     { label: 'invalid (fails validation)', user: { foo: 'bar' } },
   ])('when req.user is $label', ({ user }) => {
-    const { callHandler, mockHandle } = makeCallHandler();
-    const { context, mockGetRequest } = makeContext();
+    const { callHandler, mockHandle } = makeCallHandlerMock();
+    const { context, mockGetRequest } = makeContextMock();
     mockGetRequest.mockReturnValue({ user });
     mockHandle.mockReturnValue(of('ok'));
 
@@ -35,8 +35,8 @@ describe('StoreContextInterceptor', () => {
   });
 
   describe('when req.user is a valid JwtPayload', () => {
-    const { callHandler, mockHandle } = makeCallHandler();
-    const { context, mockGetRequest } = makeContext();
+    const { callHandler, mockHandle } = makeCallHandlerMock();
+    const { context, mockGetRequest } = makeContextMock();
     mockGetRequest.mockReturnValue({ user: validPayload });
     it('makes StoreContext available inside the handler via AsyncLocalStorage', async () => {
       let capturedContext: ReturnType<typeof storeContextStorage.getStore>;

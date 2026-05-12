@@ -1,4 +1,4 @@
-import { makeHost } from '@app/testing';
+import { makeHostMock } from '@app/testing';
 import { HttpStatus } from '@nestjs/common';
 import { DomainException } from '../exceptions';
 import { DomainExceptionFilter } from './domain-exception.filter';
@@ -26,13 +26,13 @@ describe('DomainExceptionFilter', () => {
 
   describe('HTTP status mapping', () => {
     it('sets 404 for a _NOT_FOUND exception', () => {
-      const { host, mockStatus } = makeHost();
+      const { host, mockStatus } = makeHostMock();
       filter.catch(new ProductNotFoundException(), host);
       expect(mockStatus).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
     });
 
     it('sets 422 for a business rule violation', () => {
-      const { host, mockStatus } = makeHost();
+      const { host, mockStatus } = makeHostMock();
       filter.catch(new TransactionAlreadyCompletedException(), host);
       expect(mockStatus).toHaveBeenCalledWith(HttpStatus.UNPROCESSABLE_ENTITY);
     });
@@ -40,7 +40,7 @@ describe('DomainExceptionFilter', () => {
 
   describe('response body', () => {
     it('includes statusCode, code, and message', () => {
-      const { host, mockJson } = makeHost();
+      const { host, mockJson } = makeHostMock();
       filter.catch(new ProductNotFoundException(), host);
       expect(mockJson).toHaveBeenCalledWith({
         statusCode: HttpStatus.NOT_FOUND,
@@ -50,7 +50,7 @@ describe('DomainExceptionFilter', () => {
     });
 
     it('never includes context in the response body', () => {
-      const { host, mockJson } = makeHost();
+      const { host, mockJson } = makeHostMock();
       const context = { transactionId: 'txn-123', storeId: 'store-456' };
       filter.catch(new TransactionAlreadyCompletedException(context), host);
       const [body] = mockJson.mock.calls[0];

@@ -1,4 +1,4 @@
-import { makeContext, makeReflector } from '@app/testing';
+import { makeContextMock, makeReflectorMock } from '@app/testing';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -8,20 +8,20 @@ describe('JwtAuthGuard', () => {
   let reflector: jest.Mocked<Reflector>;
 
   beforeEach(() => {
-    reflector = makeReflector();
+    reflector = makeReflectorMock();
     guard = new JwtAuthGuard(reflector);
   });
 
   describe('when route is marked @Public()', () => {
     it('returns true without invoking Passport', () => {
       reflector.getAllAndOverride.mockReturnValue(true);
-      const { context } = makeContext();
+      const { context } = makeContextMock();
       expect(guard.canActivate(context)).toBe(true);
     });
 
     it('reads the correct metadata key', () => {
       reflector.getAllAndOverride.mockReturnValue(true);
-      const { context } = makeContext();
+      const { context } = makeContextMock();
       guard.canActivate(context);
       expect(reflector.getAllAndOverride).toHaveBeenCalledWith(IS_PUBLIC_KEY, [
         context.getHandler(),
@@ -36,7 +36,7 @@ describe('JwtAuthGuard', () => {
       const superCanActivate = jest
         .spyOn(Object.getPrototypeOf(JwtAuthGuard).prototype, 'canActivate')
         .mockReturnValue(true);
-      const { context } = makeContext();
+      const { context } = makeContextMock();
       guard.canActivate(context);
       expect(superCanActivate).toHaveBeenCalled();
       superCanActivate.mockRestore();

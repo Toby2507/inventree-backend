@@ -18,7 +18,7 @@ interface CallHandlerMocks {
   mockHandle: jest.Mock;
 }
 
-export const makeHost = (): HostMocks => {
+export const makeHostMock = (): HostMocks => {
   const mockJson = jest.fn();
   const mockStatus = jest.fn().mockReturnValue({ json: mockJson });
   const mockGetResponse = jest.fn().mockReturnValue({ status: mockStatus });
@@ -30,10 +30,10 @@ export const makeHost = (): HostMocks => {
   return { host, mockStatus, mockJson, mockGetRequest };
 };
 
-export const makeContext = (): ContextMocks => {
+export const makeContextMock = (): ContextMocks => {
   const mockGetHandler = jest.fn();
   const mockGetClass = jest.fn();
-  const { host, mockGetRequest } = makeHost();
+  const { host, mockGetRequest } = makeHostMock();
   return {
     context: {
       getHandler: mockGetHandler,
@@ -46,13 +46,13 @@ export const makeContext = (): ContextMocks => {
   };
 };
 
-export const makeReflector = () => {
+export const makeReflectorMock = () => {
   return {
     getAllAndOverride: jest.fn(),
   } as unknown as jest.Mocked<Reflector>;
 };
 
-export const makeCallHandler = (): CallHandlerMocks => {
+export const makeCallHandlerMock = (): CallHandlerMocks => {
   const mockHandle = jest.fn();
   return {
     callHandler: {

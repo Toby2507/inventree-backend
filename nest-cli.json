@@ -19,6 +19,15 @@
         "tsConfigPath": "apps/api/tsconfig.app.json"
       }
     },
+    "intelligence-worker": {
+      "type": "application",
+      "root": "apps/intelligence-worker",
+      "entryFile": "main",
+      "sourceRoot": "apps/intelligence-worker/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/intelligence-worker/tsconfig.app.json"
+      }
+    },
     "migrator": {
       "type": "application",
       "root": "apps/migrator",
@@ -37,24 +46,6 @@
         "tsConfigPath": "apps/outbox-processor/tsconfig.app.json"
       }
     },
-    "worker-core": {
-      "type": "application",
-      "root": "apps/worker-core",
-      "entryFile": "main",
-      "sourceRoot": "apps/worker-core/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/worker-core/tsconfig.app.json"
-      }
-    },
-    "intelligence-worker": {
-      "type": "application",
-      "root": "apps/intelligence-worker",
-      "entryFile": "main",
-      "sourceRoot": "apps/intelligence-worker/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/intelligence-worker/tsconfig.app.json"
-      }
-    },
     "report-worker": {
       "type": "application",
       "root": "apps/report-worker",
@@ -64,22 +55,13 @@
         "tsConfigPath": "apps/report-worker/tsconfig.app.json"
       }
     },
-    "database": {
-      "type": "library",
-      "root": "libs/database",
-      "entryFile": "index",
-      "sourceRoot": "libs/database/src",
+    "worker-core": {
+      "type": "application",
+      "root": "apps/worker-core",
+      "entryFile": "main",
+      "sourceRoot": "apps/worker-core/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/database/tsconfig.lib.json"
-      }
-    },
-    "domain": {
-      "type": "library",
-      "root": "libs/domain",
-      "entryFile": "index",
-      "sourceRoot": "libs/domain/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/domain/tsconfig.lib.json"
+        "tsConfigPath": "apps/worker-core/tsconfig.app.json"
       }
     },
     "common": {
@@ -89,6 +71,42 @@
       "sourceRoot": "libs/common/src",
       "compilerOptions": {
         "tsConfigPath": "libs/common/tsconfig.lib.json"
+      }
+    },
+    "config": {
+      "type": "library",
+      "root": "libs/config",
+      "entryFile": "index",
+      "sourceRoot": "libs/config/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/config/tsconfig.lib.json"
+      }
+    },
+    "contexts": {
+      "type": "library",
+      "root": "libs/contexts",
+      "entryFile": "index",
+      "sourceRoot": "libs/contexts/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/contexts/tsconfig.lib.json"
+      }
+    },
+    "core": {
+      "type": "library",
+      "root": "libs/core",
+      "entryFile": "index",
+      "sourceRoot": "libs/core/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/core/tsconfig.lib.json"
+      }
+    },
+    "database": {
+      "type": "library",
+      "root": "libs/database",
+      "entryFile": "index",
+      "sourceRoot": "libs/database/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/database/tsconfig.lib.json"
       }
     },
     "testing": {

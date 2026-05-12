@@ -1,11 +1,16 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { Migration, MigrationProvider, Migrator } from 'kysely';
-import { DatabaseService } from './database.service';
-import { migrations } from './migrations';
+import { DatabaseProvider } from './database.provider';
+import { analyticsMigrations, operationalMigrations } from './migrations';
+import { bootstrapMigrations } from './migrations/bootstrap';
 
-export class StaticMigrationProvider implements MigrationProvider {
+type MigrationTarget = 'analytics' | 'bootstrap' | 'operational';
+
+class StaticMigrationProvider implements MigrationProvider {
+  constructor(private readonly migrations: Record<string, Migration>) {}
+
   async getMigrations(): Promise<Record<string, Migration>> {
-    return migrations;
+    return this.migrations;
   }
 }
 
@@ -13,55 +18,76 @@ export class StaticMigrationProvider implements MigrationProvider {
 export class MigrationService implements OnApplicationBootstrap {
   private readonly logger = new Logger(MigrationService.name);
 
-  constructor(private readonly databaseService: DatabaseService) {}
+  constructor(private readonly provider: DatabaseProvider) {}
 
   async onApplicationBootstrap(): Promise<void> {
-    await this.migrateToLatest();
+    await this.migrateToLatest('bootstrap');
+    await this.migrateToLatest('operational');
+    await this.migrateToLatest('analytics');
   }
 
-  async migrateToLatest(): Promise<void> {
-    const migrator = this.buildMigrator();
+  async migrateToLatest(target: MigrationTarget): Promise<void> {
+    const migrator = this.buildMigrator(target);
     const { error, results } = await migrator.migrateToLatest();
 
     results?.forEach((result) => {
       if (result.status === 'Success') {
-        this.logger.log(`Migration applied: ${result.migrationName}`);
+        this.logger.log(`[${target}] Migration applied: ${result.migrationName}`);
       } else if (result.status === 'Error') {
-        this.logger.error(`Migration failed: ${result.migrationName}`);
+        this.logger.error(`[${target}] Migration failed: ${result.migrationName}`);
       } else if (result.status === 'NotExecuted') {
-        this.logger.warn(`Migration skipped: ${result.migrationName}`);
+        this.logger.warn(`[${target}] Migration skipped: ${result.migrationName}`);
       }
     });
 
     if (error) {
-      this.logger.error('Migration run failed', error);
+      this.logger.error(`[${target}] Migration run failed`, error);
       throw error;
     }
-    if (!results?.length) this.logger.log('Database schema is up to date');
+    if (!results?.length) this.logger.log(`[${target}] Database schema is up to date`);
   }
 
-  async migrateDown(): Promise<void> {
-    const migrator = this.buildMigrator();
+  async migrateDown(target: MigrationTarget): Promise<void> {
+    if (target === 'bootstrap') {
+      this.logger.warn('Rollback of bootstrap migrations is not supported');
+      throw new Error('Rollback of bootstrap migrations is not supported');
+    }
+    const migrator = this.buildMigrator(target);
     const { error, results } = await migrator.migrateDown();
 
     results?.forEach((result) => {
       if (result.status === 'Success') {
-        this.logger.log(`Migration rolled back: ${result.migrationName}`);
+        this.logger.log(`[${target}] Migration rolled back: ${result.migrationName}`);
       } else if (result.status === 'Error') {
-        this.logger.error(`Rollback failed: ${result.migrationName}`);
+        this.logger.error(`[${target}] Rollback failed: ${result.migrationName}`);
       }
     });
 
     if (error) {
-      this.logger.error('Migration rollback failed', error);
+      this.logger.error(`[${target}] Migration rollback failed`, error);
       throw error;
     }
   }
 
-  private buildMigrator(): Migrator {
+  private buildMigrator(target: MigrationTarget): Migrator {
+    let db;
+    let migrations: Record<string, Migration>;
+
+    if (target === 'bootstrap') {
+      db = this.provider.forBootstrapMigration;
+      migrations = bootstrapMigrations;
+    } else if (target === 'operational') {
+      db = this.provider.forOperationalMigration;
+      migrations = operationalMigrations;
+    } else {
+      db = this.provider.forAnalyticsMigration;
+      migrations = analyticsMigrations;
+    }
+
     return new Migrator({
-      db: this.databaseService.operational,
-      provider: new StaticMigrationProvider(),
+      db,
+      provider: new StaticMigrationProvider(migrations),
+      migrationTableName: `kysely_migration_${target}`,
     });
   }
 }

@@ -6,10 +6,12 @@
  *   - `aggregateType` — table/aggregate name e.g. 'pos_transaction'
  *   - `payload`       — snapshot or relevant data (maps to outbox_events.payload)
  */
-export abstract class DomainEvent {
+export abstract class DomainEvent<T = unknown> {
   readonly occurredAt: Date = new Date();
+
   abstract readonly eventType: string;
   abstract readonly aggregateType: string;
+  abstract readonly payload: T;
 
   constructor(public readonly aggregateId: string) {}
 }

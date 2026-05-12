@@ -1,13 +1,15 @@
 const baseProjectConfig = {
-  setupFilesAfterEnv: ['<rootDir>/jest/setup-after-env.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest/setup-after-env.ts', '<rootDir>/jest/setup-db.ts'],
   transform: { '^.+\\.(t|j)s$': 'ts-jest' },
-  testEnvironment: 'node',
+  testEnvironment: '<rootDir>/jest/custom-jest-environment.ts',
   globalSetup: '<rootDir>/jest/global-setup.ts',
   globalTeardown: '<rootDir>/jest/global-teardown.ts',
   moduleNameMapper: {
-    '^@app/database(|/.*)$': '<rootDir>/libs/database/src$1',
-    '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src$1',
     '^@app/common(|/.*)$': '<rootDir>/libs/common/src$1',
+    '^@app/config(|/.*)$': '<rootDir>/libs/config/src$1',
+    '^@app/contexts(|/.*)$': '<rootDir>/libs/contexts/src$1',
+    '^@app/core(|/.*)$': '<rootDir>/libs/core/src$1',
+    '^@app/database(|/.*)$': '<rootDir>/libs/database/src$1',
     '^@app/testing(|/.*)$': '<rootDir>/libs/testing/src$1',
   },
 };
@@ -17,7 +19,7 @@ module.exports = {
   rootDir: '.',
   passWithNoTests: true,
   transform: { '^.+\\.(t|j)s$': 'ts-jest' },
-  setupFilesAfterEnv: ['<rootDir>/jest/setup-after-env.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest/setup-after-env.ts', '<rootDir>/jest/setup-db.ts'],
   collectCoverageFrom: [
     'apps/**/*.{ts,js}',
     'libs/**/*.{ts,js}',
@@ -34,12 +36,14 @@ module.exports = {
     '!**/*.constants.ts',
   ],
   coverageDirectory: './coverage',
-  testEnvironment: 'node',
+  testEnvironment: '<rootDir>/jest/custom-jest-environment.ts',
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   moduleNameMapper: {
-    '^@app/database(|/.*)$': '<rootDir>/libs/database/src$1',
-    '^@app/domain(|/.*)$': '<rootDir>/libs/domain/src$1',
     '^@app/common(|/.*)$': '<rootDir>/libs/common/src$1',
+    '^@app/config(|/.*)$': '<rootDir>/libs/config/src$1',
+    '^@app/contexts(|/.*)$': '<rootDir>/libs/contexts/src$1',
+    '^@app/core(|/.*)$': '<rootDir>/libs/core/src$1',
+    '^@app/database(|/.*)$': '<rootDir>/libs/database/src$1',
     '^@app/testing(|/.*)$': '<rootDir>/libs/testing/src$1',
   },
   globals: {

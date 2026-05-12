@@ -1,4 +1,4 @@
-import { makeCallHandler, makeContext } from '@app/testing';
+import { makeCallHandlerMock, makeContextMock } from '@app/testing';
 import { Expose } from 'class-transformer';
 import { firstValueFrom, of } from 'rxjs';
 import { SerializerInterceptor } from './serializer.interceptor';
@@ -14,7 +14,7 @@ class UserDto {
   password!: string;
 }
 
-const mockContext = makeContext().context;
+const mockContext = makeContextMock().context;
 
 describe('SerializerInterceptor', () => {
   let interceptor: SerializerInterceptor;
@@ -24,7 +24,7 @@ describe('SerializerInterceptor', () => {
   });
 
   describe('when response has no data envelope (data property absent)', () => {
-    const { callHandler, mockHandle } = makeCallHandler();
+    const { callHandler, mockHandle } = makeCallHandlerMock();
 
     it('passes null through unchanged', async () => {
       mockHandle.mockReturnValueOnce(of(null));
@@ -50,7 +50,7 @@ describe('SerializerInterceptor', () => {
     const raw = {
       data: { id: 'u-1', email: 'a@b.com', password: 'secret' },
     };
-    const { callHandler, mockHandle } = makeCallHandler();
+    const { callHandler, mockHandle } = makeCallHandlerMock();
     mockHandle.mockReturnValue(of(raw));
 
     it('returns a UserDto instance', async () => {
@@ -84,7 +84,7 @@ describe('SerializerInterceptor', () => {
         { id: 'u-2', email: 'b@c.com', password: 'secret2' },
       ],
     };
-    const { callHandler, mockHandle } = makeCallHandler();
+    const { callHandler, mockHandle } = makeCallHandlerMock();
     mockHandle.mockReturnValue(of(raw));
 
     it('returns an array of UserDto instances', async () => {

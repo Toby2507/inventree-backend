@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { defineConfig, globalIgnores } = require('eslint/config');
 
 const tsParser = require('@typescript-eslint/parser');
@@ -35,7 +36,14 @@ module.exports = defineConfig([
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       'prettier/prettier': ['error', { printWidth: 100 }, { usePrettierrc: true }],
+      'no-restricted-imports': ['error', { patterns: ['@app/contexts/*/**'] }],
     },
   },
   globalIgnores(['**/.eslintrc.js']),
+  {
+    files: ['libs/testing/**', '**/test/**/*.spec.ts'],
+    rules: {
+      'no-restricted-imports': 'off',
+    },
+  },
 ]);

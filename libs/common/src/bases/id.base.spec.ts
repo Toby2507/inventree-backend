@@ -16,7 +16,7 @@ class TestID2 extends BaseUUID {
   }
 }
 
-describe('BaseUUID Abstract Value Objec', () => {
+describe('BaseUUID Abstract Value Object', () => {
   describe('creation', () => {
     it('should throw if value is empty', () => {
       expect(() => new TestID('')).toThrow(UUIDCannotBeEmptyException);

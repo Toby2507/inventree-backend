@@ -134,6 +134,8 @@ export type OperationalLocationType =
   | 'virtual'
   | 'zone';
 
+export type OperationalMfaStatus = 'disabled' | 'enabled' | 'pending';
+
 export type OperationalMfaType = 'email' | 'totp';
 
 export type OperationalNotificationAudienceType = 'member' | 'member_list' | 'role' | 'store';
@@ -226,11 +228,7 @@ export type OperationalSequenceScope = 'store';
 
 export type OperationalStocktakeStatus = 'cancelled' | 'completed' | 'draft' | 'in_progress';
 
-export type OperationalStockValuationMethod =
-  | 'fifo'
-  | 'lifo'
-  | 'standard_cost'
-  | 'weighted_average';
+export type OperationalStockValuationMethod = 'fifo' | 'standard_cost' | 'weighted_average';
 
 export type OperationalStoreInvitationStatus = 'accepted' | 'expired' | 'pending' | 'revoked';
 
@@ -263,7 +261,7 @@ export type OperationalTaxBase =
 
 export type OperationalTaxScope = 'line_item' | 'order' | 'shipping';
 
-export type OperationalUserStatus = 'active' | 'disabled';
+export type OperationalUserStatus = 'active' | 'disabled' | 'pending' | 'suspended';
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
@@ -648,6 +646,35 @@ export interface OperationalInventoryAdjustments {
   updated_at: Timestamp | null;
 }
 
+export interface OperationalInventoryCostLayers {
+  consumed_at: Timestamp | null;
+  created_at: Generated<Timestamp>;
+  id: Generated<string>;
+  is_fully_consumed: Generated<boolean | null>;
+  product_variant_id: string;
+  purchase_receipt_line_id: string | null;
+  quantity_received: Numeric;
+  quantity_remaining: Numeric;
+  source_movement_id: string;
+  store_id: string;
+  unit_cost: Numeric;
+}
+
+export interface OperationalInventoryCostSnapshots {
+  average_cost: Numeric;
+  computed_at: Generated<Timestamp>;
+  id: Generated<string>;
+  last_purchase_cost: Numeric | null;
+  product_variant_id: string;
+  quantity_on_hand_at_snap: Numeric;
+  source_document_id: string | null;
+  source_document_type: string | null;
+  source_movement_id: string | null;
+  standard_cost: Numeric | null;
+  store_id: string;
+  total_inventory_value: Numeric;
+}
+
 export interface OperationalInventoryItems {
   created_at: Generated<Timestamp>;
   id: Generated<string>;
@@ -658,6 +685,24 @@ export interface OperationalInventoryItems {
   product_variant_id: string;
   reserved_qty: Generated<Numeric>;
   store_id: string;
+  updated_at: Timestamp | null;
+}
+
+export interface OperationalInventoryItemSettings {
+  allow_negative_inventory: boolean | null;
+  auto_update_cost: boolean | null;
+  created_at: Generated<Timestamp>;
+  id: Generated<string>;
+  is_perishable: boolean | null;
+  product_variant_id: string;
+  reorder_point: Numeric | null;
+  reorder_quantity: Numeric | null;
+  requires_lot_tracking: boolean | null;
+  requires_serial_tracking: boolean | null;
+  shelf_life_days: number | null;
+  stock_valuation_method: OperationalStockValuationMethod | null;
+  store_id: string;
+  track_inventory: boolean | null;
   updated_at: Timestamp | null;
 }
 
@@ -751,9 +796,11 @@ export interface OperationalInventoryStocktakeLines {
   expected_qty: Numeric | null;
   id: Generated<string>;
   location_id: string;
+  lot_id: string | null;
   metadata: Generated<Json>;
   notes: string | null;
   product_variant_id: string;
+  serial_id: string | null;
   stocktake_id: string;
   store_id: string;
   updated_at: Timestamp | null;
@@ -952,7 +999,6 @@ export interface OperationalPosSessions {
 export interface OperationalPosTerminals {
   app_version: string | null;
   created_at: Generated<Timestamp>;
-  created_by_store_member_id: string | null;
   deleted_at: Timestamp | null;
   device_fingerprint: string;
   device_name: string | null;
@@ -977,14 +1023,19 @@ export interface OperationalPosTransactionLines {
   id: Generated<string>;
   line_subtotal: Numeric;
   line_total: Generated<Numeric>;
+  location_id: string | null;
+  lot_id: string | null;
   metadata: Generated<Json>;
   product_name_snapshot: string;
   product_variant_id: string;
   quantity: Numeric;
+  serial_id: string | null;
   sku_snapshot: string | null;
   store_id: string;
   tax_amount: Generated<Numeric>;
+  total_cost: Generated<Numeric>;
   transaction_id: string;
+  unit_cost: Generated<Numeric>;
   unit_price: Numeric;
   updated_at: Timestamp | null;
 }
@@ -1014,6 +1065,7 @@ export interface OperationalPosTransactions {
   tax_amount: Generated<Numeric>;
   terminal_id: string;
   total_amount: Generated<Numeric>;
+  total_cost_amount: Generated<Numeric>;
   type: Generated<OperationalPosTransactionType>;
   updated_at: Timestamp | null;
   voided_at: Timestamp | null;
@@ -1022,7 +1074,6 @@ export interface OperationalPosTransactions {
 export interface OperationalProductMedia {
   alt_text: string | null;
   created_at: Generated<Timestamp>;
-  created_by_store_member_id: string | null;
   deleted_at: Timestamp | null;
   id: Generated<string>;
   is_primary: Generated<boolean>;
@@ -1040,7 +1091,6 @@ export interface OperationalProducts {
   brand_name: string | null;
   category_id: string | null;
   created_at: Generated<Timestamp>;
-  created_by_store_member_id: string | null;
   deleted_at: Timestamp | null;
   description: string | null;
   has_variants: Generated<boolean>;
@@ -1071,7 +1121,6 @@ export interface OperationalProducts {
 export interface OperationalProductUoms {
   conversion_to_base: Numeric;
   created_at: Generated<Timestamp>;
-  created_by_store_member_id: string | null;
   deleted_at: Timestamp | null;
   id: Generated<string>;
   is_default_for_purchase: Generated<boolean>;
@@ -1084,40 +1133,67 @@ export interface OperationalProductUoms {
   usage: Generated<OperationalProductUomUsage>;
 }
 
+export interface OperationalProductVariantGroups {
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  description: string | null;
+  id: Generated<string>;
+  metadata: Generated<Json>;
+  name: string;
+  normalized_name: string;
+  store_id: string;
+  updated_at: Timestamp | null;
+}
+
 export interface OperationalProductVariantOptionAssignments {
   created_at: Generated<Timestamp>;
   product_variant_id: string;
+  product_variant_option_id: string;
   store_id: string;
-  store_variant_option_id: string;
+}
+
+export interface OperationalProductVariantOptions {
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  description: string | null;
+  id: Generated<string>;
+  metadata: Generated<Json>;
+  name: string;
+  normalized_name: string;
+  product_variant_group_id: string;
+  store_id: string;
+  updated_at: Timestamp | null;
+}
+
+export interface OperationalProductVariantPrices {
+  allow_discount: Generated<boolean>;
+  created_at: Generated<Timestamp>;
+  id: Generated<string>;
+  max_discount_percent: Numeric | null;
+  min_selling_price: Numeric | null;
+  product_variant_id: string;
+  selling_price: Numeric;
+  store_id: string;
+  updated_at: Timestamp | null;
+  valid_from: Timestamp;
+  valid_to: Timestamp | null;
 }
 
 export interface OperationalProductVariants {
-  allow_discount: Generated<boolean>;
-  allow_negative_inventory: Generated<boolean>;
   attributes: Generated<Json>;
-  auto_update_cost: Generated<boolean>;
   barcode: string | null;
   barcode_registry_id: string | null;
-  cost_price: Numeric | null;
-  cost_updated_at: Timestamp | null;
   created_at: Generated<Timestamp>;
-  created_by_store_member_id: string | null;
   deleted_at: Timestamp | null;
   display_name: string;
   id: Generated<string>;
   is_active: Generated<boolean>;
-  max_discount_percent: Numeric | null;
   metadata: Generated<Json>;
-  min_selling_price: Numeric | null;
   normalized_display_name: string;
   pack_size: string | null;
   product_id: string;
-  reorder_point: Numeric | null;
-  reorder_quantity: Numeric | null;
-  selling_price: Numeric;
   sku: string | null;
   sort_order: number | null;
-  stock_valuation_method: Generated<OperationalStockValuationMethod>;
   store_id: string;
   unit_precision: Generated<number>;
   updated_at: Timestamp | null;
@@ -1181,6 +1257,7 @@ export interface OperationalPurchaseOrders {
 }
 
 export interface OperationalPurchaseReceiptLines {
+  allocated_landed_costs: Generated<Numeric>;
   barcode_snapshot: string | null;
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
@@ -1269,7 +1346,6 @@ export interface OperationalReportRuns {
 
 export interface OperationalStoreCategories {
   created_at: Generated<Timestamp>;
-  created_by_store_member_id: string | null;
   deleted_at: Timestamp | null;
   description: string | null;
   id: Generated<string>;
@@ -1299,7 +1375,6 @@ export interface OperationalStoreDiscountConditions {
 export interface OperationalStoreDiscounts {
   code: string;
   created_at: Generated<Timestamp>;
-  created_by_store_member_id: string | null;
   deleted_at: Timestamp | null;
   description: string | null;
   discount_type: OperationalDiscountType;
@@ -1340,7 +1415,6 @@ export interface OperationalStoreInvitations {
 export interface OperationalStoreLocations {
   code: string;
   created_at: Generated<Timestamp>;
-  created_by_store_member_id: string | null;
   deleted_at: Timestamp | null;
   id: Generated<string>;
   is_active: Generated<boolean>;
@@ -1447,6 +1521,7 @@ export interface OperationalStoreSettings {
   allow_discount: Generated<boolean>;
   allow_negative_inventory: Generated<boolean>;
   auto_reorder_enabled: Generated<boolean>;
+  auto_update_cost: Generated<boolean>;
   cash_rounding_increment: Numeric | null;
   created_at: Generated<Timestamp>;
   currency: Generated<string>;
@@ -1472,7 +1547,6 @@ export interface OperationalStoreSuppliers {
   city: string | null;
   country_code: string | null;
   created_at: Generated<Timestamp>;
-  created_by_store_member_id: string | null;
   deleted_at: Timestamp | null;
   email: string | null;
   id: Generated<string>;
@@ -1501,31 +1575,6 @@ export interface OperationalStoreUoms {
   sort_order: number | null;
   store_id: string;
   symbol: string | null;
-  updated_at: Timestamp | null;
-}
-
-export interface OperationalStoreVariantGroups {
-  created_at: Generated<Timestamp>;
-  deleted_at: Timestamp | null;
-  description: string | null;
-  id: Generated<string>;
-  metadata: Generated<Json>;
-  name: string;
-  normalized_name: string;
-  store_id: string;
-  updated_at: Timestamp | null;
-}
-
-export interface OperationalStoreVariantOptions {
-  created_at: Generated<Timestamp>;
-  deleted_at: Timestamp | null;
-  description: string | null;
-  id: Generated<string>;
-  metadata: Generated<Json>;
-  name: string;
-  normalized_name: string;
-  store_id: string;
-  store_variant_group_id: string;
   updated_at: Timestamp | null;
 }
 
@@ -1651,11 +1700,11 @@ export interface OperationalUserSecurity {
   last_password_change_at: Timestamp | null;
   lockout_reason: string | null;
   lockout_until: Timestamp | null;
-  mfa_enabled: Generated<boolean>;
   mfa_enabled_at: Timestamp | null;
   mfa_last_used_at: Timestamp | null;
   mfa_secret_ciphertext: Buffer | null;
   mfa_secret_kid: string | null;
+  mfa_status: Generated<OperationalMfaStatus>;
   mfa_type: OperationalMfaType | null;
   updated_at: Timestamp | null;
   user_id: string;
@@ -2313,6 +2362,9 @@ export interface DB {
   'operational.inventory_adjustment_lines': OperationalInventoryAdjustmentLines;
   'operational.inventory_adjustment_reasons': OperationalInventoryAdjustmentReasons;
   'operational.inventory_adjustments': OperationalInventoryAdjustments;
+  'operational.inventory_cost_layers': OperationalInventoryCostLayers;
+  'operational.inventory_cost_snapshots': OperationalInventoryCostSnapshots;
+  'operational.inventory_item_settings': OperationalInventoryItemSettings;
   'operational.inventory_items': OperationalInventoryItems;
   'operational.inventory_lot_items': OperationalInventoryLotItems;
   'operational.inventory_lot_movements': OperationalInventoryLotMovements;
@@ -2336,7 +2388,10 @@ export interface DB {
   'operational.pos_transactions': OperationalPosTransactions;
   'operational.product_media': OperationalProductMedia;
   'operational.product_uoms': OperationalProductUoms;
+  'operational.product_variant_groups': OperationalProductVariantGroups;
   'operational.product_variant_option_assignments': OperationalProductVariantOptionAssignments;
+  'operational.product_variant_options': OperationalProductVariantOptions;
+  'operational.product_variant_prices': OperationalProductVariantPrices;
   'operational.product_variants': OperationalProductVariants;
   'operational.products': OperationalProducts;
   'operational.purchase_order_lines': OperationalPurchaseOrderLines;
@@ -2357,8 +2412,6 @@ export interface DB {
   'operational.store_settings': OperationalStoreSettings;
   'operational.store_suppliers': OperationalStoreSuppliers;
   'operational.store_uoms': OperationalStoreUoms;
-  'operational.store_variant_groups': OperationalStoreVariantGroups;
-  'operational.store_variant_options': OperationalStoreVariantOptions;
   'operational.stores': OperationalStores;
   'operational.supplier_return_lines': OperationalSupplierReturnLines;
   'operational.supplier_returns': OperationalSupplierReturns;

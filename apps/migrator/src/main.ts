@@ -12,7 +12,7 @@ async function bootstrap() {
   try {
     logger.log('Starting database migration');
     const migrationService = app.get(MigrationService);
-    await migrationService.migrateToLatest();
+    await migrationService.onApplicationBootstrap();
     logger.log('All migrations completed successfully');
     process.exit(0);
   } catch (error) {

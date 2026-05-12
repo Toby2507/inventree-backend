@@ -5,6 +5,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { sql } from 'kysely';
 import { DatabaseModule } from '../../src/database.module';
 import { storeContextStorage } from '../../src/store-context';
+import { DATABASE_CONTEXT } from '@app/database';
 
 const storeContext = fsStoreContext.generate();
 
@@ -17,7 +18,7 @@ describe('DatabaseContextService (integration)', () => {
       imports: [DatabaseModule],
     }).compile();
     await module.init();
-    service = module.get(DatabaseContextService);
+    service = module.get<DatabaseContextService>(DATABASE_CONTEXT);
   });
 
   afterAll(async () => {

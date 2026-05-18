@@ -32,6 +32,7 @@ const BASE_SCOPES = [
   'core', // core utilities, services, and abstractions
   'testing', // test utilities, fakers, testcontainers setup
   // Tooling
+  'docker', // docker files and compose configs
   'ci', // github actions, pipelines, release automation
   'config', // linting, formatting, commitlint, editorconfig
   'deps', // dependency updates

@@ -1,7 +1,7 @@
-name: InvenTree
+name: inventree
 
 services:
-  # --------------------- Infrastructure services ---------------------
+  # --------------------- Infrastructure Services ---------------------
   db:
     image: postgis/postgis:18-3.6
     platform: linux/amd64
@@ -51,7 +51,7 @@ services:
       retries: 5
       start_period: 5s
 
-  # --------------------- Application services ---------------------
+  # --------------------- Application Services ---------------------
   migrator:
     container_name: inventree_migrator
     build:
@@ -201,8 +201,7 @@ services:
 
 networks:
   inventree:
-    driver: bridge
-    name: inventree_network
+    external: true
 
 volumes:
   db_data:

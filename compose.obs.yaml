@@ -63,6 +63,32 @@ services:
     networks:
       - inventree
 
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter
+    container_name: inventree_postgres_exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${DB_USER:-inventree}:${DB_PASSWORD:-localdevpassword}@${DB_HOST:-db}:${DB_PORT:-5432}/${DB_NAME:-inventree}?sslmode=disable"
+    ports:
+      - 9187:9187
+    networks:
+      - inventree
+    depends_on:
+      db:
+        condition: service_healthy
+  
+  redis-exporter:
+    image: oliver006/redis_exporter
+    container_name: inventree_redis_exporter
+    environment:
+      REDIS_ADDR: ${REDIS_URL}
+    ports:
+      - 9121:9121
+    networks:
+      - inventree
+    depends_on:
+      cache:
+        condition: service_healthy
+
   prometheus:
     image: prom/prometheus:latest
     container_name: inventree_prometheus

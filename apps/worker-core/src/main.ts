@@ -1,3 +1,6 @@
+import { initObservability } from '@app/core';
+initObservability({ serviceName: 'inventree-worker-core', serviceVersion: '1.0.0' });
+
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';

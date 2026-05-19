@@ -31,6 +31,7 @@ const BASE_SCOPES = [
   'common', // shared kernel — base entities, VOs, domain event base types
   'core', // core utilities, services, and abstractions
   'testing', // test utilities, fakers, testcontainers setup
+  'observability', // logging, metrics, tracing
   // Tooling
   'docker', // docker files and compose configs
   'ci', // github actions, pipelines, release automation

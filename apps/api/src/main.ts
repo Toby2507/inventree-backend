@@ -1,3 +1,6 @@
+import { initObservability } from '@app/core';
+initObservability({ serviceName: 'inventree-api', serviceVersion: '1.0.0' });
+
 import { setupSwagger } from '@app/config';
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';

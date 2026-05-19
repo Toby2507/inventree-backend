@@ -63,7 +63,7 @@ services:
       - .env
     volumes:
       - .:/app
-      - migrator_node_modules:/app/node_modules
+      - /app/node_modules
     depends_on:
       db:
         condition: service_healthy
@@ -84,7 +84,7 @@ services:
       - .env
     volumes:
       - .:/app
-      - api_node_modules:/app/node_modules
+      - /app/node_modules
     restart: unless-stopped
     depends_on:
       db:
@@ -109,7 +109,7 @@ services:
       - .env
     volumes:
       - .:/app
-      - outbox_processor_node_modules:/app/node_modules
+      - /app/node_modules
     restart: unless-stopped
     depends_on:
       db:
@@ -134,7 +134,7 @@ services:
       - .env
     volumes:
       - .:/app
-      - worker_core_node_modules:/app/node_modules
+      - /app/node_modules
     restart: unless-stopped
     depends_on:
       db:
@@ -159,7 +159,7 @@ services:
       - .env
     volumes:
       - .:/app
-      - intelligence_worker_node_modules:/app/node_modules
+      - /app/node_modules
     restart: unless-stopped
     depends_on:
       db:
@@ -196,7 +196,7 @@ services:
       - no-new-privileges:true
     volumes:
       - .:/app
-      - report_worker_node_modules:/app/node_modules
+      - /app/node_modules
       - report_tmp:/tmp/reports
 
 networks:
@@ -213,22 +213,3 @@ volumes:
   report_tmp:
     driver: local
     name: inventree_report_tmp
-  # Named node modules volumes to prevent anonymous volume explosion
-  migrator_node_modules:
-    driver: local
-    name: inventree_migrator_node_modules
-  api_node_modules:
-    driver: local
-    name: inventree_api_node_modules
-  outbox_processor_node_modules:
-    driver: local
-    name: inventree_outbox_processor_node_modules
-  worker_core_node_modules:
-    driver: local
-    name: inventree_worker_core_node_modules
-  intelligence_worker_node_modules:
-    driver: local
-    name: inventree_intelligence_worker_node_modules
-  report_worker_node_modules:
-    driver: local
-    name: inventree_report_worker_node_modules

@@ -72,10 +72,7 @@ services:
       - 9187:9187
     networks:
       - inventree
-    depends_on:
-      db:
-        condition: service_healthy
-  
+
   redis-exporter:
     image: oliver006/redis_exporter
     container_name: inventree_redis_exporter
@@ -85,9 +82,6 @@ services:
       - 9121:9121
     networks:
       - inventree
-    depends_on:
-      cache:
-        condition: service_healthy
 
   prometheus:
     image: prom/prometheus:latest
@@ -132,9 +126,13 @@ networks:
 volumes:
   grafana_data:
     driver: local
+    name: inventree_grafana_data
   loki_data:
     driver: local
+    name: inventree_loki_data
   prometheus_data:
     driver: local
+    name: inventree_prometheus_data
   tempo_data:
     driver: local
+    name: inventree_tempo_data

@@ -1,5 +1,5 @@
-import { initObservability } from '@app/core';
-initObservability({ serviceName: 'inventree-migrator-service', serviceVersion: '1.0.0' });
+import { bootstrapTelemetry } from '@app/core';
+bootstrapTelemetry({ serviceName: 'inventree-migrator-service', serviceVersion: '1.0.0' });
 
 import { MigrationService } from '@app/database';
 import { Logger } from '@nestjs/common';

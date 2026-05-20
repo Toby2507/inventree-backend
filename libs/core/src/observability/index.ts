@@ -1,1 +1,1 @@
-export { initObservability } from './instrumentation';
+export { bootstrapTelemetry } from './tracing';

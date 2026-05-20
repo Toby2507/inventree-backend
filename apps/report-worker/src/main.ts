@@ -1,5 +1,5 @@
-import { initObservability } from '@app/core';
-initObservability({ serviceName: 'inventree-report-worker', serviceVersion: '1.0.0' });
+import { bootstrapTelemetry } from '@app/core';
+bootstrapTelemetry({ serviceName: 'inventree-report-worker', serviceVersion: '1.0.0' });
 
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';

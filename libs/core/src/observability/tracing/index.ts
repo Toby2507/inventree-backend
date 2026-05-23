@@ -1,1 +1,2 @@
-export * from './tracing.provider';
+export * from './span-attributes';
+export * from './tracer.provider';

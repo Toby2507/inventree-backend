@@ -1,5 +1,3 @@
-export type Maybe<T> = T | null | undefined;
-
 interface SyncControllerResponse<T = undefined, P = undefined> {
   code: string;
   message: string;
@@ -9,3 +7,11 @@ interface SyncControllerResponse<T = undefined, P = undefined> {
 export type ControllerResponse<T = undefined, P = undefined> = Promise<
   SyncControllerResponse<T, P>
 >;
+
+export type DeepMutable<T> = {
+  -readonly [P in keyof T]: T[P] extends object ? DeepMutable<T[P]> : T[P];
+};
+
+export type Maybe<T> = T | null | undefined;
+
+export type Mutable<T> = { -readonly [P in keyof T]: T[P] };

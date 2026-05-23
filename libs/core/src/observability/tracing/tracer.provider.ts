@@ -17,13 +17,20 @@ import {
   ParentBasedSampler,
   TraceIdRatioBasedSampler,
 } from '@opentelemetry/sdk-trace-node';
-import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
+import {
+  ATTR_DEPLOYMENT_ENVIRONMENT_NAME,
+  ATTR_SERVICE_NAME,
+  ATTR_SERVICE_VERSION,
+} from '@opentelemetry/semantic-conventions';
+import { BullMQInstrumentation } from '@appsignal/opentelemetry-instrumentation-bullmq';
 
 interface ObservabilityConfig {
   serviceName: string;
   serviceVersion?: string;
   otlpEndpoint?: string; // grpc endpoint e.g. http://otel-collector:4317
 }
+
+export const INVENTREE_TRACER = 'inventree';
 
 export function bootstrapTelemetry(props: ObservabilityConfig): void {
   const url = props.otlpEndpoint || process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
@@ -33,7 +40,7 @@ export function bootstrapTelemetry(props: ObservabilityConfig): void {
   const resource: Resource = resourceFromAttributes({
     [ATTR_SERVICE_NAME]: props.serviceName,
     [ATTR_SERVICE_VERSION]: props.serviceVersion ?? '0.0.0',
-    'deployment.environment': process.env.NODE_ENV ?? 'development',
+    [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: process.env.NODE_ENV ?? 'development',
   });
   const traceExporter = new OTLPTraceExporter({ url });
   const metricExporter = new OTLPMetricExporter({ url });
@@ -54,10 +61,16 @@ export function bootstrapTelemetry(props: ObservabilityConfig): void {
     logRecordProcessors: [new BatchLogRecordProcessor(logExporter)],
     instrumentations: [
       getNodeAutoInstrumentations({
-        '@opentelemetry/instrumentation-pg': { enhancedDatabaseReporting: false },
+        '@opentelemetry/instrumentation-pg': { enhancedDatabaseReporting: isDev },
         '@opentelemetry/instrumentation-fs': { enabled: false },
-        '@opentelemetry/instrumentation-pino': { enabled: true },
+        '@opentelemetry/instrumentation-http': {
+          ignoreIncomingRequestHook: (req) => {
+            const ignorePaths = ['/health', '/metrics', '/favicon'];
+            return ignorePaths.some((path) => req.url?.includes(path));
+          },
+        },
       }),
+      new BullMQInstrumentation(),
     ],
     textMapPropagator: new CompositePropagator({
       propagators: [new W3CTraceContextPropagator(), new W3CBaggagePropagator()],
@@ -71,10 +84,13 @@ export function bootstrapTelemetry(props: ObservabilityConfig): void {
   const shutdown = async () => {
     if (isShuttingDown) return;
     isShuttingDown = true;
-    await sdk.shutdown();
+    try {
+      await sdk.shutdown();
+    } finally {
+      process.exit(0);
+    }
   };
 
-  process.on('SIGTERM', shutdown);
-  process.on('SIGINT', shutdown);
-  process.on('beforeExit', shutdown);
+  process.once('SIGTERM', shutdown);
+  process.once('SIGINT', shutdown);
 }

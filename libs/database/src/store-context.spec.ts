@@ -20,12 +20,35 @@ describe('StoreContext', () => {
 
     it('does not leak context across async boundaries', (done) => {
       storeContextStorage.run(mockContext, () => {
-        // inner context visible here
         expect(getStoreContext()).toEqual(mockContext);
       });
-      // outer scope — context should be gone
       expect(() => getStoreContext()).toThrow();
       done();
+    });
+
+    it('isolates nested contexts correctly', (done) => {
+      const outer = fsStoreContext.generate({ storeId: 'outer' });
+      const inner = fsStoreContext.generate({ storeId: 'inner' });
+      storeContextStorage.run(outer, () => {
+        expect(getStoreContext().storeId).toBe('outer');
+        storeContextStorage.run(inner, () => {
+          expect(getStoreContext().storeId).toBe('inner');
+        });
+        expect(getStoreContext().storeId).toBe('outer');
+        done();
+      });
+    });
+
+    it('propagates through async continuations', async () => {
+      let capturedStoreId: string | undefined;
+      await new Promise<void>((resolve) => {
+        storeContextStorage.run(mockContext, async () => {
+          await Promise.resolve();
+          capturedStoreId = getStoreContext().storeId;
+          resolve();
+        });
+      });
+      expect(capturedStoreId).toBe(mockContext.storeId);
     });
   });
 

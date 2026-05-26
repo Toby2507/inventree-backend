@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { SpanKind, SpanOptions, SpanStatusCode } from '@opentelemetry/api';
+import { SpanOptions } from '@opentelemetry/api';
 
 export const makeMockSpan = () => ({
   setAttribute: jest.fn().mockReturnThis(),
@@ -46,5 +46,3 @@ export const makeMockMeter = () => {
     instruments: { counter, histogram, upDown, gauge },
   };
 };
-
-export { SpanKind, SpanStatusCode };

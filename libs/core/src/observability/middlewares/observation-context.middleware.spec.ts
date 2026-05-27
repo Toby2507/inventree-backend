@@ -89,14 +89,14 @@ describe('ObservationContextMiddleware', () => {
   });
 
   describe('context isolation', () => {
-    it('context is not accessible outside next()', async () => {
+    it('should not make context accessible outside next()', async () => {
       const req = makeRequestMock();
       const res = makeResponseMock();
       await runInMiddleware(req, res);
       expect(getOptionalObservationContext()).toBeUndefined();
     });
 
-    it('two concurrent requests have independent contexts', async () => {
+    it('should have independent contexts for two concurrent requests', async () => {
       const capturedIds: string[] = [];
       const runRequest = async (corrId: string) => {
         const req = makeRequestMock({ headers: { [CORRELATION_HEADER]: corrId } });

@@ -20,6 +20,14 @@ describe('RequestLoggerInterceptor', () => {
   let mockGetRequest: jest.Mock;
   let mockGetResponse: jest.Mock;
 
+  const runInterceptor = (ctx?: any) => {
+    if (ctx)
+      return observationStorage.run(ctx, () =>
+        firstValueFrom(interceptor.intercept(context, callHandler)),
+      );
+    return firstValueFrom(interceptor.intercept(context, callHandler));
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     logger = makeLoggerMock();
@@ -31,10 +39,8 @@ describe('RequestLoggerInterceptor', () => {
     mockGetResponse.mockReturnValue({ statusCode: 201 });
   });
 
-  it('logs incoming request with method, path, and correlationId', async () => {
-    await observationStorage.run(ctx, () =>
-      firstValueFrom(interceptor.intercept(context, callHandler)),
-    );
+  it('should log incoming request with method, path, and correlationId', async () => {
+    await runInterceptor(ctx);
     expect(logger.log).toHaveBeenCalledWith(
       'Incoming request',
       expect.objectContaining({
@@ -45,10 +51,8 @@ describe('RequestLoggerInterceptor', () => {
     );
   });
 
-  it('logs request completion with statusCode and durationMs', async () => {
-    await observationStorage.run(ctx, () =>
-      firstValueFrom(interceptor.intercept(context, callHandler)),
-    );
+  it('should log request completion with statusCode and durationMs', async () => {
+    await runInterceptor(ctx);
     expect(logger.log).toHaveBeenCalledWith(
       'Request completed',
       expect.objectContaining({
@@ -58,15 +62,11 @@ describe('RequestLoggerInterceptor', () => {
     );
   });
 
-  it('logs error with errorMessage on handler failure', async () => {
+  it('should log error with errorMessage on handler failure', async () => {
     const error = new Error('Unhandled explosion');
     (error as any).code = 'INTERNAL_ERROR';
     mockHandle.mockReturnValueOnce(throwError(() => error));
-    await expect(
-      observationStorage.run(ctx, () =>
-        firstValueFrom(interceptor.intercept(context, callHandler)),
-      ),
-    ).rejects.toThrow();
+    await expect(runInterceptor(ctx)).rejects.toThrow();
     expect(logger.error).toHaveBeenCalledWith(
       'Request failed',
       expect.objectContaining({
@@ -76,8 +76,8 @@ describe('RequestLoggerInterceptor', () => {
     );
   });
 
-  it('works without an ObservationContext (e.g. health check route)', async () => {
-    await firstValueFrom(interceptor.intercept(context, callHandler));
+  it('should work without an ObservationContext (e.g. health check route)', async () => {
+    await runInterceptor();
     expect(logger.log).toHaveBeenCalledWith(
       'Incoming request',
       expect.objectContaining({ idempotencyKey: undefined }),

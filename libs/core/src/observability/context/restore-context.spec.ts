@@ -1,47 +1,29 @@
 import {
+  createOtelTestHarness,
   faker,
   fsSerializedBusinessContext,
   fsSerializedOutboxContext,
-  makeMockSpan,
-  makeMockTracer,
 } from '@app/testing';
-import {
-  context,
-  propagation,
-  ROOT_CONTEXT,
-  SpanKind,
-  SpanStatusCode,
-  trace,
-} from '@opentelemetry/api';
-import { v4 as uuidV4 } from 'uuid';
+import { ROOT_CONTEXT, SpanKind, SpanStatusCode } from '@opentelemetry/api';
 import { INVENTREE_TRACER, SpanAttributes } from '../tracing';
-import { observationStorage } from './observation-context.storage';
 import { RestoredContextOptions, withRestoredObservationContext } from './restore-context';
 
-const mockSpan = makeMockSpan();
-const mockTracer = makeMockTracer(mockSpan);
-const mockUuid = faker.string.uuid();
-const mockObservationRun = jest.fn((_ctx, fn) => fn());
-const mockPropagationExtract = jest.fn((_ctx, carrier) => ({ __extracted: true, ...carrier }));
-
-jest.mock('@opentelemetry/api', () => {
-  const actual = jest.requireActual('@opentelemetry/api');
-  return {
-    ...actual,
-    trace: { getTracer: jest.fn(() => mockTracer) },
-    context: { with: jest.fn().mockImplementation((_ctx, fn) => fn()) },
-    propagation: { extract: jest.fn((_ctx, carrier) => mockPropagationExtract(_ctx, carrier)) },
-    ROOT_CONTEXT: {},
-  };
+let generatedUUID: string;
+const mockUuidV4 = jest.fn().mockImplementation(() => {
+  generatedUUID = faker.string.uuid();
+  return generatedUUID;
 });
+const mockObservationRun = jest.fn((_ctx, fn) => fn());
+
 jest.mock('uuid', () => ({
-  v4: jest.fn(() => mockUuid),
+  v4: jest.fn(() => mockUuidV4()),
 }));
 jest.mock('./observation-context.storage', () => ({
   observationStorage: { run: jest.fn((_ctx, fn) => mockObservationRun(_ctx, fn)) },
 }));
 
 describe('withRestoredObservationContext()', () => {
+  const otel = createOtelTestHarness();
   const defaultOptions: RestoredContextOptions = { spanName: 'test.span' };
   const serializedContext = fsSerializedOutboxContext.generate();
 
@@ -52,30 +34,30 @@ describe('withRestoredObservationContext()', () => {
   describe('when no serialized context is provided', () => {
     it('should generate and propagate a fallback correlationId across tracing and observation context', async () => {
       await withRestoredObservationContext(null, defaultOptions, async () => {});
-      const [, spanOpts] = mockTracer.startActiveSpan.mock.calls[0];
-      expect(uuidV4).toHaveBeenCalled();
-      expect(spanOpts.attributes[SpanAttributes.CORRELATION_ID]).toBe(mockUuid);
-      expect(observationStorage.run).toHaveBeenCalledWith(
-        expect.objectContaining({ correlationId: mockUuid }),
+      const [, spanOpts] = otel.tracer.startActiveSpan.mock.calls[0];
+      expect(mockUuidV4).toHaveBeenCalled();
+      expect(spanOpts.attributes[SpanAttributes.CORRELATION_ID]).toBe(generatedUUID);
+      expect(mockObservationRun).toHaveBeenCalledWith(
+        expect.objectContaining({ correlationId: generatedUUID }),
         expect.any(Function),
       );
     });
 
     it('should not extract propagation context when serialized trace is not provided', async () => {
       await withRestoredObservationContext(null, defaultOptions, async () => {});
-      expect(propagation.extract).not.toHaveBeenCalled();
-      expect(context.with).toHaveBeenCalledWith(ROOT_CONTEXT, expect.any(Function));
+      expect(otel.spies.propagationExtract).not.toHaveBeenCalled();
+      expect(otel.spies.contextWith).toHaveBeenCalledWith(ROOT_CONTEXT, expect.any(Function));
     });
   });
 
   describe('OTEL context restoration', () => {
     it('should extract and use OTEL context from serialized trace', async () => {
       await withRestoredObservationContext(serializedContext, defaultOptions, async () => {});
-      expect(propagation.extract).toHaveBeenCalledWith(ROOT_CONTEXT, {
+      expect(otel.spies.propagationExtract).toHaveBeenCalledWith(ROOT_CONTEXT, {
         traceparent: serializedContext.traceparent,
         tracestate: serializedContext.tracestate,
       });
-      expect(context.with).toHaveBeenCalledWith(
+      expect(otel.spies.contextWith).toHaveBeenCalledWith(
         expect.objectContaining({
           __extracted: true,
           traceparent: serializedContext.traceparent,
@@ -98,8 +80,8 @@ describe('withRestoredObservationContext()', () => {
     it('should not extract propagation context when trace fields are not provided', async () => {
       const contextWithoutTrace = fsSerializedBusinessContext.generate();
       await withRestoredObservationContext(contextWithoutTrace, defaultOptions, async () => {});
-      expect(propagation.extract).not.toHaveBeenCalled();
-      expect(context.with).toHaveBeenCalledWith(ROOT_CONTEXT, expect.any(Function));
+      expect(otel.spies.propagationExtract).not.toHaveBeenCalled();
+      expect(otel.spies.contextWith).toHaveBeenCalledWith(ROOT_CONTEXT, expect.any(Function));
     });
   });
 
@@ -111,8 +93,8 @@ describe('withRestoredObservationContext()', () => {
         { ...defaultOptions, spanKind: 2, spanAttributes: customAttributes },
         async () => {},
       );
-      expect(mockTracer.startActiveSpan).toHaveBeenCalledTimes(1);
-      expect(mockTracer.startActiveSpan).toHaveBeenCalledWith(
+      expect(otel.tracer.startActiveSpan).toHaveBeenCalledTimes(1);
+      expect(otel.tracer.startActiveSpan).toHaveBeenCalledWith(
         defaultOptions.spanName,
         expect.objectContaining({
           kind: 2,
@@ -134,13 +116,13 @@ describe('withRestoredObservationContext()', () => {
         },
         async () => {},
       );
-      const [, spanOpts] = mockTracer.startActiveSpan.mock.calls[0];
+      const [, spanOpts] = otel.tracer.startActiveSpan.mock.calls[0];
       expect(spanOpts.attributes[SpanAttributes.CORRELATION_ID]).toBe(customCorrelationId);
     });
 
     it('should create a tracer using the INVENTREE_TRACER name', async () => {
       await withRestoredObservationContext(serializedContext, defaultOptions, async () => {});
-      expect(trace.getTracer).toHaveBeenCalledWith(INVENTREE_TRACER);
+      expect(otel.spies.getTracer).toHaveBeenCalledWith(INVENTREE_TRACER);
     });
   });
 
@@ -160,7 +142,7 @@ describe('withRestoredObservationContext()', () => {
         await Promise.resolve();
         events.push('fn');
       };
-      mockSpan.setStatus.mockImplementation(() => {
+      otel.span.setStatus.mockImplementation(() => {
         events.push('setStatus');
       });
       await withRestoredObservationContext(serializedContext, defaultOptions, fn);
@@ -171,9 +153,9 @@ describe('withRestoredObservationContext()', () => {
   describe('Span lifecycle', () => {
     it('should set span status to OK and end it on successful completion', async () => {
       await withRestoredObservationContext(serializedContext, defaultOptions, async () => 'ok');
-      expect(mockSpan.setStatus).toHaveBeenCalledWith({ code: SpanStatusCode.OK });
-      expect(mockSpan.end).toHaveBeenCalled();
-      expect(mockSpan.recordException).not.toHaveBeenCalled();
+      expect(otel.span.setStatus).toHaveBeenCalledWith({ code: SpanStatusCode.OK });
+      expect(otel.span.end).toHaveBeenCalled();
+      expect(otel.span.recordException).not.toHaveBeenCalled();
     });
 
     it('should record exception, set span status to ERROR, and end it when fn() throws', async () => {
@@ -182,12 +164,12 @@ describe('withRestoredObservationContext()', () => {
       await expect(
         withRestoredObservationContext(serializedContext, defaultOptions, fn),
       ).rejects.toThrow('test error');
-      expect(mockSpan.recordException).toHaveBeenCalledWith(error);
-      expect(mockSpan.setStatus).toHaveBeenCalledWith({
+      expect(otel.span.recordException).toHaveBeenCalledWith(error);
+      expect(otel.span.setStatus).toHaveBeenCalledWith({
         code: SpanStatusCode.ERROR,
         message: error.message,
       });
-      expect(mockSpan.end).toHaveBeenCalled();
+      expect(otel.span.end).toHaveBeenCalled();
     });
   });
 
@@ -204,11 +186,11 @@ describe('withRestoredObservationContext()', () => {
         fn,
       );
       expect(result).toBe('full-result');
-      expect(mockPropagationExtract).toHaveBeenCalledWith(ROOT_CONTEXT, {
+      expect(otel.spies.propagationExtract).toHaveBeenCalledWith(ROOT_CONTEXT, {
         traceparent: serializedContext.traceparent,
         tracestate: serializedContext.tracestate,
       });
-      expect(mockTracer.startActiveSpan).toHaveBeenCalledWith(
+      expect(otel.tracer.startActiveSpan).toHaveBeenCalledWith(
         'outbox.process.full.roundtrip',
         expect.objectContaining({
           kind: SpanKind.CONSUMER,
@@ -222,7 +204,7 @@ describe('withRestoredObservationContext()', () => {
         }),
         expect.any(Function),
       );
-      expect(observationStorage.run).toHaveBeenCalledWith(
+      expect(mockObservationRun).toHaveBeenCalledWith(
         {
           correlationId: serializedContext.correlationId,
           causationId: serializedContext.causationId,
@@ -236,9 +218,9 @@ describe('withRestoredObservationContext()', () => {
         expect.any(Function),
       );
       expect(fn).toHaveBeenCalledTimes(1);
-      expect(mockSpan.setStatus).toHaveBeenCalledWith({ code: SpanStatusCode.OK });
-      expect(mockSpan.recordException).not.toHaveBeenCalled();
-      expect(mockSpan.end).toHaveBeenCalledTimes(1);
+      expect(otel.span.setStatus).toHaveBeenCalledWith({ code: SpanStatusCode.OK });
+      expect(otel.span.recordException).not.toHaveBeenCalled();
+      expect(otel.span.end).toHaveBeenCalledTimes(1);
     });
   });
 });

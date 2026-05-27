@@ -1,5 +1,12 @@
 import { Logger } from '@nestjs/common';
 
+jest.mock('@opentelemetry/api', () => ({
+  ...jest.requireActual('@opentelemetry/api'),
+  trace: { getTracer: jest.fn() },
+  context: { with: jest.fn() },
+  propagation: { extract: jest.fn() },
+  ROOT_CONTEXT: {},
+}));
 // Suppress expected error logs during tests to keep output clean
 beforeEach(() => {
   jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});

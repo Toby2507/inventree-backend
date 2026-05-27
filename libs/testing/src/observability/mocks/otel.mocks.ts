@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { SpanOptions } from '@opentelemetry/api';
+import { context, propagation, SpanOptions, trace } from '@opentelemetry/api';
 
 export const makeMockSpan = () => ({
   setAttribute: jest.fn().mockReturnThis(),
@@ -20,11 +20,7 @@ export const makeMockTracer = (span = makeMockSpan()) => ({
   startActiveSpan: jest
     .fn()
     .mockImplementation(
-      (
-        _name: string,
-        _opts: SpanOptions,
-        fn?: (span: ReturnType<typeof makeMockSpan>) => Promise<any>,
-      ) => {
+      (_name: string, _opts: SpanOptions, fn?: (span: ReturnType<typeof makeMockSpan>) => any) => {
         return fn ? fn(span) : span;
       },
     ),
@@ -44,5 +40,35 @@ export const makeMockMeter = () => {
       createObservableGauge: jest.fn().mockReturnValue(gauge),
     },
     instruments: { counter, histogram, upDown, gauge },
+  };
+};
+
+export const createOtelTestHarness = () => {
+  const span = makeMockSpan();
+  const tracer = makeMockTracer(span);
+
+  const traceMock = {
+    getTracer: jest.fn().mockReturnValue(tracer),
+  };
+  const contextMock = {
+    with: jest.fn().mockImplementation((_ctx, fn) => fn()),
+  };
+  const propagationMock = {
+    extract: jest.fn().mockImplementation((_ctx, carrier) => ({ __extracted: true, ...carrier })),
+  };
+
+  (trace.getTracer as jest.Mock).mockImplementation(traceMock.getTracer);
+  (context.with as jest.Mock).mockImplementation(contextMock.with);
+  (propagation.extract as jest.Mock).mockImplementation(propagationMock.extract);
+
+  return {
+    span,
+    tracer,
+
+    spies: {
+      getTracer: traceMock.getTracer,
+      contextWith: contextMock.with,
+      propagationExtract: propagationMock.extract,
+    },
   };
 };

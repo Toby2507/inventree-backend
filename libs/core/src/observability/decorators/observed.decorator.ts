@@ -1,12 +1,15 @@
 import { AppLoggerService, ContextLogger } from '../logger';
 import { Trace, TraceOptions } from './trace.decorator';
 
+type LoggableInstance = { logger?: AppLoggerService };
 export interface ObservedOptions extends TraceOptions {
   logContext?: string;
   logArgs?: boolean;
   logResult?: boolean;
   redactArgKeys?: string[];
 }
+
+const isDev = process.env.NODE_ENV !== 'production';
 
 /**
  * `@Observed()` — method decorator.
@@ -20,19 +23,18 @@ export function Observed(options: ObservedOptions = {}): MethodDecorator {
     propertyKey: string | symbol,
     descriptor: TypedPropertyDescriptor<any>,
   ) {
-    const traced = descriptor.value as (...args: unknown[]) => Promise<unknown>;
+    const original = descriptor.value as (...args: unknown[]) => Promise<unknown>;
     const className = target.constructor.name;
     const methodName = String(propertyKey);
     const logContext = options.logContext ?? `${className}.${methodName}`;
 
-    Trace({ name: options.name ?? logContext, attributes: options.attributes })(
-      target,
-      propertyKey,
-      descriptor,
-    );
-
     descriptor.value = async function (...args: unknown[]) {
-      const logger: AppLoggerService | undefined = (this as any).logger;
+      const logger = (this as LoggableInstance).logger;
+      if (!logger && isDev) {
+        console.warn(
+          `[Observed] logger missing on ${className}, cannot log ${methodName} execution. Please inject AppLoggerService and add "public logger: AppLoggerService" to the class.`,
+        );
+      }
       const log: ContextLogger | undefined = logger?.forContext(logContext);
       const startMs = performance.now();
 
@@ -41,7 +43,7 @@ export function Observed(options: ObservedOptions = {}): MethodDecorator {
       });
 
       try {
-        const result = await traced.apply(this, args);
+        const result = await original.apply(this, args);
         log?.log(`${methodName} completed`, {
           durationMs: performance.now() - startMs,
           ...(options.logResult ? { result } : {}),
@@ -57,6 +59,12 @@ export function Observed(options: ObservedOptions = {}): MethodDecorator {
         throw err;
       }
     };
+
+    Trace({ name: options.name ?? logContext, attributes: options.attributes })(
+      target,
+      propertyKey,
+      descriptor,
+    );
 
     return descriptor;
   };

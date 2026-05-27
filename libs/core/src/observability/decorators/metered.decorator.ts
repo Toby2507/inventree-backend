@@ -1,5 +1,6 @@
 import { MetricName, MetricNames, MetricsService } from '../metrics';
 
+type MeteredInstance = { metrics?: MetricsService };
 export type MeteredKind = 'command' | 'query' | 'repository' | 'job' | 'custom';
 
 export interface MeteredOptions {
@@ -8,6 +9,7 @@ export interface MeteredOptions {
   attributes?: Record<string, string>;
 }
 
+const isDev = process.env.NODE_ENV !== 'production';
 const DURATION_METRIC: Record<MeteredKind, MetricName> = {
   command: MetricNames.COMMAND_DURATION,
   query: MetricNames.QUERY_DURATION,
@@ -49,7 +51,12 @@ export function Metered(options: MeteredOptions = {}): MethodDecorator {
     const operationName = options.name ?? `${className}.${methodName}`;
 
     descriptor.value = async function (...args: unknown[]) {
-      const metricsService: MetricsService | undefined = (this as any).metrics;
+      const metricsService = (this as MeteredInstance).metrics;
+      if (!metricsService && isDev) {
+        console.warn(
+          `[Metered] metricsService missing on ${className}, cannot record metrics for ${methodName}. Please inject MetricsService and add "public metrics: MetricsService" to the class.`,
+        );
+      }
       if (!metricsService) return original.apply(this, args);
 
       const attributes = {

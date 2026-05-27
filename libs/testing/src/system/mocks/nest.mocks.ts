@@ -8,12 +8,14 @@ interface HostMocks {
   mockStatus: jest.Mock;
   mockJson: jest.Mock;
   mockGetRequest: jest.Mock;
+  mockGetResponse: jest.Mock;
 }
 interface ContextMocks {
   context: ExecutionContext;
   mockGetHandler: jest.Mock;
   mockGetClass: jest.Mock;
   mockGetRequest: jest.Mock;
+  mockGetResponse: jest.Mock;
 }
 interface CallHandlerMocks {
   callHandler: CallHandler;
@@ -34,13 +36,13 @@ export const makeHostMock = (): HostMocks => {
     .fn()
     .mockReturnValue({ getResponse: mockGetResponse, getRequest: mockGetRequest });
   const host = { switchToHttp: mockSwitchToHttp } as unknown as ArgumentsHost;
-  return { host, mockStatus, mockJson, mockGetRequest };
+  return { host, mockStatus, mockJson, mockGetRequest, mockGetResponse };
 };
 
 export const makeContextMock = (): ContextMocks => {
   const mockGetHandler = jest.fn();
   const mockGetClass = jest.fn();
-  const { host, mockGetRequest } = makeHostMock();
+  const { host, mockGetRequest, mockGetResponse } = makeHostMock();
   return {
     context: {
       getHandler: mockGetHandler,
@@ -50,6 +52,7 @@ export const makeContextMock = (): ContextMocks => {
     mockGetHandler,
     mockGetClass,
     mockGetRequest,
+    mockGetResponse,
   };
 };
 

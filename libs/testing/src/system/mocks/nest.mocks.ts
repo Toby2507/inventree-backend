@@ -1,5 +1,7 @@
+import { Fn } from '@app/common';
 import { ArgumentsHost, CallHandler, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { Request, Response } from 'express';
 
 interface HostMocks {
   host: ArgumentsHost;
@@ -16,6 +18,11 @@ interface ContextMocks {
 interface CallHandlerMocks {
   callHandler: CallHandler;
   mockHandle: jest.Mock;
+}
+interface MockRequestArgs {
+  method?: string;
+  path?: string;
+  headers?: Record<string, string>;
 }
 
 export const makeHostMock = (): HostMocks => {
@@ -60,4 +67,30 @@ export const makeCallHandlerMock = (): CallHandlerMocks => {
     },
     mockHandle,
   };
+};
+
+const DEFAULT_REQ_ARGS: MockRequestArgs = {
+  method: 'GET',
+  path: '/api/v1/test',
+  headers: {},
+};
+export const makeRequestMock = ({ method, path, headers }: MockRequestArgs = DEFAULT_REQ_ARGS) => {
+  return {
+    method,
+    path,
+    headers,
+    route: { path },
+  } as unknown as jest.Mocked<Request>;
+};
+
+export const makeResponseMock = () => {
+  const listeners: Record<string, Fn> = {};
+  return {
+    setHeader: jest.fn(),
+    statusCode: 200,
+    on: jest.fn((event: string, cb: Fn) => {
+      listeners[event] = cb;
+    }),
+    emit: (event: string) => listeners[event]?.(),
+  } as unknown as jest.Mocked<Response>;
 };

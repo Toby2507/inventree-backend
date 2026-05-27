@@ -8,15 +8,11 @@ import { ROOT_CONTEXT, SpanKind, SpanStatusCode } from '@opentelemetry/api';
 import { INVENTREE_TRACER, SpanAttributes } from '../tracing';
 import { RestoredContextOptions, withRestoredObservationContext } from './restore-context';
 
-let generatedUUID: string;
-const mockUuidV4 = jest.fn().mockImplementation(() => {
-  generatedUUID = faker.string.uuid();
-  return generatedUUID;
-});
+const generatedUUID = faker.string.uuid();
 const mockObservationRun = jest.fn((_ctx, fn) => fn());
 
 jest.mock('uuid', () => ({
-  v4: jest.fn(() => mockUuidV4()),
+  v4: jest.fn(() => generatedUUID),
 }));
 jest.mock('./observation-context.storage', () => ({
   observationStorage: { run: jest.fn((_ctx, fn) => mockObservationRun(_ctx, fn)) },
@@ -35,7 +31,6 @@ describe('withRestoredObservationContext()', () => {
     it('should generate and propagate a fallback correlationId across tracing and observation context', async () => {
       await withRestoredObservationContext(null, defaultOptions, async () => {});
       const [, spanOpts] = otel.tracer.startActiveSpan.mock.calls[0];
-      expect(mockUuidV4).toHaveBeenCalled();
       expect(spanOpts.attributes[SpanAttributes.CORRELATION_ID]).toBe(generatedUUID);
       expect(mockObservationRun).toHaveBeenCalledWith(
         expect.objectContaining({ correlationId: generatedUUID }),

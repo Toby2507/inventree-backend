@@ -49,26 +49,31 @@ export const createOtelTestHarness = () => {
 
   const traceMock = {
     getTracer: jest.fn().mockReturnValue(tracer),
+    getSpan: jest.fn().mockReturnValue(span),
   };
   const contextMock = {
     with: jest.fn().mockImplementation((_ctx, fn) => fn()),
+    active: jest.fn().mockReturnValue({}),
   };
   const propagationMock = {
     extract: jest.fn().mockImplementation((_ctx, carrier) => ({ __extracted: true, ...carrier })),
   };
 
   (trace.getTracer as jest.Mock).mockImplementation(traceMock.getTracer);
+  (trace.getSpan as jest.Mock).mockImplementation(traceMock.getSpan);
   (context.with as jest.Mock).mockImplementation(contextMock.with);
+  (context.active as jest.Mock).mockImplementation(contextMock.active);
   (propagation.extract as jest.Mock).mockImplementation(propagationMock.extract);
 
   return {
     span,
     tracer,
-
     spies: {
       getTracer: traceMock.getTracer,
       contextWith: contextMock.with,
       propagationExtract: propagationMock.extract,
+      getSpan: traceMock.getSpan,
+      activeContext: contextMock.active,
     },
   };
 };

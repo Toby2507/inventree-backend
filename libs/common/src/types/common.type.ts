@@ -15,3 +15,5 @@ export type DeepMutable<T> = {
 export type Maybe<T> = T | null | undefined;
 
 export type Mutable<T> = { -readonly [P in keyof T]: T[P] };
+
+export type Fn = (...args: any) => any;

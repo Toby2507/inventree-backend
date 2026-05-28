@@ -6,6 +6,8 @@ export const makeMetricsMock = () => {
     increment: jest.fn(),
     adjust: jest.fn(),
     gauge: jest.fn(),
-    timeAsync: jest.fn().mockImplementation((_d, _t, _a, fn) => fn()),
+    timeAsync: jest
+      .fn()
+      .mockImplementation((_d: string, _t: string, _a: object, fn: () => Promise<unknown>) => fn()),
   } as unknown as jest.Mocked<MetricsService>;
 };

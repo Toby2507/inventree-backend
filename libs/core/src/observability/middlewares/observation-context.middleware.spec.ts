@@ -1,13 +1,13 @@
+import { Fn } from '@app/common';
 import { createOtelTestHarness, faker, makeRequestMock, makeResponseMock } from '@app/testing';
-import { getOptionalObservationContext } from '../context/observation-context.storage';
+import { getOptionalObservationContext } from '../context';
+import { SpanAttributes } from '../tracing';
 import {
   CAUSATION_HEADER,
   CORRELATION_HEADER,
   IDEMPOTENCY_HEADER,
   ObservationContextMiddleware,
 } from './observation-context.middleware';
-import { Fn } from '@app/common';
-import { SpanAttributes } from '../tracing';
 
 const generatedUUID = faker.string.uuid();
 jest.mock('uuid', () => ({
@@ -101,8 +101,7 @@ describe('ObservationContextMiddleware', () => {
       const runRequest = async (corrId: string) => {
         const req = makeRequestMock({ headers: { [CORRELATION_HEADER]: corrId } });
         const res = makeResponseMock();
-        const next = async () => {
-          await Promise.resolve();
+        const next = () => {
           capturedIds.push(getOptionalObservationContext()?.correlationId ?? 'none');
         };
         await runInMiddleware(req, res, next);

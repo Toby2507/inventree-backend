@@ -1,14 +1,16 @@
 import { AppLoggerService, ContextLogger } from '@app/core/observability/logger';
 
 export const makeLoggerMock = () => {
-  return {
+  const contextLogger = makeContextLoggerMock();
+  const logger = {
     log: jest.fn(),
     error: jest.fn(),
     warn: jest.fn(),
     debug: jest.fn(),
     verbose: jest.fn(),
-    forContext: jest.fn().mockImplementation(() => makeContextLoggerMock()),
+    forContext: jest.fn().mockImplementation(() => contextLogger),
   } as unknown as jest.Mocked<AppLoggerService>;
+  return { logger, contextLogger };
 };
 
 export const makeContextLoggerMock = () => {

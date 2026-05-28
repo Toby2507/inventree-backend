@@ -1,8 +1,7 @@
-import { of, throwError, firstValueFrom } from 'rxjs';
-import { MetricsInterceptor } from './metrics.interceptor';
-import { MetricsService } from '../metrics/metrics.service';
-import { MetricNames } from '../metrics/metric-names';
 import { makeCallHandlerMock, makeContextMock, makeMetricsMock } from '@app/testing';
+import { firstValueFrom, of, throwError } from 'rxjs';
+import { MetricNames, MetricsService } from '../metrics';
+import { MetricsInterceptor } from './metrics.interceptor';
 
 describe('MetricsInterceptor', () => {
   let interceptor: MetricsInterceptor;

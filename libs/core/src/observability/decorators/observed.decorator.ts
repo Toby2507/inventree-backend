@@ -1,4 +1,4 @@
-import { AppLoggerService, ContextLogger } from '../logger';
+import { AppLoggerService } from '../logger';
 import { Trace, TraceOptions } from './trace.decorator';
 
 type LoggableInstance = { logger?: AppLoggerService };
@@ -7,6 +7,7 @@ export interface ObservedOptions extends TraceOptions {
   logArgs?: boolean;
   logResult?: boolean;
   redactArgKeys?: string[];
+  redactResultKeys?: string[];
 }
 
 const isDev = process.env.NODE_ENV !== 'production';
@@ -35,23 +36,25 @@ export function Observed(options: ObservedOptions = {}): MethodDecorator {
           `[Observed] logger missing on ${className}, cannot log ${methodName} execution. Please inject AppLoggerService and add "public logger: AppLoggerService" to the class.`,
         );
       }
-      const log: ContextLogger | undefined = logger?.forContext(logContext);
+      const log = logger?.forContext(logContext);
       const startMs = performance.now();
 
-      log?.log(`${methodName} started`, {
+      log?.log(`started`, {
         ...(options.logArgs ? { args: sanitizeArgs(args, options.redactArgKeys) } : {}),
       });
 
       try {
         const result = await original.apply(this, args);
-        log?.log(`${methodName} completed`, {
+        log?.log(`completed`, {
           durationMs: performance.now() - startMs,
-          ...(options.logResult ? { result } : {}),
+          ...(options.logResult
+            ? { result: sanitizeResult(result, options.redactResultKeys) }
+            : {}),
         });
         return result;
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));
-        log?.error(`${methodName} failed`, {
+        log?.error(`failed`, {
           durationMs: performance.now() - startMs,
           errorMessage: error.message,
           errorCode: (err as any)?.code,
@@ -83,4 +86,16 @@ function sanitizeArgs(args: unknown[], redactKeys: string[] = []): unknown[] {
     }
     return arg;
   });
+}
+
+function sanitizeResult(result: unknown, redactKeys: string[] = []): unknown {
+  if (result === null || result === undefined) return result;
+  if (typeof result === 'object') {
+    const sanitized = { ...(result as Record<string, unknown>) };
+    for (const key of redactKeys) {
+      if (key in sanitized) sanitized[key] = '[REDACTED]';
+    }
+    return sanitized;
+  }
+  return result;
 }

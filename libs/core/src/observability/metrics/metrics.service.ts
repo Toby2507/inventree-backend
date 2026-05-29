@@ -17,6 +17,24 @@ type GaugeDefinition = {
   callbacks: Array<{ fn: () => number; attributes: Attributes }>;
 };
 
+export const PRE_ALLOCATED_METRICS = {
+  counters: [
+    MetricNames.COMMAND_TOTAL,
+    MetricNames.QUERY_TOTAL,
+    MetricNames.HTTP_TOTAL,
+    MetricNames.REPO_TOTAL,
+    MetricNames.JOB_TOTAL,
+  ],
+  histograms: [
+    MetricNames.COMMAND_DURATION,
+    MetricNames.QUERY_DURATION,
+    MetricNames.HTTP_DURATION,
+    MetricNames.REPO_DURATION,
+    MetricNames.JOB_DURATION,
+  ],
+  upDownCounters: [MetricNames.HTTP_ACTIVE],
+};
+
 @Injectable()
 export class MetricsService implements OnApplicationBootstrap {
   private meter!: Meter;
@@ -32,14 +50,17 @@ export class MetricsService implements OnApplicationBootstrap {
   }
 
   increment(name: MetricName, attributes: Attributes = {}, amount = 1): void {
+    if (amount < 1) return;
     this.getCounter(name).add(amount, this.enrichAttributes(attributes));
   }
 
   record(name: MetricName, value: number, attributes: Attributes = {}): void {
+    if (value < 0) return;
     this.getHistogram(name).record(value, this.enrichAttributes(attributes));
   }
 
   adjust(name: MetricName, delta: number, attributes: Attributes = {}): void {
+    if (delta === 0) return;
     this.getUpDownCounter(name).add(delta, this.enrichAttributes(attributes));
   }
 
@@ -123,21 +144,9 @@ export class MetricsService implements OnApplicationBootstrap {
   }
 
   private preAllocateInstruments(): void {
-    [
-      MetricNames.COMMAND_TOTAL,
-      MetricNames.QUERY_TOTAL,
-      MetricNames.HTTP_TOTAL,
-      MetricNames.REPO_TOTAL,
-      MetricNames.JOB_TOTAL,
-    ].forEach((name) => this.getCounter(name));
-    [
-      MetricNames.COMMAND_DURATION,
-      MetricNames.QUERY_DURATION,
-      MetricNames.HTTP_DURATION,
-      MetricNames.REPO_DURATION,
-      MetricNames.JOB_DURATION,
-    ].forEach((name) => this.getHistogram(name));
-    this.getUpDownCounter(MetricNames.HTTP_ACTIVE);
+    PRE_ALLOCATED_METRICS.counters.forEach((name) => this.getCounter(name));
+    PRE_ALLOCATED_METRICS.histograms.forEach((name) => this.getHistogram(name));
+    PRE_ALLOCATED_METRICS.upDownCounters.forEach((name) => this.getUpDownCounter(name));
     for (const name of this.gauges.keys()) this.initializeGauge(name);
   }
 

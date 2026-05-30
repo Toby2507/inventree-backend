@@ -1,17 +1,9 @@
-import { fsObservationContext } from '@app/testing';
+import { fsObservationContext, makeMockPino } from '@app/testing';
 import { observationStorage } from '../context';
 import { AppLoggerService, ContextLogger } from './app-logger.service';
 
 let capturedPinoConfig: Record<string, unknown> = {};
-let mockIsoTime: string;
-const mockPinoInstance = {
-  info: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn(),
-  debug: jest.fn(),
-  trace: jest.fn(),
-  child: jest.fn().mockReturnThis(),
-};
+const mockPinoInstance = makeMockPino();
 
 jest.mock('pino', () => {
   const pinoFactory = jest.fn().mockImplementation((config: Record<string, unknown>) => {
@@ -19,10 +11,7 @@ jest.mock('pino', () => {
     return mockPinoInstance;
   });
   (pinoFactory as any).stdTimeFunctions = {
-    isoTime: jest.fn(() => {
-      mockIsoTime = new Date().toISOString();
-      return mockIsoTime;
-    }),
+    isoTime: jest.fn(() => new Date().toISOString()),
   };
   return pinoFactory;
 });

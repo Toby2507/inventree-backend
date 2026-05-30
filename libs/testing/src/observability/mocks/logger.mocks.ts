@@ -1,5 +1,14 @@
 import { AppLoggerService, ContextLogger } from '@app/core/observability/logger';
 
+export const makeMockPino = () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  trace: jest.fn(),
+  child: jest.fn().mockReturnThis(),
+});
+
 export const makeLoggerMock = () => {
   const contextLogger = makeContextLoggerMock();
   const logger = {

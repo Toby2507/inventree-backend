@@ -1,6 +1,7 @@
-import { MetricName, MetricNames, MetricsService } from '../metrics';
+import { MetricName, MetricNames } from '../metrics';
+import { MetricsPort } from '../ports';
 
-type MeteredInstance = { metrics?: MetricsService };
+type MeteredInstance = { metrics?: MetricsPort };
 export type MeteredKind = 'command' | 'query' | 'repository' | 'job' | 'custom';
 
 export interface MeteredOptions {
@@ -36,7 +37,7 @@ const LABEL_KEY: Record<MeteredKind, string> = {
  * `@Metered()` — method decorator.
  *
  * Automatically records execution time and total count metrics for the decorated method.
- * The class must expose `this.metrics: MetricsService` (injected via DI).
+ * The class must expose `this.metrics: MetricsPort` (injected via DI).
  */
 export function Metered(options: MeteredOptions = {}): MethodDecorator {
   return function (
@@ -54,7 +55,7 @@ export function Metered(options: MeteredOptions = {}): MethodDecorator {
       const metricsService = (this as MeteredInstance).metrics;
       if (!metricsService && isDev) {
         console.warn(
-          `[Metered] metricsService missing on ${className}, cannot record metrics for ${methodName}. Please inject MetricsService and add "public metrics: MetricsService" to the class.`,
+          `[Metered] metrics provider missing on ${className}, cannot record metrics for ${methodName}. Please inject Metrics and add "public metrics: MetricsPort" to the class.`,
         );
       }
       if (!metricsService) return original.apply(this, args);

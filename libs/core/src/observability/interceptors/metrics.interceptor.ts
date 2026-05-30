@@ -1,12 +1,13 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import { CallHandler, ExecutionContext, Inject, Injectable, NestInterceptor } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { MetricNames, MetricsService } from '../metrics';
+import { MetricNames } from '../metrics';
+import { METRICS, MetricsPort } from '../ports';
 
 @Injectable()
 export class MetricsInterceptor implements NestInterceptor {
-  constructor(private readonly metrics: MetricsService) {}
+  constructor(@Inject(METRICS) private readonly metrics: MetricsPort) {}
 
   intercept(executionContext: ExecutionContext, next: CallHandler): Observable<unknown> {
     const req = executionContext.switchToHttp().getRequest<Request>();

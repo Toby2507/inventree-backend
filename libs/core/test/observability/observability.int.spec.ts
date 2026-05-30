@@ -1,23 +1,31 @@
+import { LOGGER, LoggerPort, METRICS, MetricsPort } from '@app/core/observability/ports';
 import { createOtelTestHarness, makeLoggerMock } from '@app/testing';
-import { Controller, Get, INestApplication, Injectable, Module, NestModule } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  INestApplication,
+  Inject,
+  Injectable,
+  Module,
+  NestModule,
+} from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
+import { SpanStatusCode } from '@opentelemetry/api';
 import request from 'supertest';
 import { getOptionalObservationContext } from '../../src/observability/context';
 import { Metered, Observed } from '../../src/observability/decorators';
 import { MetricsInterceptor, RequestLoggerInterceptor } from '../../src/observability/interceptors';
-import { AppLoggerService } from '../../src/observability/logger';
 import { MetricsService } from '../../src/observability/metrics';
 import { ObservationContextMiddleware } from '../../src/observability/middlewares';
-import { SpanStatusCode } from '@opentelemetry/api';
 
 @Injectable()
 class TestService {
   public capturedContext: any;
 
   constructor(
-    readonly logger: AppLoggerService,
-    readonly metrics: MetricsService,
+    @Inject(LOGGER) readonly logger: LoggerPort,
+    @Inject(METRICS) readonly metrics: MetricsPort,
   ) {}
 
   @Observed()
@@ -65,8 +73,8 @@ const { logger, contextLogger } = makeLoggerMock();
   controllers: [TestController],
   providers: [
     TestService,
-    MetricsService,
-    { provide: AppLoggerService, useValue: logger },
+    { provide: LOGGER, useValue: logger },
+    { provide: METRICS, useClass: MetricsService },
     { provide: APP_INTERCEPTOR, useClass: RequestLoggerInterceptor },
     { provide: APP_INTERCEPTOR, useClass: MetricsInterceptor },
   ],

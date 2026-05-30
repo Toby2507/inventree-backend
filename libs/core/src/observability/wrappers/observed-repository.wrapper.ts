@@ -1,6 +1,6 @@
 import { SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
 import { getOptionalObservationContext } from '../context';
-import { AppLoggerService } from '../logger';
+import { LoggerPort } from '../ports';
 import { INVENTREE_TRACER, SpanAttributes } from '../tracing';
 
 /**
@@ -13,9 +13,9 @@ import { INVENTREE_TRACER, SpanAttributes } from '../tracing';
  * ```
  *   {
  *     provide: USER_REPOSITORY,
- *     useFactory: (raw: UserKyselyRepository, logger: AppLoggerService) =>
+ *     useFactory: (raw: UserKyselyRepository, logger: LoggerPort) =>
  *       new ObservedRepositoryWrapper(raw, 'user', logger),
- *     inject: [UserKyselyRepository, AppLoggerService],
+ *     inject: [UserKyselyRepository, LOGGER],
  *   }
  * ```
  */
@@ -25,7 +25,7 @@ export class ObservedRepositoryWrapper<T extends object> {
   constructor(
     private readonly repository: T,
     private readonly entityName: string,
-    logger: AppLoggerService,
+    logger: LoggerPort,
   ) {
     this.logger = logger.forContext(`Repository.${entityName}`);
 

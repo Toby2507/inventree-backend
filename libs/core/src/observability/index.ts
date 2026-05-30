@@ -5,6 +5,8 @@ export {
   serializeOutboxContext,
   withRestoredObservationContext,
 } from './context';
-export { AppLoggerService } from './logger';
+export { ObservationContextMiddleware } from './middlewares';
+export { ObservabilityModule } from './observability.module';
+export { LOGGER, LoggerPort, METRICS, MetricsPort } from './ports';
 export { bootstrapTelemetry } from './tracing';
 export { createObservedProcessor } from './wrappers';

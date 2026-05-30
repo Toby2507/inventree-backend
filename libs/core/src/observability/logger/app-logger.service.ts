@@ -1,11 +1,12 @@
 import { Injectable, LoggerService } from '@nestjs/common';
 import pino, { Logger } from 'pino';
 import { getOptionalObservationContext } from '../context/observation-context.storage';
+import { ContextLoggerPort, LoggerPort } from '../ports';
 
 type LogMeta = Record<string, unknown>;
 
 @Injectable()
-export class AppLoggerService implements LoggerService {
+export class AppLoggerService implements LoggerPort, LoggerService {
   private readonly pino: Logger;
 
   constructor() {
@@ -60,7 +61,7 @@ export class AppLoggerService implements LoggerService {
     this.pino.trace(this.normalizeMeta(meta), message);
   }
 
-  forContext(contextName: string): ContextLogger {
+  forContext(contextName: string): ContextLoggerPort {
     const child = this.pino.child({ context: contextName });
     return new ContextLogger(child);
   }
@@ -72,7 +73,7 @@ export class AppLoggerService implements LoggerService {
   }
 }
 
-export class ContextLogger {
+export class ContextLogger implements ContextLoggerPort {
   constructor(private readonly pino: Logger) {}
 
   log(message: string, meta: Record<string, unknown> = {}): void {

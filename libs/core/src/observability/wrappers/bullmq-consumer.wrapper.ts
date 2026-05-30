@@ -1,16 +1,16 @@
-import { trace, context as otelCtx } from '@opentelemetry/api';
+import { context as otelCtx, trace } from '@opentelemetry/api';
 import { Job } from 'bullmq';
 import { v4 as uuidV4 } from 'uuid';
 import { ObservationContext, observationStorage, SerializedBusinessContext } from '../context';
-import { AppLoggerService } from '../logger';
-import { JobPayload } from './bullmq-producer.wrapper';
+import { LoggerPort } from '../ports';
 import { SpanAttributes } from '../tracing';
+import { JobPayload } from './bullmq-producer.wrapper';
 
 type JobProcessor<T> = (job: Job<JobPayload<T>>, data: T) => Promise<void>;
 
 export function createObservedProcessor<T>(
   queueName: string,
-  logger: AppLoggerService,
+  logger: LoggerPort,
   processor: JobProcessor<T>,
 ): (job: Job<JobPayload<T>>) => Promise<void> {
   const log = logger.forContext(`Worker.${queueName}`);

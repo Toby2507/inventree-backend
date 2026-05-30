@@ -1,13 +1,9 @@
-import { AppLoggerService } from '@app/core';
-import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import { LOGGER, LoggerPort } from '@app/core';
+import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 
 @Injectable()
 export class OutboxProcessorService implements OnApplicationBootstrap {
-  private readonly logger;
-
-  constructor(private readonly appLogger: AppLoggerService) {
-    this.logger = appLogger.forContext('OutboxProcessor');
-  }
+  constructor(@Inject(LOGGER) private readonly logger: LoggerPort) {}
 
   onApplicationBootstrap(): void {
     this.startPolling();

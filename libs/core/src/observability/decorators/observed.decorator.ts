@@ -1,7 +1,7 @@
-import { AppLoggerService } from '../logger';
+import { LoggerPort } from '../ports';
 import { Trace, TraceOptions } from './trace.decorator';
 
-type LoggableInstance = { logger?: AppLoggerService };
+type LoggableInstance = { logger?: LoggerPort };
 export interface ObservedOptions extends TraceOptions {
   logContext?: string;
   logArgs?: boolean;
@@ -16,7 +16,7 @@ const isDev = process.env.NODE_ENV !== 'production';
  * `@Observed()` — method decorator.
  *
  * Automatically logs and traces execution of decorated method.
- * The class must expose `this.logger: AppLoggerService` (injected via DI).
+ * The class must expose `this.logger: LoggerPort` (injected via DI).
  */
 export function Observed(options: ObservedOptions = {}): MethodDecorator {
   return function (
@@ -33,7 +33,7 @@ export function Observed(options: ObservedOptions = {}): MethodDecorator {
       const logger = (this as LoggableInstance).logger;
       if (!logger && isDev) {
         console.warn(
-          `[Observed] logger missing on ${className}, cannot log ${methodName} execution. Please inject AppLoggerService and add "public logger: AppLoggerService" to the class.`,
+          `[Observed] logger missing on ${className}, cannot log ${methodName} execution. Please inject Logger and add "public logger: LoggerPort" to the class.`,
         );
       }
       const log = logger?.forContext(logContext);

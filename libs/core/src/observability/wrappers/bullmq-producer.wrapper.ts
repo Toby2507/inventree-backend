@@ -4,7 +4,7 @@ import {
   serializeBusinessContext,
   SerializedBusinessContext,
 } from '../context';
-import { AppLoggerService } from '../logger';
+import { LoggerPort } from '../ports';
 
 export interface JobPayload<T = unknown> {
   data: T;
@@ -16,7 +16,7 @@ export class ObservedQueueWrapper<T = unknown> {
 
   constructor(
     private readonly queue: Queue,
-    logger: AppLoggerService,
+    logger: LoggerPort,
   ) {
     this.logger = logger.forContext(`Queue.${queue.name}`);
   }

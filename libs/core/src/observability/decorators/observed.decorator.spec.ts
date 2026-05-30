@@ -1,11 +1,11 @@
+import { Fn } from '@app/common';
 import { createOtelTestHarness, fsObservationContext, makeLoggerMock } from '@app/testing';
 import { observationStorage } from '../context';
-import { AppLoggerService } from '../logger';
+import { LoggerPort } from '../ports';
 import { Observed } from './observed.decorator';
-import { Fn } from '@app/common';
 
 class SomeService {
-  constructor(private readonly logger?: AppLoggerService) {}
+  constructor(private readonly logger?: LoggerPort) {}
 
   @Observed()
   async doWork(fn?: Fn): Promise<string> {

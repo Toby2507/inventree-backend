@@ -1,13 +1,13 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import { CallHandler, ExecutionContext, Inject, Injectable, NestInterceptor } from '@nestjs/common';
 import { Request } from 'express';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { getOptionalObservationContext } from '../context';
-import { AppLoggerService } from '../logger';
+import { LOGGER, LoggerPort } from '../ports';
 
 @Injectable()
 export class RequestLoggerInterceptor implements NestInterceptor {
-  constructor(private readonly logger: AppLoggerService) {}
+  constructor(@Inject(LOGGER) private readonly logger: LoggerPort) {}
 
   intercept(executionContext: ExecutionContext, next: CallHandler): Observable<unknown> {
     const req = executionContext.switchToHttp().getRequest<Request>();

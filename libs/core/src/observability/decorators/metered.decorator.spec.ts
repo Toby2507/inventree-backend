@@ -1,9 +1,10 @@
 import { makeMetricsMock } from '@app/testing';
-import { MetricNames, MetricsService } from '../metrics';
+import { MetricNames } from '../metrics';
+import { MetricsPort } from '../ports';
 import { Metered } from './metered.decorator';
 
 class SomeService {
-  constructor(private readonly metrics?: MetricsService) {}
+  constructor(private readonly metrics?: MetricsPort) {}
 
   @Metered()
   async doWork(): Promise<string> {
@@ -31,27 +32,27 @@ class SomeService {
   }
 }
 class RegisterUserCommandHandler {
-  constructor(public readonly metrics: MetricsService) {}
+  constructor(public readonly metrics: MetricsPort) {}
   @Metered()
   async execute(): Promise<void> {}
 }
 class GetTransactionQueryHandler {
-  constructor(public readonly metrics: MetricsService) {}
+  constructor(public readonly metrics: MetricsPort) {}
   @Metered()
   async execute(): Promise<void> {}
 }
 class UserKyselyRepository {
-  constructor(public readonly metrics: MetricsService) {}
+  constructor(public readonly metrics: MetricsPort) {}
   @Metered()
   async create(): Promise<void> {}
 }
 class EmailJobHandler {
-  constructor(public readonly metrics: MetricsService) {}
+  constructor(public readonly metrics: MetricsPort) {}
   @Metered()
   async handle(): Promise<void> {}
 }
 class QueueProcessor {
-  constructor(public readonly metrics: MetricsService) {}
+  constructor(public readonly metrics: MetricsPort) {}
   @Metered()
   async process(): Promise<void> {}
 }
@@ -185,7 +186,7 @@ describe('@Metered() decorator', () => {
       if (process.env.NODE_ENV === 'production') expect(warnSpy).not.toHaveBeenCalled();
       else {
         expect(warnSpy).toHaveBeenCalledWith(
-          expect.stringContaining('[Metered] metricsService missing on SomeService'),
+          expect.stringContaining('[Metered] metrics provider missing on SomeService'),
         );
       }
     });

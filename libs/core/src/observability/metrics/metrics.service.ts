@@ -11,6 +11,7 @@ import {
 } from '@opentelemetry/api';
 import { getOptionalObservationContext } from '../context';
 import { MetricName, MetricNames } from './metric-names';
+import { MetricsPort } from '../ports';
 
 type GaugeDefinition = {
   instrument?: ObservableGauge;
@@ -36,7 +37,7 @@ export const PRE_ALLOCATED_METRICS = {
 };
 
 @Injectable()
-export class MetricsService implements OnApplicationBootstrap {
+export class MetricsService implements MetricsPort, OnApplicationBootstrap {
   private meter!: Meter;
 
   private readonly counters = new Map<MetricName, Counter>();

@@ -1,14 +1,14 @@
-import { AppLoggerService } from '../logger';
+import { LoggerPort } from '../ports';
 
-type LoggableInstance = { logger?: AppLoggerService };
+type LoggableInstance = { logger?: LoggerPort };
 
 const isDev = process.env.NODE_ENV !== 'production';
 
 /**
  * `@LogExecution()` — method decorator.
  *
- * Automatically logs the of decorated method.
- * The class must expose `this.logger: AppLoggerService` (injected via DI).
+ * Automatically logs the execution of the decorated method.
+ * The class must expose `this.logger: LoggerPort` (injected via DI).
  */
 export function LogExecution(contextOverride?: string): MethodDecorator {
   return function (
@@ -25,7 +25,7 @@ export function LogExecution(contextOverride?: string): MethodDecorator {
       const logger = (this as LoggableInstance).logger;
       if (!logger && isDev) {
         console.warn(
-          `[LogExecution] logger missing on ${className}, cannot log ${methodName} execution. Please inject AppLoggerService and add "public logger: AppLoggerService" to the class.`,
+          `[LogExecution] logger missing on ${className}, cannot log ${methodName} execution. Please inject Logger and add "public logger: LoggerPort" to the class.`,
         );
       }
       const log = logger?.forContext(logContext);

@@ -6,20 +6,19 @@ import {
 } from '@app/testing';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { observationStorage } from '../context';
-import { AppLoggerService } from '../logger';
 import { RequestLoggerInterceptor } from './request-logger.interceptor';
 
 const ctx = fsObservationContext.generate();
 
 describe('RequestLoggerInterceptor', () => {
   let interceptor: RequestLoggerInterceptor;
-  let logger: AppLoggerService;
   let callHandler: ReturnType<typeof makeCallHandlerMock>['callHandler'];
   let mockHandle: jest.Mock;
   let context: ReturnType<typeof makeContextMock>['context'];
   let mockGetRequest: jest.Mock;
   let mockGetResponse: jest.Mock;
 
+  const { logger } = makeLoggerMock();
   const runInterceptor = (ctx?: any) => {
     if (ctx)
       return observationStorage.run(ctx, () =>
@@ -30,7 +29,6 @@ describe('RequestLoggerInterceptor', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    ({ logger } = makeLoggerMock());
     interceptor = new RequestLoggerInterceptor(logger);
     ({ callHandler, mockHandle } = makeCallHandlerMock());
     ({ context, mockGetRequest, mockGetResponse } = makeContextMock());

@@ -1,4 +1,4 @@
-import { AppLoggerService, ContextLogger } from '@app/core/observability/logger';
+import { ContextLoggerPort, LoggerPort } from '@app/core/observability/ports';
 
 export const makeMockPino = () => ({
   info: jest.fn(),
@@ -18,7 +18,7 @@ export const makeLoggerMock = () => {
     debug: jest.fn(),
     verbose: jest.fn(),
     forContext: jest.fn().mockImplementation(() => contextLogger),
-  } as unknown as jest.Mocked<AppLoggerService>;
+  } as unknown as jest.Mocked<LoggerPort>;
   return { logger, contextLogger };
 };
 
@@ -28,5 +28,5 @@ export const makeContextLoggerMock = () => {
     error: jest.fn(),
     warn: jest.fn(),
     debug: jest.fn(),
-  } as unknown as jest.Mocked<ContextLogger>;
+  } as unknown as jest.Mocked<ContextLoggerPort>;
 };

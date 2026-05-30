@@ -1,21 +1,20 @@
 import { makeCallHandlerMock, makeContextMock, makeMetricsMock } from '@app/testing';
 import { firstValueFrom, of, throwError } from 'rxjs';
-import { MetricNames, MetricsService } from '../metrics';
+import { MetricNames } from '../metrics';
 import { MetricsInterceptor } from './metrics.interceptor';
 
 describe('MetricsInterceptor', () => {
   let interceptor: MetricsInterceptor;
-  let metrics: jest.Mocked<MetricsService>;
   let callHandler: ReturnType<typeof makeCallHandlerMock>['callHandler'];
   let mockHandle: jest.Mock;
   let context: ReturnType<typeof makeContextMock>['context'];
   let mockGetRequest: jest.Mock;
   let mockGetResponse: jest.Mock;
 
+  const metrics = makeMetricsMock();
   const runInterceptor = () => firstValueFrom(interceptor.intercept(context, callHandler));
 
   beforeEach(() => {
-    metrics = makeMetricsMock();
     interceptor = new MetricsInterceptor(metrics);
     ({ callHandler, mockHandle } = makeCallHandlerMock());
     ({ context, mockGetRequest, mockGetResponse } = makeContextMock());

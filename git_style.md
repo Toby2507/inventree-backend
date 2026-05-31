@@ -89,7 +89,8 @@ feat: add stuff
 ```
 Create branch from main
   → write code
-  → pnpm migrate:test (if migrations changed)
+  → pnpm migrate:run (if migrations changed)
+  → pnpm migrate:restart (if you want to clear the db and start over)
   → push → open as draft PR
   → mark ready for review when complete
   → squash merge to main
@@ -130,6 +131,6 @@ Before every commit:
 
 - [ ] `pnpm typecheck` passes
 - [ ] `pnpm lint` passes
-- [ ] `pnpm migrate:test` passes (if migrations changed)
+- [ ] `pnpm migrate:run` passes (if migrations changed)
 - [ ] No `console.log` or debug code
 - [ ] No `gen_random_uuid()` — use `uuidv7()`

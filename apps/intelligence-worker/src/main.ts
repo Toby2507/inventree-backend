@@ -1,3 +1,6 @@
+import { bootstrapTelemetry } from '@app/core';
+bootstrapTelemetry({ serviceName: 'inventree-intelligence-worker', serviceVersion: '1.0.0' });
+
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';

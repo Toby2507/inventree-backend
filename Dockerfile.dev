@@ -5,7 +5,9 @@ RUN corepack enable
 # Copy only manifests first for better caching
 COPY package.json pnpm-lock.yaml ./
 # Install all dependencies (including dev)
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+  pnpm config set store-dir /pnpm/store && \
+  pnpm install --frozen-lockfile
 # Copy entrypoint script
 COPY /scripts/docker-entrypoint.dev.sh /entrypoint.sh
 # Make entrypoint executable

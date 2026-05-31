@@ -1,7 +1,10 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { bootstrapTelemetry } from '@app/core';
+bootstrapTelemetry({ serviceName: 'inventree-migrator-service', serviceVersion: '1.0.0' });
+
 import { MigrationService } from '@app/database';
 import { Logger } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const logger = new Logger('Migrator');
@@ -16,7 +19,7 @@ async function bootstrap() {
     logger.log('All migrations completed successfully');
     process.exit(0);
   } catch (error) {
-    logger.error('Migration failed', error);
+    logger.log('Migration failed', error);
     process.exit(1);
   }
 }

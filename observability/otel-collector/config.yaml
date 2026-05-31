@@ -1,0 +1,61 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: cadvisor
+          static_configs:
+            - targets: ['cadvisor:8080']
+
+processors:
+  memory_limiter:
+    check_interval: 5s
+    limit_percentage: 90
+    spike_limit_percentage: 20
+
+  batch:
+    send_batch_max_size: 512
+    send_batch_size: 256
+    timeout: 8s
+
+  filter/drop_health:
+    trace_conditions:
+      - IsMatch(span.attributes["http.target"], ".*[Hh]ealth.*")
+
+exporters:
+  debug:
+    verbosity: detailed
+
+  prometheus:
+    endpoint: 0.0.0.0:8889
+
+  otlp_grpc/tempo:
+    endpoint: http://tempo:4317
+    tls:
+      insecure: true
+
+  otlp_http/loki:
+    endpoint: http://loki:3100/otlp
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp_http/loki, debug]
+
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus, debug]
+
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, filter/drop_health]
+      exporters: [otlp_grpc/tempo, debug]

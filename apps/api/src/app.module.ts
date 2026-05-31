@@ -26,6 +26,6 @@ import { IdentityModule } from './identity';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ObservationContextMiddleware).forRoutes('*');
+    consumer.apply(ObservationContextMiddleware).forRoutes('api/*path');
   }
 }

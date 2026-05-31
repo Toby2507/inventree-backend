@@ -41,6 +41,14 @@ export class Environment {
 
   @IsDefined()
   @IsString()
+  REDIS_HOST!: string;
+
+  @IsDefined()
+  @IsNumber()
+  REDIS_PORT!: number;
+
+  @IsDefined()
+  @IsString()
   REDIS_URL!: string;
 
   // API

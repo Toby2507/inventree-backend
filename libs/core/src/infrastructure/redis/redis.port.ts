@@ -2,9 +2,10 @@ import { Redis } from 'ioredis';
 
 export interface RedisPort {
   client: Redis;
-  set(key: string, value: any, ttl?: number): Promise<'OK'>;
   get<T = any>(key: string): Promise<T | null>;
-  del(key: string): Promise<number>;
+  set<T>(key: string, value: T, ttl?: number): Promise<'OK'>;
+  setIfNotExists<T>(key: string, value: T, ttl?: number): Promise<'OK' | null>;
+  del(...key: string[]): Promise<number>;
 }
 
 export const REDIS = Symbol('REDIS');

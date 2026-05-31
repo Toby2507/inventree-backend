@@ -7,27 +7,31 @@ import { REDIS_CLIENT } from './redis.provider';
 export class RedisService implements OnModuleDestroy, RedisPort {
   constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
 
-  async onModuleDestroy() {
-    await this.redis.quit();
-  }
-
   get client(): Redis {
     return this.redis;
   }
 
-  // optional: sugar helpers for JSON storage
-  async set(key: string, value: any, ttl?: number) {
-    const val = JSON.stringify(value);
-    if (ttl) return this.redis.set(key, val, 'EX', ttl);
-    return this.redis.set(key, val);
+  async onModuleDestroy() {
+    await this.redis.quit();
   }
 
-  async get<T = any>(key: string): Promise<T | null> {
+  // optional: sugar helpers for JSON storage
+  async get<T>(key: string): Promise<T | null> {
     const data = await this.redis.get(key);
     return data ? (JSON.parse(data) as T) : null;
   }
 
-  async del(key: string) {
-    return this.redis.del(key);
+  async set<T>(key: string, value: T, ttl?: number): Promise<'OK'> {
+    const val = JSON.stringify(value);
+    return ttl ? this.redis.set(key, val, 'EX', ttl) : this.redis.set(key, val);
+  }
+
+  async setIfNotExists<T>(key: string, value: T, ttl?: number): Promise<'OK' | null> {
+    const val = JSON.stringify(value);
+    return ttl ? this.redis.set(key, val, 'EX', ttl, 'NX') : this.redis.set(key, val, 'NX');
+  }
+
+  async del(...key: string[]): Promise<number> {
+    return this.redis.del(...key);
   }
 }

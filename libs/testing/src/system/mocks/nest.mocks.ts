@@ -1,21 +1,30 @@
+import { Fn } from '@app/common';
 import { ArgumentsHost, CallHandler, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { Request, Response } from 'express';
 
 interface HostMocks {
   host: ArgumentsHost;
   mockStatus: jest.Mock;
   mockJson: jest.Mock;
   mockGetRequest: jest.Mock;
+  mockGetResponse: jest.Mock;
 }
 interface ContextMocks {
   context: ExecutionContext;
   mockGetHandler: jest.Mock;
   mockGetClass: jest.Mock;
   mockGetRequest: jest.Mock;
+  mockGetResponse: jest.Mock;
 }
 interface CallHandlerMocks {
   callHandler: CallHandler;
   mockHandle: jest.Mock;
+}
+interface MockRequestArgs {
+  method?: string;
+  path?: string;
+  headers?: Record<string, string>;
 }
 
 export const makeHostMock = (): HostMocks => {
@@ -27,13 +36,13 @@ export const makeHostMock = (): HostMocks => {
     .fn()
     .mockReturnValue({ getResponse: mockGetResponse, getRequest: mockGetRequest });
   const host = { switchToHttp: mockSwitchToHttp } as unknown as ArgumentsHost;
-  return { host, mockStatus, mockJson, mockGetRequest };
+  return { host, mockStatus, mockJson, mockGetRequest, mockGetResponse };
 };
 
 export const makeContextMock = (): ContextMocks => {
   const mockGetHandler = jest.fn();
   const mockGetClass = jest.fn();
-  const { host, mockGetRequest } = makeHostMock();
+  const { host, mockGetRequest, mockGetResponse } = makeHostMock();
   return {
     context: {
       getHandler: mockGetHandler,
@@ -43,6 +52,7 @@ export const makeContextMock = (): ContextMocks => {
     mockGetHandler,
     mockGetClass,
     mockGetRequest,
+    mockGetResponse,
   };
 };
 
@@ -60,4 +70,30 @@ export const makeCallHandlerMock = (): CallHandlerMocks => {
     },
     mockHandle,
   };
+};
+
+const DEFAULT_REQ_ARGS: MockRequestArgs = {
+  method: 'GET',
+  path: '/api/v1/test',
+  headers: {},
+};
+export const makeRequestMock = ({ method, path, headers }: MockRequestArgs = DEFAULT_REQ_ARGS) => {
+  return {
+    method,
+    path,
+    headers,
+    route: { path },
+  } as unknown as jest.Mocked<Request>;
+};
+
+export const makeResponseMock = () => {
+  const listeners: Record<string, Fn> = {};
+  return {
+    setHeader: jest.fn(),
+    statusCode: 200,
+    on: jest.fn((event: string, cb: Fn) => {
+      listeners[event] = cb;
+    }),
+    emit: (event: string) => listeners[event]?.(),
+  } as unknown as jest.Mocked<Response>;
 };

@@ -78,6 +78,8 @@ export type OperationalDiscountScope = 'line_item' | 'transaction';
 
 export type OperationalDiscountType = 'fixed_amount' | 'percentage';
 
+export type OperationalIdempotencyStatus = 'completed' | 'failed' | 'in_progress';
+
 export type OperationalInventoryAdjustmentDirection = 'in' | 'out';
 
 export type OperationalInventoryAdjustmentKind = 'manual_adjustment' | 'writeoff' | 'writeon';
@@ -379,6 +381,21 @@ export interface GeometryColumns {
   type: string | null;
 }
 
+export interface KyselyMigrationAnalytics {
+  name: string;
+  timestamp: string;
+}
+
+export interface KyselyMigrationBootstrap {
+  name: string;
+  timestamp: string;
+}
+
+export interface KyselyMigrationOperational {
+  name: string;
+  timestamp: string;
+}
+
 export interface OperationalAuditLogs {
   action: OperationalAuditAction;
   actor_store_member_id: string | null;
@@ -585,6 +602,18 @@ export interface OperationalBusinesses {
   tax_id: string | null;
   trading_name: string | null;
   updated_at: Timestamp | null;
+}
+
+export interface OperationalIdempotency {
+  created_at: Generated<Timestamp>;
+  error: Json | null;
+  expires_at: Timestamp;
+  idempotency_key: string;
+  request_hash: string;
+  resolved_at: Timestamp | null;
+  response: Json | null;
+  scope: string;
+  status: Generated<OperationalIdempotencyStatus>;
 }
 
 export interface OperationalInventoryAdjustmentLines {
@@ -2349,6 +2378,9 @@ export interface DB {
   'analytics.product_trend_snapshots': AnalyticsProductTrendSnapshots;
   geography_columns: GeographyColumns;
   geometry_columns: GeometryColumns;
+  kysely_migration_analytics: KyselyMigrationAnalytics;
+  kysely_migration_bootstrap: KyselyMigrationBootstrap;
+  kysely_migration_operational: KyselyMigrationOperational;
   'operational.audit_logs': OperationalAuditLogs;
   'operational.barcode_registry': OperationalBarcodeRegistry;
   'operational.billing_customers': OperationalBillingCustomers;
@@ -2359,6 +2391,7 @@ export interface DB {
   'operational.billing_subscription_events': OperationalBillingSubscriptionEvents;
   'operational.billing_subscriptions': OperationalBillingSubscriptions;
   'operational.businesses': OperationalBusinesses;
+  'operational.idempotency': OperationalIdempotency;
   'operational.inventory_adjustment_lines': OperationalInventoryAdjustmentLines;
   'operational.inventory_adjustment_reasons': OperationalInventoryAdjustmentReasons;
   'operational.inventory_adjustments': OperationalInventoryAdjustments;

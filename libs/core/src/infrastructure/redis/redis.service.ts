@@ -26,7 +26,7 @@ export class RedisService implements OnModuleDestroy, RedisPort {
     return ttl ? this.redis.set(key, val, 'EX', ttl) : this.redis.set(key, val);
   }
 
-  async setIfNotExists<T>(key: string, value: T, ttl?: number): Promise<'OK' | null> {
+  async setNX<T>(key: string, value: T, ttl?: number): Promise<'OK' | null> {
     const val = JSON.stringify(value);
     return ttl ? this.redis.set(key, val, 'EX', ttl, 'NX') : this.redis.set(key, val, 'NX');
   }

@@ -1,3 +1,4 @@
+import { copyMethodMetadata } from '@app/common';
 import { LoggerPort } from '../ports';
 import { Trace, TraceOptions } from './trace.decorator';
 
@@ -63,6 +64,7 @@ export function Observed(options: ObservedOptions = {}): MethodDecorator {
       }
     };
 
+    copyMethodMetadata(original, descriptor.value);
     Trace({ name: options.name ?? logContext, attributes: options.attributes })(
       target,
       propertyKey,

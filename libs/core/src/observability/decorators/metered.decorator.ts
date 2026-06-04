@@ -1,3 +1,4 @@
+import { copyMethodMetadata } from '@app/common';
 import { MetricName, MetricNames } from '../metrics';
 import { MetricsPort } from '../ports';
 
@@ -70,6 +71,7 @@ export function Metered(options: MeteredOptions = {}): MethodDecorator {
       );
     };
 
+    copyMethodMetadata(original, descriptor.value);
     return descriptor;
   };
 }

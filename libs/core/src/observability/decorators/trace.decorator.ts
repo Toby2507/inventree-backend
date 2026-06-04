@@ -1,6 +1,7 @@
 import { SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
 import { getOptionalObservationContext } from '../context';
 import { INVENTREE_TRACER, SpanAttributes } from '../tracing';
+import { copyMethodMetadata } from '@app/common';
 
 export interface TraceOptions {
   name?: string;
@@ -50,6 +51,7 @@ export function Trace(options: TraceOptions = {}): MethodDecorator {
       );
     };
 
+    copyMethodMetadata(original, descriptor.value);
     return descriptor;
   };
 }

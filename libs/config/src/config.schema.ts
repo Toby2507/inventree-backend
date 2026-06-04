@@ -45,11 +45,17 @@ export class Environment {
 
   @IsDefined()
   @IsNumber()
+  @Transform(({ value }) => Number(value))
   REDIS_PORT!: number;
 
   @IsDefined()
   @IsString()
   REDIS_URL!: string;
+
+  // Security
+  @IsDefined()
+  @IsString()
+  OBFUSCATION_KEY!: string;
 
   // API
   @IsDefined()

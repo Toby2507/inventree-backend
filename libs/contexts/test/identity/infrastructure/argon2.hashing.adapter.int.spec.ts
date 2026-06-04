@@ -1,4 +1,4 @@
-import { Argon2HashingAdapter } from '@app/contexts';
+import { Argon2HashingAdapter } from '@app/contexts/identity/infrastructure/security/hashing/argon2.hashing.adapter';
 
 describe('Argon2HashingAdapter (integration)', () => {
   let adapter: Argon2HashingAdapter;

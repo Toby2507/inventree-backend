@@ -1,5 +1,5 @@
 import { fsObservationContext, makeMockPino } from '@app/testing';
-import { observationStorage } from '../context';
+import { observationStorage } from '../context/observation-context.storage';
 import { AppLoggerService, ContextLogger } from './app-logger.service';
 
 let capturedPinoConfig: Record<string, unknown> = {};

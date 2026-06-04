@@ -1,13 +1,11 @@
 import { DATABASE_CONTEXT, DatabaseContextPort } from '@app/database';
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { LOGGER, LoggerPort } from '../../../observability';
 import { IDEMPOTENCY_REPOSITORY, IdempotencyRepository } from '../persistence/idempotency.port';
 
 @Injectable()
 export class IdempotencyService {
   constructor(
-    @Inject(LOGGER) public readonly logger: LoggerPort,
     @Inject(DATABASE_CONTEXT) private readonly db: DatabaseContextPort,
     @Inject(IDEMPOTENCY_REPOSITORY) private readonly repository: IdempotencyRepository,
   ) {}

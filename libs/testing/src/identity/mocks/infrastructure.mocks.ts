@@ -1,4 +1,4 @@
-import { HashingPort, UserRepository } from '@app/contexts';
+import { HashingPort, UserRepository } from '@app/contexts/identity';
 
 export const makeArgon2HasherMock = (): jest.Mocked<HashingPort> => ({
   hash: jest.fn(),

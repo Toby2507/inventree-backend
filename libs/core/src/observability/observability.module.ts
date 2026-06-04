@@ -1,10 +1,11 @@
 import { Global, Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { MetricsInterceptor } from './interceptors';
+import { MetricsInterceptor } from './interceptors/metrics.interceptor';
 import { RequestLoggerInterceptor } from './interceptors/request-logger.interceptor';
 import { AppLoggerService } from './logger/app-logger.service';
-import { MetricsService } from './metrics';
-import { LOGGER, METRICS } from './ports';
+import { MetricsService } from './metrics/metrics.service';
+import { LOGGER } from './ports/logger.port';
+import { METRICS } from './ports/metrics.port';
 
 @Global()
 @Module({

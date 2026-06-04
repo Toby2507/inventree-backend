@@ -5,7 +5,7 @@ import {
   makeLoggerMock,
 } from '@app/testing';
 import { firstValueFrom, of, throwError } from 'rxjs';
-import { observationStorage } from '../context';
+import { observationStorage } from '../context/observation-context.storage';
 import { RequestLoggerInterceptor } from './request-logger.interceptor';
 
 const ctx = fsObservationContext.generate();

@@ -5,7 +5,8 @@ import {
   fsSerializedOutboxContext,
 } from '@app/testing';
 import { ROOT_CONTEXT, SpanKind, SpanStatusCode } from '@opentelemetry/api';
-import { INVENTREE_TRACER, SpanAttributes } from '../tracing';
+import { SpanAttributes } from '../tracing/span-attributes';
+import { INVENTREE_TRACER } from '../tracing/tracer.provider';
 import { RestoredContextOptions, withRestoredObservationContext } from './restore-context';
 
 const generatedUUID = faker.string.uuid();

@@ -1,12 +1,13 @@
 import { feUserSecurity, fsUserSecurity } from '@app/testing';
-import { UserLockedOutEvent, UserLoggedInEvent } from '../events';
+import { UserLockedOutEvent } from '../events/user-locked-out.event';
+import { UserLoggedInEvent } from '../events/user-logged-in.event';
 import {
   MfaAlreadyEnabledException,
   MfaNotEnabledException,
   MfaSecretRequiredException,
   MfaSetupInProgressException,
   MfaSetupNotInProgressException,
-} from '../exceptions';
+} from '../exceptions/security.exceptions';
 import { UserSecurity } from './user-security.entity';
 
 const USER_ID = 'user-uuid-001';

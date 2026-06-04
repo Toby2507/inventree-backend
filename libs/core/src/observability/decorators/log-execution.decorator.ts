@@ -1,5 +1,5 @@
-import { copyMethodMetadata } from '@app/common';
-import { LoggerPort } from '../ports';
+import { copyMethodMetadata } from '@app/common/utils';
+import { LoggerPort } from '../ports/logger.port';
 
 type LoggableInstance = { logger?: LoggerPort };
 

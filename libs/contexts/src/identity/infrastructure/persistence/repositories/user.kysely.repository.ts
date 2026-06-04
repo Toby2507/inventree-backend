@@ -1,7 +1,9 @@
 import { OperationalDB } from '@app/database';
 import { Injectable } from '@nestjs/common';
-import { User, UserEmailAlreadyExistsException, UserRepository } from '../../../domain';
-import { UserMapper } from '../mappers';
+import { User } from '../../../domain/user/aggregates/user.aggregate';
+import { UserEmailAlreadyExistsException } from '../../../domain/user/exceptions/registration.exceptions';
+import { UserRepository } from '../../../domain/user/ports/repositories/user.repository';
+import { UserMapper } from '../mappers/user/user.mapper';
 
 @Injectable()
 export class UserKyselyRepository implements UserRepository {

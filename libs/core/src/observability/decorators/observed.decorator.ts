@@ -1,5 +1,5 @@
-import { copyMethodMetadata } from '@app/common';
-import { LoggerPort } from '../ports';
+import { copyMethodMetadata } from '@app/common/utils';
+import { LoggerPort } from '../ports/logger.port';
 import { Trace, TraceOptions } from './trace.decorator';
 
 type LoggableInstance = { logger?: LoggerPort };
@@ -76,14 +76,11 @@ export function Observed(options: ObservedOptions = {}): MethodDecorator {
 }
 
 function sanitizeArgs(args: unknown[], redactKeys: string[] = []): unknown[] {
-  const defaultRedactKeys = ['password', 'passwordHash', 'token', 'secret', 'mfaSecret'];
   return args.map((arg) => {
     if (arg === null || arg === undefined) return arg;
     if (typeof arg === 'object') {
       const sanitized = { ...(arg as Record<string, unknown>) };
-      for (const key of [...defaultRedactKeys, ...redactKeys]) {
-        if (key in sanitized) sanitized[key] = '[REDACTED]';
-      }
+      for (const key of redactKeys) if (key in sanitized) sanitized[key] = '[REDACTED]';
       return sanitized;
     }
     return arg;
@@ -94,9 +91,7 @@ function sanitizeResult(result: unknown, redactKeys: string[] = []): unknown {
   if (result === null || result === undefined) return result;
   if (typeof result === 'object') {
     const sanitized = { ...(result as Record<string, unknown>) };
-    for (const key of redactKeys) {
-      if (key in sanitized) sanitized[key] = '[REDACTED]';
-    }
+    for (const key of redactKeys) if (key in sanitized) sanitized[key] = '[REDACTED]';
     return sanitized;
   }
   return result;

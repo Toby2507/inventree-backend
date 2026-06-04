@@ -1,5 +1,5 @@
-import { DomainException } from '@app/common';
-import { UserStatus } from '../aggregates';
+import { DomainException } from '@app/common/exceptions';
+import { UserStatus } from '../aggregates/user.aggregate';
 
 export class UserCannotAuthenticateException extends DomainException {
   readonly code = 'UNAUTHENTICABLE_USER_FORBIDDEN';

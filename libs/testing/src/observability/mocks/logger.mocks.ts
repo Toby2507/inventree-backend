@@ -1,4 +1,4 @@
-import { ContextLoggerPort, LoggerPort } from '@app/core/observability/ports';
+import { ContextLoggerPort, LoggerPort } from '@app/core/observability/ports/logger.port';
 
 export const makeMockPino = () => ({
   info: jest.fn(),

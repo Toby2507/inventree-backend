@@ -1,14 +1,14 @@
-import { UUID_GENERATOR_PORT, UUIDGeneratorPort } from '@app/core';
+import { UUID_GENERATOR_PORT, UUIDGeneratorPort } from '@app/core/generators';
 import { DATABASE_CONTEXT, DatabaseContextPort } from '@app/database';
 import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { User } from '../../../domain/user/aggregates/user.aggregate';
+import { UserEmailAlreadyExistsException } from '../../../domain/user/exceptions/registration.exceptions';
 import {
-  User,
   USER_REPOSITORY,
-  UserEmailAlreadyExistsException,
   UserRepository,
-} from '../../../domain';
-import { HASHING_PORT, HashingPort } from '../../ports';
+} from '../../../domain/user/ports/repositories/user.repository';
+import { HASHING_PORT, HashingPort } from '../../ports/hashing.port';
 import { RegisterUserCommand } from './register-user.command';
 
 @CommandHandler(RegisterUserCommand)

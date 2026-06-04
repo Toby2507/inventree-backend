@@ -1,4 +1,4 @@
-import { JobPayload } from '@app/core/observability/wrappers';
+import { JobPayload } from '@app/core/observability';
 import { createFaker } from '@app/testing/faker-factory';
 import { faker } from '@faker-js/faker';
 import { Job } from 'bullmq';

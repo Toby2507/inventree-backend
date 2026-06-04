@@ -1,4 +1,4 @@
-import { MetricsPort } from '@app/core/observability/ports';
+import { MetricsPort } from '@app/core/observability';
 
 export const makeMetricsMock = () => {
   return {

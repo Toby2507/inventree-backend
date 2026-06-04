@@ -1,4 +1,4 @@
-import { DomainException } from '@app/common';
+import { DomainException } from '@app/common/exceptions';
 
 export class MfaAlreadyEnabledException extends DomainException {
   readonly code = 'MFA_ALREADY_ENABLED';

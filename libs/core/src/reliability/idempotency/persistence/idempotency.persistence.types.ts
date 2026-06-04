@@ -1,4 +1,4 @@
-import { JsonValue } from '@app/common';
+import { JsonValue } from '@app/common/types';
 
 export type IdempotencyStatus = 'in_progress' | 'completed' | 'failed';
 

@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common';
-import { UUIDGeneratorAdapter } from './adapters';
-import { UUID_GENERATOR_PORT } from './ports';
+import { UUIDGeneratorAdapter } from './adapters/uuid-generator.adapter';
+import { UUID_GENERATOR_PORT } from './ports/uuid-generator.port';
 
 @Global()
 @Module({

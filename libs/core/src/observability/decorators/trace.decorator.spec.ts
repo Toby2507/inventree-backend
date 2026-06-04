@@ -1,7 +1,7 @@
 import { createOtelTestHarness, faker, fsObservationContext } from '@app/testing';
 import { SpanStatusCode } from '@opentelemetry/api';
-import { observationStorage } from '../context';
-import { SpanAttributes } from '../tracing';
+import { observationStorage } from '../context/observation-context.storage';
+import { SpanAttributes } from '../tracing/span-attributes';
 import { Trace } from './trace.decorator';
 
 class SomeService {

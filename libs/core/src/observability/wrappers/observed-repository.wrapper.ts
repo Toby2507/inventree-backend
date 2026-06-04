@@ -1,7 +1,8 @@
 import { SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
-import { getOptionalObservationContext } from '../context';
-import { LoggerPort } from '../ports';
-import { INVENTREE_TRACER, SpanAttributes } from '../tracing';
+import { getOptionalObservationContext } from '../context/observation-context.storage';
+import { LoggerPort } from '../ports/logger.port';
+import { SpanAttributes } from '../tracing/span-attributes';
+import { INVENTREE_TRACER } from '../tracing/tracer.provider';
 
 /**
  * Wraps a Kysely repository with automatic span creation and logging.

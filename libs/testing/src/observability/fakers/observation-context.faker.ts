@@ -1,4 +1,7 @@
-import { ObservationContext, SerializedOutboxContext } from '@app/core/observability/context';
+import {
+  ObservationContext,
+  SerializedOutboxContext,
+} from '@app/core/observability/context/observation-context';
 import { faker } from '@faker-js/faker';
 import { createFaker } from '../../faker-factory';
 

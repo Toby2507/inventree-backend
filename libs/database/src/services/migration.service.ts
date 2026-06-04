@@ -1,8 +1,7 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { Migration, MigrationProvider, Migrator } from 'kysely';
-import { DatabaseProvider } from './database.provider';
-import { analyticsMigrations, operationalMigrations } from './migrations';
-import { bootstrapMigrations } from './migrations/bootstrap';
+import { DatabaseProvider } from '../database.provider';
+import { analyticsMigrations, bootstrapMigrations, operationalMigrations } from '../migrations';
 
 type MigrationTarget = 'analytics' | 'bootstrap' | 'operational';
 

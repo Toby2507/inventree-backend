@@ -1,3 +1,4 @@
+import { CAUSATION_HEADER, CORRELATION_HEADER, IDEMPOTENCY_HEADER } from '@app/common/constants';
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { context as otelCtx, propagation, ROOT_CONTEXT, trace } from '@opentelemetry/api';
 import { NextFunction, Request, Response } from 'express';
@@ -5,10 +6,6 @@ import { v4 as uuidV4 } from 'uuid';
 import { ObservationContext } from '../context/observation-context';
 import { observationStorage } from '../context/observation-context.storage';
 import { SpanAttributes } from '../tracing/span-attributes';
-
-export const CORRELATION_HEADER = 'x-correlation-id';
-export const IDEMPOTENCY_HEADER = 'x-idempotency-key';
-export const CAUSATION_HEADER = 'x-causation-id';
 
 @Injectable()
 export class ObservationContextMiddleware implements NestMiddleware {

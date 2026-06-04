@@ -1,10 +1,10 @@
 import { faker } from '@faker-js/faker';
-import { PersonName } from './person-name.vo';
 import {
   PersonNameCannotBeEmptyException,
   PersonNameInvalidException,
   PersonNameMaxLengthExceededException,
-} from '../exceptions';
+} from '../exceptions/user.exceptions';
+import { PersonName } from './person-name.vo';
 
 const VALID_NAME = faker.person.fullName();
 describe('PersonName Value Object', () => {

@@ -1,6 +1,6 @@
-import { Fn } from '@app/common';
+import { Fn } from '@app/common/types';
 import { createOtelTestHarness, faker, fsJob, makeLoggerMock } from '@app/testing';
-import { SpanAttributes } from '../tracing';
+import { SpanAttributes } from '../tracing/span-attributes';
 import { createObservedProcessor } from './bullmq-consumer.wrapper';
 
 const generatedUUID = faker.string.uuid();

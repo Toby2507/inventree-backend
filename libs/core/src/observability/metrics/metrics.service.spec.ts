@@ -1,5 +1,5 @@
 import { createOtelTestHarness, fsObservationContext } from '@app/testing';
-import { observationStorage } from '../context';
+import { observationStorage } from '../context/observation-context.storage';
 import { MetricNames } from './metric-names';
 import { MetricsService, PRE_ALLOCATED_METRICS } from './metrics.service';
 

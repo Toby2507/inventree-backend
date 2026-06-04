@@ -1,4 +1,4 @@
-import { bootstrapTelemetry } from '@app/core';
+import { bootstrapTelemetry } from '@app/core/observability';
 bootstrapTelemetry({ serviceName: 'inventree-migrator-service', serviceVersion: '1.0.0' });
 
 import { MigrationService } from '@app/database';

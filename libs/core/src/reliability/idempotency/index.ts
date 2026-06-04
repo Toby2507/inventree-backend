@@ -1,2 +1,2 @@
 export { Idempotent } from './decorators/idempotency.decorator';
-export * from './idempotency.module';
+export { IdempotencyModule } from './idempotency.module';

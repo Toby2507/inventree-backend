@@ -1,4 +1,4 @@
-import { DomainEvent } from '@app/common';
+import { DomainEvent } from '@app/common/bases';
 
 export interface UserRegisteredPayload {
   userId: string;

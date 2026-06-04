@@ -1,4 +1,4 @@
-import { DomainException } from '@app/common';
+import { DomainException } from '@app/common/exceptions';
 
 export class UserEmailAlreadyExistsException extends DomainException {
   readonly code = 'USER_EMAIL_ALREADY_EXISTS';

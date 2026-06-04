@@ -1,4 +1,7 @@
-import { PasswordHashCannotBeEmptyException, PasswordHashInvalidException } from '../exceptions';
+import {
+  PasswordHashCannotBeEmptyException,
+  PasswordHashInvalidException,
+} from '../exceptions/user.exceptions';
 
 export class PasswordHash {
   // Guards against accidentally passing a plaintext password or an empty string.

@@ -1,4 +1,4 @@
-import { JsonValue } from '@app/common';
+import { JsonValue } from '@app/common/types';
 import { OperationalDB } from '@app/database';
 import { Injectable } from '@nestjs/common';
 import { sql } from 'kysely';

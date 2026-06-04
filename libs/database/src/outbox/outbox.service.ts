@@ -1,7 +1,7 @@
-import { DomainEvent } from '@app/common';
-import { getOptionalObservationContext, serializeOutboxContext } from '@app/core';
-import { OperationalDB } from '../db.schema.types';
+import { DomainEvent } from '@app/common/bases';
+import { getOptionalObservationContext, serializeOutboxContext } from '@app/core/observability';
 import { trace } from '@opentelemetry/api';
+import { OperationalDB } from '../types/db.schema.types';
 
 // interface OutboxEventInsert {
 //   event_type: string;

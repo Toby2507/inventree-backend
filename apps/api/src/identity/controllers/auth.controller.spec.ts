@@ -1,8 +1,8 @@
-import { RegisterUserCommand } from '@app/contexts';
+import { RegisterUserCommand } from '@app/contexts/identity';
 import { faker, makeCommandBusMock } from '@app/testing';
 import { CommandBus } from '@nestjs/cqrs';
 import { Test, TestingModule } from '@nestjs/testing';
-import { RegisterUserDTO } from '../dtos';
+import { RegisterUserDTO } from '../dtos/input/user.dtos';
 import { AuthController } from './auth.controller';
 
 describe('AuthController', () => {

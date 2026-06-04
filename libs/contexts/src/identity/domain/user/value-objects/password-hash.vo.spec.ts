@@ -1,5 +1,8 @@
 import { faker } from '@faker-js/faker';
-import { PasswordHashCannotBeEmptyException, PasswordHashInvalidException } from '../exceptions';
+import {
+  PasswordHashCannotBeEmptyException,
+  PasswordHashInvalidException,
+} from '../exceptions/user.exceptions';
 import { PasswordHash } from './password-hash.vo';
 
 const VALID_HASH = faker.string.alphanumeric(128);

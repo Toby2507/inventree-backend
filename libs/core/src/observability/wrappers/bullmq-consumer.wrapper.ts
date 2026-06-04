@@ -1,9 +1,10 @@
 import { context as otelCtx, trace } from '@opentelemetry/api';
 import { Job } from 'bullmq';
 import { v4 as uuidV4 } from 'uuid';
-import { ObservationContext, observationStorage, SerializedBusinessContext } from '../context';
-import { LoggerPort } from '../ports';
-import { SpanAttributes } from '../tracing';
+import { ObservationContext, SerializedBusinessContext } from '../context/observation-context';
+import { observationStorage } from '../context/observation-context.storage';
+import { LoggerPort } from '../ports/logger.port';
+import { SpanAttributes } from '../tracing/span-attributes';
 import { JobPayload } from './bullmq-producer.wrapper';
 
 type JobProcessor<T> = (job: Job<JobPayload<T>>, data: T) => Promise<void>;

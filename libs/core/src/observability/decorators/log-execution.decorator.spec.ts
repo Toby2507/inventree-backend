@@ -1,5 +1,5 @@
 import { makeLoggerMock } from '@app/testing';
-import { LoggerPort } from '../ports';
+import { LoggerPort } from '../ports/logger.port';
 import { LogExecution } from './log-execution.decorator';
 
 class SomeService {

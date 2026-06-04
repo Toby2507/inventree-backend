@@ -1,4 +1,4 @@
-import { UUID_GENERATOR_PORT } from '@app/core';
+import { UUID_GENERATOR_PORT } from '@app/core/generators';
 import { DATABASE_CONTEXT } from '@app/database';
 import {
   faker,
@@ -8,8 +8,10 @@ import {
   makeUUIDGeneratorMock,
 } from '@app/testing';
 import { Test, TestingModule } from '@nestjs/testing';
-import { User, USER_REPOSITORY, UserEmailAlreadyExistsException } from '../../../domain';
-import { HASHING_PORT } from '../../ports';
+import { User } from '../../../domain/user/aggregates/user.aggregate';
+import { UserEmailAlreadyExistsException } from '../../../domain/user/exceptions/registration.exceptions';
+import { USER_REPOSITORY } from '../../../domain/user/ports/repositories/user.repository';
+import { HASHING_PORT } from '../../ports/hashing.port';
 import { RegisterUserCommand } from './register-user.command';
 import { RegisterUserCommandHandler } from './register-user.command-handler';
 

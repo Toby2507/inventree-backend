@@ -1,7 +1,7 @@
-import { Fn } from '@app/common';
+import { Fn } from '@app/common/types';
 import { createOtelTestHarness, fsObservationContext, makeLoggerMock } from '@app/testing';
-import { observationStorage } from '../context';
-import { LoggerPort } from '../ports';
+import { observationStorage } from '../context/observation-context.storage';
+import { LoggerPort } from '../ports/logger.port';
 import { Observed } from './observed.decorator';
 
 class SomeService {

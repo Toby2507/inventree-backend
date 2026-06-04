@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import argon2 from 'argon2';
-import { HashingPort } from '../../../application';
+import { HashingPort } from '../../../application/ports/hashing.port';
 
 @Injectable()
 export class Argon2HashingAdapter implements HashingPort {

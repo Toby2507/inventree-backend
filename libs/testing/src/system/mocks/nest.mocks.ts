@@ -1,4 +1,4 @@
-import { Fn } from '@app/common';
+import { Fn } from '@app/common/types';
 import { ArgumentsHost, CallHandler, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request, Response } from 'express';

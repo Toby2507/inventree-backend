@@ -1,4 +1,5 @@
-import { UserEmailAlreadyExistsException, UserKyselyRepository } from '@app/contexts';
+import { UserEmailAlreadyExistsException } from '@app/contexts/identity/domain/user/exceptions/registration.exceptions';
+import { UserKyselyRepository } from '@app/contexts/identity/infrastructure/persistence/repositories/user.kysely.repository';
 import { OperationalSchema } from '@app/database';
 import { createTestContext, faker, feUser, fsUserSecurity, TestContext } from '@app/testing';
 import { Kysely } from 'kysely';

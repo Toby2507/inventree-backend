@@ -1,9 +1,8 @@
 import { CallHandler, ExecutionContext, Inject, Injectable, NestInterceptor } from '@nestjs/common';
 import { Request } from 'express';
-import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
-import { getOptionalObservationContext } from '../context';
-import { LOGGER, LoggerPort } from '../ports';
+import { catchError, Observable, tap, throwError } from 'rxjs';
+import { getOptionalObservationContext } from '../context/observation-context.storage';
+import { LOGGER, LoggerPort } from '../ports/logger.port';
 
 @Injectable()
 export class RequestLoggerInterceptor implements NestInterceptor {

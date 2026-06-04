@@ -1,13 +1,9 @@
-import { Fn } from '@app/common';
+import { CAUSATION_HEADER, CORRELATION_HEADER, IDEMPOTENCY_HEADER } from '@app/common/constants';
+import { Fn } from '@app/common/types';
 import { createOtelTestHarness, faker, makeRequestMock, makeResponseMock } from '@app/testing';
-import { getOptionalObservationContext } from '../context';
-import { SpanAttributes } from '../tracing';
-import {
-  CAUSATION_HEADER,
-  CORRELATION_HEADER,
-  IDEMPOTENCY_HEADER,
-  ObservationContextMiddleware,
-} from './observation-context.middleware';
+import { getOptionalObservationContext } from '../context/observation-context.storage';
+import { SpanAttributes } from '../tracing/span-attributes';
+import { ObservationContextMiddleware } from './observation-context.middleware';
 
 const generatedUUID = faker.string.uuid();
 jest.mock('uuid', () => ({

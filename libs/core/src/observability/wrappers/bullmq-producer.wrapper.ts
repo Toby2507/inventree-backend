@@ -1,10 +1,10 @@
 import { JobsOptions, Queue } from 'bullmq';
 import {
-  getOptionalObservationContext,
   serializeBusinessContext,
   SerializedBusinessContext,
-} from '../context';
-import { LoggerPort } from '../ports';
+} from '../context/observation-context';
+import { getOptionalObservationContext } from '../context/observation-context.storage';
+import { LoggerPort } from '../ports/logger.port';
 
 export interface JobPayload<T = unknown> {
   data: T;

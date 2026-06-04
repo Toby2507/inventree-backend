@@ -1,8 +1,12 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { sql } from 'kysely';
-import { CommandDbContext, DatabaseContextPort, QueryDbContext } from './database.context.types';
-import { DatabaseProvider } from './database.provider';
-import { storeContextStorage } from './store-context';
+import {
+  CommandDbContext,
+  DatabaseContextPort,
+  QueryDbContext,
+} from '../context/database.context.types';
+import { storeContextStorage } from '../context/store-context';
+import { DatabaseProvider } from '../database.provider';
 
 @Injectable()
 export class DatabaseContextService implements DatabaseContextPort {

@@ -2,7 +2,7 @@ import {
   CreateUserSecurityProps,
   UserSecurity,
   UserSecuritySnapshot,
-} from '@app/contexts/identity/domain/user/entities';
+} from '@app/contexts/identity/domain/user/entities/user-security.entity';
 import { UserSecuritySnapRow } from '@app/contexts/identity/infrastructure/persistence/mappers/user/user.persistence.types';
 import { faker } from '@faker-js/faker';
 import { createEntityFaker, createFaker } from '../../faker-factory';

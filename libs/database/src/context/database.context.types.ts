@@ -1,4 +1,4 @@
-import { AnalyticsDB, OperationalDB } from './db.schema.types';
+import { AnalyticsDB, OperationalDB } from '../types/db.schema.types';
 
 export interface CommandDbContext {
   operational: OperationalDB;

@@ -1,4 +1,4 @@
-import { bootstrapTelemetry } from '@app/core';
+import { bootstrapTelemetry } from '@app/core/observability';
 bootstrapTelemetry({ serviceName: 'inventree-api', serviceVersion: '1.0.0' });
 
 import { setupSwagger } from '@app/config';

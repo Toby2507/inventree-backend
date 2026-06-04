@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from './database.module';
-import { MigrationService } from './migration.service';
+import { MigrationService } from '../services/migration.service';
 
 @Module({
   imports: [DatabaseModule],

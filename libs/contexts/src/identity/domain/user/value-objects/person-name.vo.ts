@@ -2,7 +2,7 @@ import {
   PersonNameCannotBeEmptyException,
   PersonNameInvalidException,
   PersonNameMaxLengthExceededException,
-} from '../exceptions';
+} from '../exceptions/user.exceptions';
 
 export class PersonName {
   static readonly MAX_LENGTH = 100;

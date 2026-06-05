@@ -1,6 +1,6 @@
-import { UUIDGeneratorPort } from '@app/core/generators';
+import { IDGeneratorPort } from '@app/core/generators';
 
-export const makeUUIDGeneratorMock = (): jest.Mocked<UUIDGeneratorPort> => ({
-  generateV4: jest.fn(),
-  generateV7: jest.fn(),
+export const makeIDGeneratorMock = (): jest.Mocked<IDGeneratorPort> => ({
+  generateUUIDV4: jest.fn(),
+  generateUUIDV7: jest.fn(),
 });

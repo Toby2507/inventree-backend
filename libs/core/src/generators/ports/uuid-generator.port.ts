@@ -1,6 +1,6 @@
-export interface UUIDGeneratorPort {
-  generateV4(): string;
-  generateV7(): string;
+export interface IDGeneratorPort {
+  generateUUIDV4(): string;
+  generateUUIDV7(): string;
 }
 
-export const UUID_GENERATOR_PORT = Symbol('UUID_GENERATOR_PORT');
+export const ID_GENERATOR_PORT = Symbol('ID_GENERATOR_PORT');

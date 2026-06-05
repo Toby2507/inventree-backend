@@ -1,11 +1,11 @@
-import { UUID_GENERATOR_PORT } from '@app/core/generators';
+import { ID_GENERATOR_PORT } from '@app/core/generators';
 import { DATABASE_CONTEXT } from '@app/database';
 import {
   faker,
   makeArgon2HasherMock,
   makeDatabaseContextMock,
+  makeIDGeneratorMock,
   makeUserRepositoryMock,
-  makeUUIDGeneratorMock,
 } from '@app/testing';
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '../../../domain/user/aggregates/user.aggregate';
@@ -21,7 +21,7 @@ describe('RegisterUserCommandHandler', () => {
 
   const argon2Hasher = makeArgon2HasherMock();
   const dbContext = makeDatabaseContextMock();
-  const uuidGenerator = makeUUIDGeneratorMock();
+  const idGenerator = makeIDGeneratorMock();
   const userRepository = makeUserRepositoryMock();
 
   const command = new RegisterUserCommand({
@@ -38,7 +38,7 @@ describe('RegisterUserCommandHandler', () => {
         RegisterUserCommandHandler,
         { provide: HASHING_PORT, useValue: argon2Hasher },
         { provide: USER_REPOSITORY, useValue: userRepository },
-        { provide: UUID_GENERATOR_PORT, useValue: uuidGenerator },
+        { provide: ID_GENERATOR_PORT, useValue: idGenerator },
         { provide: DATABASE_CONTEXT, useValue: dbContext },
       ],
     }).compile();
@@ -48,7 +48,7 @@ describe('RegisterUserCommandHandler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    uuidGenerator.generateV7.mockReturnValue(faker.string.uuid());
+    idGenerator.generateUUIDV7.mockReturnValue(faker.string.uuid());
     argon2Hasher.hash.mockResolvedValue(faker.string.alphanumeric(32));
     userRepository.existsByEmail.mockResolvedValue(false);
   });
@@ -67,7 +67,7 @@ describe('RegisterUserCommandHandler', () => {
 
   it('should register a new user successfully', async () => {
     await handler.execute(command);
-    expect(uuidGenerator.generateV7).toHaveBeenCalled();
+    expect(idGenerator.generateUUIDV7).toHaveBeenCalled();
     expect(argon2Hasher.hash).toHaveBeenCalledWith(command.props.password);
     expect(dbContext.platformCommand).toHaveBeenCalledWith(expect.any(Function));
   });

@@ -9,11 +9,12 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   ServiceUnavailableException,
-  UnprocessableEntityException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { Observable, catchError, from, map, mergeMap, of, switchMap, throwError } from 'rxjs';
+import { Observable, catchError, defer, from, of, throwError } from 'rxjs';
+import { map, mergeMap, switchMap } from 'rxjs/operators';
 import { IdempotencyOptions } from '../decorators/idempotency.decorator';
 import { IdempotencyException } from '../exceptions/idempotency.exception';
 import { IdempotencyRedisRecord } from '../persistence/idempotency.persistence.types';
@@ -21,6 +22,7 @@ import { IdempotencyStrategy } from './interface';
 
 @Injectable()
 export class RedisIdempotencyStrategy implements IdempotencyStrategy {
+  private readonly IP_TTL_SECONDS = 300; // 5 minutes
   private readonly TTL_SECONDS = 86_400; // 24 hours
 
   constructor(
@@ -28,23 +30,16 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
     @Inject(OBFUSCATION_PORT) private readonly obfuscation: ObfuscationPort,
   ) {}
 
-  handle<T>(request: any, next: CallHandler, options: IdempotencyOptions): Observable<T> {
-    return from(this.handleInterval<T>(request, next, options)).pipe(switchMap((obs) => obs));
-  }
-
-  private async handleInterval<T>(
-    request: Request,
-    next: CallHandler,
-    options: IdempotencyOptions,
-  ): Promise<Observable<T>> {
-    const key = request.header(IDEMPOTENCY_HEADER);
-    if (!key) throw new BadRequestException('Missing Idempotency-Key');
-    const hash = this.obfuscation.hash(request.body);
-    const existingRecord = await this.getRecord(key, options.scope);
-    if (existingRecord) {
-      const record = this.resolveExistingRecord(existingRecord, hash);
-      return this.replayRecord<T>(record);
-    } else {
+  handle<T>(request: Request, next: CallHandler, options: IdempotencyOptions): Observable<T> {
+    return defer(async () => {
+      const key = request.header(IDEMPOTENCY_HEADER);
+      if (!key) throw new BadRequestException('Missing Idempotency-Key');
+      const hash = this.obfuscation.hash(request.body);
+      const existingRecord = await this.getRecord(key, options.scope);
+      if (existingRecord) {
+        const record = this.resolveExistingRecord(existingRecord, hash);
+        return this.replayRecord<T>(record);
+      }
       const acquired = await this.createRecord(key, options.scope, hash);
       if (!acquired) {
         return next.handle().pipe(
@@ -72,11 +67,11 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
         );
       } else {
         const existingRecord = await this.getRecord(key, options.scope);
-        if (!existingRecord) throw new UnprocessableEntityException('Idempotency record not found');
+        if (!existingRecord) throw new InternalServerErrorException('Idempotency record not found');
         const record = this.resolveExistingRecord(existingRecord, hash);
         return this.replayRecord<T>(record);
       }
-    }
+    }).pipe(switchMap((result) => result));
   }
 
   private async getRecord(key: string, scope: string): Promise<IdempotencyRedisRecord | null> {
@@ -89,8 +84,8 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
 
   private async createRecord(key: string, scope: string, hash: string): Promise<boolean> {
     const record: IdempotencyRedisRecord = { requestHash: hash, status: 'in_progress' };
-    const result = await this.redis.setNX(this.getRedisKey(key, scope), record, this.TTL_SECONDS);
-    return result === 'OK';
+    const res = await this.redis.setNX(this.getRedisKey(key, scope), record, this.IP_TTL_SECONDS);
+    return res === 'OK';
   }
 
   private async deleteRecord(key: string, scope: string): Promise<void> {
@@ -99,7 +94,7 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
 
   private async markCompleted(key: string, scope: string, hash: string, response: JsonValue) {
     const record: IdempotencyRedisRecord = { requestHash: hash, status: 'completed', response };
-    await this.redis.setNX(this.getRedisKey(key, scope), record, this.TTL_SECONDS);
+    await this.redis.set(this.getRedisKey(key, scope), record, this.TTL_SECONDS);
   }
 
   private async markFailed(
@@ -109,7 +104,7 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
     error: JsonValue,
   ): Promise<void> {
     const record: IdempotencyRedisRecord = { requestHash: hash, status: 'failed', error };
-    await this.redis.setNX(this.getRedisKey(key, scope), record, this.TTL_SECONDS);
+    await this.redis.set(this.getRedisKey(key, scope), record, this.TTL_SECONDS);
   }
 
   private isDeterministicError(err: any): boolean {
@@ -140,11 +135,6 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
   private replayRecord<T>(record: IdempotencyRedisRecord): Observable<T> {
     if (record.status === 'failed') return throwError(() => this.reconstructError(record.error!));
     return of(record.response as T);
-  }
-
-  private getRemainingTtl(expiresAt: Date): number {
-    const remainingMs = expiresAt.getTime() - new Date().getTime();
-    return remainingMs > 0 ? Math.ceil(remainingMs / 1000) : 0;
   }
 
   private reconstructError(error: JsonValue): Error {

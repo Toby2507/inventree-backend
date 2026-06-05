@@ -10,10 +10,11 @@ import {
   ConflictException,
   Inject,
   Injectable,
-  UnprocessableEntityException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { Observable, catchError, from, map, mergeMap, of, switchMap, throwError } from 'rxjs';
+import { Observable, catchError, defer, from, of, throwError } from 'rxjs';
+import { map, mergeMap, switchMap } from 'rxjs/operators';
 import { IdempotencyOptions } from '../decorators/idempotency.decorator';
 import { IdempotencyException } from '../exceptions/idempotency.exception';
 import {
@@ -35,22 +36,15 @@ export class DurableIdempotencyStrategy implements IdempotencyStrategy {
   ) {}
 
   handle<T>(request: Request, next: CallHandler, options: IdempotencyOptions): Observable<T> {
-    return from(this.handleInternal<T>(request, next, options)).pipe(switchMap((obs) => obs));
-  }
-
-  private async handleInternal<T>(
-    request: Request,
-    next: CallHandler,
-    options: IdempotencyOptions,
-  ): Promise<Observable<T>> {
-    const key = request.header(IDEMPOTENCY_HEADER);
-    if (!key) throw new BadRequestException('Missing Idempotency-Key');
-    const hash = this.obfuscation.hash(request.body);
-    const existingRecord = await this.getRecord(key, options.scope);
-    if (existingRecord) {
-      const record = this.resolveExistingRecord(existingRecord, hash);
-      return this.replayRecord<T>(record);
-    } else {
+    return defer(async () => {
+      const key = request.header(IDEMPOTENCY_HEADER);
+      if (!key) throw new BadRequestException('Missing Idempotency-Key');
+      const hash = this.obfuscation.hash(request.body);
+      const existingRecord = await this.getRecord(key, options.scope);
+      if (existingRecord) {
+        const record = this.resolveExistingRecord(existingRecord, hash);
+        return this.replayRecord<T>(record);
+      }
       const ttl = options.ttlSeconds ?? this.TTL_SECONDS;
       const createResult = await this.createRecord(key, options.scope, hash, ttl);
       if (createResult.created) {
@@ -77,11 +71,11 @@ export class DurableIdempotencyStrategy implements IdempotencyStrategy {
         );
       } else {
         const existingRecord = await this.getRecord(key, options.scope);
-        if (!existingRecord) throw new UnprocessableEntityException('Idempotency record not found');
+        if (!existingRecord) throw new InternalServerErrorException('Idempotency record not found');
         const record = this.resolveExistingRecord(existingRecord, hash);
         return this.replayRecord<T>(record);
       }
-    }
+    }).pipe(switchMap((obs) => obs));
   }
 
   private async getRecord(key: string, scope: string): Promise<IdempotencyRecord | null> {

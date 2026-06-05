@@ -1,10 +1,6 @@
 import { IdempotencyStrategyFactory } from '@app/core/reliability/idempotency/strategies/factory';
 
-export const makeIdempotencyRedisStrategyMock = () => ({
-  handle: jest.fn(),
-});
-
-export const makeIdempotencyDurableStrategyMock = () => ({
+export const makeIdempotencyStrategyMock = () => ({
   handle: jest.fn(),
 });
 

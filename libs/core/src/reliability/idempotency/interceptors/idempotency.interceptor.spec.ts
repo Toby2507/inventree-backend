@@ -1,5 +1,13 @@
-import { makeIdempotencyStrategyFactoryMock } from '@app/testing/core/reliability/idempotency';
-import { makeCallHandlerMock, makeContextMock, makeReflectorMock } from '@app/testing/system';
+import {
+  makeIdempotencyStrategyFactoryMock,
+  makeIdempotencyStrategyMock,
+} from '@app/testing/core/reliability/idempotency';
+import {
+  makeCallHandlerMock,
+  makeContextMock,
+  makeReflectorMock,
+  makeRequestMock,
+} from '@app/testing/system';
 import { firstValueFrom, of } from 'rxjs';
 import { IDEMPOTENCY_KEY } from '../decorators/idempotency.decorator';
 import { IdempotencyInterceptor } from './idempotency.interceptor';
@@ -13,21 +21,34 @@ describe('IdempotencyInterceptor', () => {
 
   const factory = makeIdempotencyStrategyFactoryMock();
   const reflector = makeReflectorMock();
+  const request = makeRequestMock();
   const runInterceptor = () => firstValueFrom(interceptor.intercept(context, callHandler));
 
   beforeEach(() => {
     interceptor = new IdempotencyInterceptor(reflector, factory);
     ({ callHandler, mockHandle } = makeCallHandlerMock());
     ({ context, mockGetRequest } = makeContextMock());
-    const path = '/api/v1/auth/register';
     mockHandle.mockReturnValue(of('ok'));
-    mockGetRequest.mockReturnValue({ method: 'POST', path, route: { path } });
+    mockGetRequest.mockReturnValue(request);
   });
 
-  it('should call next.handle directly if idempotency context is not provided', async () => {
+  it('should call next.handle when no idempotency metadata is found', async () => {
     reflector.get.mockReturnValue(undefined);
-    await runInterceptor();
-    expect(reflector.get).toHaveBeenCalledWith(IDEMPOTENCY_KEY, undefined);
-    expect(mockHandle).toHaveBeenCalledWith();
+    expect(await runInterceptor()).toBe('ok');
+    expect(reflector.get).toHaveBeenCalledWith(IDEMPOTENCY_KEY, context.getHandler());
+    expect(factory.get).not.toHaveBeenCalled();
+    expect(mockHandle).toHaveBeenCalledTimes(1);
+  });
+
+  it('should delegate to the configured strategy when metadata exists', async () => {
+    const options = { strategy: 'redis', ttl: 300 };
+    const strategy = makeIdempotencyStrategyMock();
+    strategy.handle.mockReturnValue(of('strategy result'));
+    reflector.get.mockReturnValue(options);
+    factory.get.mockReturnValue(strategy);
+    expect(await runInterceptor()).toBe('strategy result');
+    expect(factory.get).toHaveBeenCalledWith(options.strategy);
+    expect(strategy.handle).toHaveBeenCalledWith(request, callHandler, options);
+    expect(callHandler.handle).not.toHaveBeenCalled();
   });
 });

@@ -1,5 +1,6 @@
 import { RegisterUserCommand } from '@app/contexts/identity';
-import { faker, makeCommandBusMock } from '@app/testing';
+import { makeCommandBusMock } from '@app/testing/system';
+import { faker } from '@app/testing/utils';
 import { CommandBus } from '@nestjs/cqrs';
 import { Test, TestingModule } from '@nestjs/testing';
 import { RegisterUserDTO } from '../dtos/input/user.dtos';

@@ -1,6 +1,8 @@
 import { CAUSATION_HEADER, CORRELATION_HEADER, IDEMPOTENCY_HEADER } from '@app/common/constants';
 import { Fn } from '@app/common/types';
-import { createOtelTestHarness, faker, makeRequestMock, makeResponseMock } from '@app/testing';
+import { createOtelTestHarness } from '@app/testing/core/observability';
+import { makeRequestMock, makeResponseMock } from '@app/testing/system';
+import { faker } from '@app/testing/utils';
 import { getOptionalObservationContext } from '../context/observation-context.storage';
 import { SpanAttributes } from '../tracing/span-attributes';
 import { ObservationContextMiddleware } from './observation-context.middleware';

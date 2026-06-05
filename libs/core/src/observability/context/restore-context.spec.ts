@@ -1,9 +1,9 @@
 import {
   createOtelTestHarness,
-  faker,
   fsSerializedBusinessContext,
   fsSerializedOutboxContext,
-} from '@app/testing';
+} from '@app/testing/core/observability';
+import { faker } from '@app/testing/utils';
 import { ROOT_CONTEXT, SpanKind, SpanStatusCode } from '@opentelemetry/api';
 import { SpanAttributes } from '../tracing/span-attributes';
 import { INVENTREE_TRACER } from '../tracing/tracer.provider';

@@ -11,7 +11,7 @@ import {
 import { MetricsInterceptor } from '@app/core/observability/interceptors/metrics.interceptor';
 import { RequestLoggerInterceptor } from '@app/core/observability/interceptors/request-logger.interceptor';
 import { MetricsService } from '@app/core/observability/metrics/metrics.service';
-import { createOtelTestHarness, makeLoggerMock } from '@app/testing';
+import { createOtelTestHarness, makeLoggerMock } from '@app/testing/core/observability';
 import {
   Controller,
   Get,

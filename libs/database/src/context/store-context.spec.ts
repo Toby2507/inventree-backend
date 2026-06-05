@@ -1,4 +1,4 @@
-import { fsStoreContext } from '@app/testing';
+import { fsStoreContext } from '@app/testing/identity';
 import { getOptionalStoreContext, getStoreContext, storeContextStorage } from './store-context';
 
 const mockContext = fsStoreContext.generate();

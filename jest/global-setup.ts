@@ -1,5 +1,10 @@
 import 'tsconfig-paths/register';
-import { installExtensions, recreateTestDB, runMigrations, TEMPLATE_DB_NAME } from '@app/testing';
+import {
+  installExtensions,
+  recreateTestDB,
+  runMigrations,
+  TEMPLATE_DB_NAME,
+} from '@app/testing/utils';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 

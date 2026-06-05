@@ -1,4 +1,4 @@
-import { makeLoggerMock } from '@app/testing';
+import { makeLoggerMock } from '@app/testing/core/observability';
 import { LoggerPort } from '../ports/logger.port';
 import { LogExecution } from './log-execution.decorator';
 

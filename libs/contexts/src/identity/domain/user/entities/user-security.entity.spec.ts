@@ -1,4 +1,4 @@
-import { feUserSecurity, fsUserSecurity } from '@app/testing';
+import { feUserSecurity, fsUserSecurity } from '@app/testing/identity';
 import { UserLockedOutEvent } from '../events/user-locked-out.event';
 import { UserLoggedInEvent } from '../events/user-logged-in.event';
 import {

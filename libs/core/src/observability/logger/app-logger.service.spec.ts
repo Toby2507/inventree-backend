@@ -1,4 +1,4 @@
-import { fsObservationContext, makeMockPino } from '@app/testing';
+import { fsObservationContext, makeMockPino } from '@app/testing/core/observability';
 import { observationStorage } from '../context/observation-context.storage';
 import { AppLoggerService, ContextLogger } from './app-logger.service';
 

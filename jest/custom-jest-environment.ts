@@ -1,5 +1,5 @@
 import 'tsconfig-paths/register';
-import { cloneDatabase, getTestDbName, TEMPLATE_DB_NAME } from '@app/testing';
+import { cloneDatabase, getTestDbName, TEMPLATE_DB_NAME } from '@app/testing/utils';
 import NodeEnvironment from 'jest-environment-node';
 
 export default class CustomEnvironment extends NodeEnvironment {

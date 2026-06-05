@@ -1,4 +1,4 @@
-import { getTestDbName } from '@app/testing';
+import { getTestDbName } from '@app/testing/utils';
 
 const shouldSetupDatabase = (): boolean => {
   const testPath = expect.getState().testPath ?? '';

@@ -1,4 +1,4 @@
-import { makeMetricsMock } from '@app/testing';
+import { makeMetricsMock } from '@app/testing/core/observability';
 import { MetricNames } from '../metrics/metric-names';
 import { MetricsPort } from '../ports/metrics.port';
 import { Metered } from './metered.decorator';

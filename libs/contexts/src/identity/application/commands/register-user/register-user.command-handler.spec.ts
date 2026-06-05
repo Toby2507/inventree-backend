@@ -1,12 +1,9 @@
 import { ID_GENERATOR_PORT } from '@app/core/generators';
 import { DATABASE_CONTEXT } from '@app/database';
-import {
-  faker,
-  makeArgon2HasherMock,
-  makeDatabaseContextMock,
-  makeIDGeneratorMock,
-  makeUserRepositoryMock,
-} from '@app/testing';
+import { makeIDGeneratorMock } from '@app/testing/core/generators';
+import { makeArgon2HasherMock, makeUserRepositoryMock } from '@app/testing/identity';
+import { makeDatabaseContextMock } from '@app/testing/system';
+import { faker } from '@app/testing/utils';
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '../../../domain/user/aggregates/user.aggregate';
 import { UserEmailAlreadyExistsException } from '../../../domain/user/exceptions/registration.exceptions';

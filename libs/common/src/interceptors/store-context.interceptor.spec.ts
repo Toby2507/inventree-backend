@@ -1,5 +1,6 @@
 import { storeContextStorage } from '@app/database';
-import { fsJwtPayload, makeCallHandlerMock, makeContextMock } from '@app/testing';
+import { fsJwtPayload } from '@app/testing/identity';
+import { makeCallHandlerMock, makeContextMock } from '@app/testing/system';
 import { Observable, firstValueFrom, of } from 'rxjs';
 import { StoreContextInterceptor } from './store-context.interceptor';
 

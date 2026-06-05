@@ -1,5 +1,6 @@
 import { Email } from '@app/common/value-objects';
-import { faker, feUser, fsUser } from '@app/testing';
+import { feUser, fsUser } from '@app/testing/identity';
+import { faker } from '@app/testing/utils';
 import { AuthenticationBlockedEvent } from '../events/authentication-blocked.event';
 import { UserDisabledEvent } from '../events/user-disabled.event';
 import { UserEmailVerifiedEvent } from '../events/user-email-verified.event';

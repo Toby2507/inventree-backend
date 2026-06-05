@@ -1,4 +1,4 @@
-import { makeContextMock, makeReflectorMock } from '@app/testing';
+import { makeContextMock, makeReflectorMock } from '@app/testing/system';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators';
 import { JwtAuthGuard } from './jwt-auth.guard';

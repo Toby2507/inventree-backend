@@ -2,8 +2,8 @@ import {
   ObservationContext,
   SerializedOutboxContext,
 } from '@app/core/observability/context/observation-context';
+import { createFaker } from '@app/testing/faker-factory';
 import { faker } from '@faker-js/faker';
-import { createFaker } from '../../faker-factory';
 
 export const fsObservationContext = createFaker<ObservationContext>(() => ({
   correlationId: faker.string.uuid(),

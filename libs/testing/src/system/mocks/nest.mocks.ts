@@ -58,6 +58,7 @@ export const makeContextMock = (): ContextMocks => {
 
 export const makeReflectorMock = () => {
   return {
+    get: jest.fn(),
     getAllAndOverride: jest.fn(),
   } as unknown as jest.Mocked<Reflector>;
 };

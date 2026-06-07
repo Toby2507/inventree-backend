@@ -84,6 +84,7 @@ export const makeRequestMock = ({ method, path, headers }: MockRequestArgs = DEF
     path,
     headers,
     route: { path },
+    header: (key: string) => headers![key],
   } as unknown as jest.Mocked<Request>;
 };
 

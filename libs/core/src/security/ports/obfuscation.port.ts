@@ -4,4 +4,4 @@ export interface ObfuscationPort {
   decrypt(data: string): string;
 }
 
-export const OBFUSCATION_PORT = Symbol('OBFUSCATION_PORT');
+export const OBFUSCATION = Symbol('OBFUSCATION_PORT');

@@ -2,7 +2,7 @@ import { IDEMPOTENCY_HEADER } from '@app/common/constants';
 import { mapCodeToStatus } from '@app/common/exceptions';
 import { JsonValue } from '@app/common/types';
 import { REDIS, RedisPort } from '@app/core/infrastructure/redis';
-import { OBFUSCATION_PORT, ObfuscationPort } from '@app/core/security';
+import { OBFUSCATION, ObfuscationPort } from '@app/core/security';
 import {
   BadRequestException,
   CallHandler,
@@ -27,7 +27,7 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
 
   constructor(
     @Inject(REDIS) private readonly redis: RedisPort,
-    @Inject(OBFUSCATION_PORT) private readonly obfuscation: ObfuscationPort,
+    @Inject(OBFUSCATION) private readonly obfuscation: ObfuscationPort,
   ) {}
 
   handle<T>(request: Request, next: CallHandler, options: IdempotencyOptions): Observable<T> {
@@ -40,13 +40,11 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
         const record = this.resolveExistingRecord(existingRecord, hash);
         return this.replayRecord<T>(record);
       }
-      const acquired = await this.createRecord(key, options.scope, hash);
-      if (!acquired) {
+      const created = await this.createRecord(key, options.scope, hash);
+      if (created) {
         return next.handle().pipe(
           switchMap((response) =>
-            from(this.markCompleted(key, options.scope, hash, response)).pipe(
-              map(() => response as T),
-            ),
+            from(this.markCompleted(key, options, hash, response)).pipe(map(() => response as T)),
           ),
           catchError((err) => {
             if (this.isDeterministicError(err)) {
@@ -56,7 +54,7 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
                 status: err.status ?? err.getStatus?.(),
                 name: err.name,
               };
-              return from(this.markFailed(key, options.scope, hash, errorPayload)).pipe(
+              return from(this.markFailed(key, options, hash, errorPayload)).pipe(
                 mergeMap(() => throwError(() => err)),
               );
             }
@@ -76,7 +74,7 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
 
   private async getRecord(key: string, scope: string): Promise<IdempotencyRedisRecord | null> {
     try {
-      return this.redis.get<IdempotencyRedisRecord | null>(this.getRedisKey(key, scope));
+      return await this.redis.get<IdempotencyRedisRecord | null>(this.getRedisKey(key, scope));
     } catch {
       throw new ServiceUnavailableException('Idempotency service unavailable');
     }
@@ -92,19 +90,26 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
     await this.redis.del(this.getRedisKey(key, scope));
   }
 
-  private async markCompleted(key: string, scope: string, hash: string, response: JsonValue) {
+  private async markCompleted(
+    key: string,
+    options: IdempotencyOptions,
+    hash: string,
+    response: JsonValue,
+  ) {
     const record: IdempotencyRedisRecord = { requestHash: hash, status: 'completed', response };
-    await this.redis.set(this.getRedisKey(key, scope), record, this.TTL_SECONDS);
+    const ttl = options.ttlSeconds ?? this.TTL_SECONDS;
+    await this.redis.set(this.getRedisKey(key, options.scope), record, ttl);
   }
 
   private async markFailed(
     key: string,
-    scope: string,
+    options: IdempotencyOptions,
     hash: string,
     error: JsonValue,
   ): Promise<void> {
     const record: IdempotencyRedisRecord = { requestHash: hash, status: 'failed', error };
-    await this.redis.set(this.getRedisKey(key, scope), record, this.TTL_SECONDS);
+    const ttl = options.ttlSeconds ?? this.TTL_SECONDS;
+    await this.redis.set(this.getRedisKey(key, options.scope), record, ttl);
   }
 
   private isDeterministicError(err: any): boolean {

@@ -34,7 +34,7 @@ describe('IdempotencyInterceptor', () => {
 
   it('should call next.handle when no idempotency metadata is found', async () => {
     reflector.get.mockReturnValue(undefined);
-    expect(await runInterceptor()).toBe('ok');
+    await expect(runInterceptor()).resolves.toBe('ok');
     expect(reflector.get).toHaveBeenCalledWith(IDEMPOTENCY_KEY, context.getHandler());
     expect(factory.get).not.toHaveBeenCalled();
     expect(mockHandle).toHaveBeenCalledTimes(1);
@@ -46,7 +46,7 @@ describe('IdempotencyInterceptor', () => {
     strategy.handle.mockReturnValue(of('strategy result'));
     reflector.get.mockReturnValue(options);
     factory.get.mockReturnValue(strategy);
-    expect(await runInterceptor()).toBe('strategy result');
+    await expect(runInterceptor()).resolves.toBe('strategy result');
     expect(factory.get).toHaveBeenCalledWith(options.strategy);
     expect(strategy.handle).toHaveBeenCalledWith(request, callHandler, options);
     expect(callHandler.handle).not.toHaveBeenCalled();

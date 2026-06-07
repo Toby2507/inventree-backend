@@ -41,5 +41,5 @@ export interface CreateIdempotency {
 }
 
 export type CreateIdempotencyResult =
-  | { created: true; record?: IdempotencyRecord }
+  | { created: true; record: IdempotencyRecord }
   | { created: false };

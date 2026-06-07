@@ -2,7 +2,7 @@ import { IDEMPOTENCY_HEADER } from '@app/common/constants';
 import { mapCodeToStatus } from '@app/common/exceptions';
 import { JsonValue } from '@app/common/types';
 import { REDIS, RedisPort } from '@app/core/infrastructure/redis';
-import { OBFUSCATION_PORT, ObfuscationPort } from '@app/core/security';
+import { ObfuscationPort } from '@app/core/security';
 import { DATABASE_CONTEXT, DatabaseContextPort } from '@app/database';
 import {
   BadRequestException,
@@ -23,6 +23,7 @@ import {
 } from '../persistence/idempotency.persistence.types';
 import { IDEMPOTENCY_REPOSITORY, IdempotencyRepository } from '../persistence/idempotency.port';
 import { IdempotencyStrategy } from './interface';
+import { OBFUSCATION } from '@app/core/security/ports/obfuscation.port';
 
 @Injectable()
 export class DurableIdempotencyStrategy implements IdempotencyStrategy {
@@ -30,8 +31,8 @@ export class DurableIdempotencyStrategy implements IdempotencyStrategy {
 
   constructor(
     @Inject(REDIS) private readonly redis: RedisPort,
+    @Inject(OBFUSCATION) private readonly obfuscation: ObfuscationPort,
     @Inject(DATABASE_CONTEXT) private readonly db: DatabaseContextPort,
-    @Inject(OBFUSCATION_PORT) private readonly obfuscation: ObfuscationPort,
     @Inject(IDEMPOTENCY_REPOSITORY) private readonly repository: IdempotencyRepository,
   ) {}
 

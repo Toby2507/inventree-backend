@@ -1,4 +1,5 @@
 import {
+  CreateIdempotency,
   IdempotencyRecord,
   IdempotencyRedisRecord,
 } from '@app/core/reliability/idempotency/persistence/idempotency.persistence.types';
@@ -22,4 +23,11 @@ export const fsIdempotencyRecord = createFaker<IdempotencyRecord>(() => ({
   createdAt: faker.date.past(),
   expiresAt: faker.date.future(),
   resolvedAt: faker.helpers.arrayElement([null, faker.date.recent()]),
+}));
+
+export const fsCreateIdempotencyInput = createFaker<CreateIdempotency>(() => ({
+  key: faker.string.uuid(),
+  scope: faker.lorem.words(2).replace(/\s+/g, '-'),
+  hash: faker.string.alphanumeric({ length: 64 }),
+  ttl: faker.number.int({ min: 3_600, max: 86_400 }), // 1 hour to 1 day in seconds
 }));

@@ -27,7 +27,7 @@ export interface IdempotencyRepository {
   ): Promise<IdempotencyRecord | null>;
   deleteExpired(db: OperationalDB): Promise<void>;
   deleteRecord(db: OperationalDB, key: string, scope: string): Promise<void>;
-  sweepStaleInProgress(db: OperationalDB): Promise<void>;
+  sweepStaleInProgress(db: OperationalDB, thresholdMin?: number): Promise<void>;
 }
 
 export const IDEMPOTENCY_REPOSITORY = Symbol('IDEMPOTENCY_REPOSITORY');

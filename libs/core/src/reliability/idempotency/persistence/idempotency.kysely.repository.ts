@@ -100,8 +100,8 @@ export class IdempotencyKyselyRepository implements IdempotencyRepository {
     await db.deleteFrom('idempotency').where('expires_at', '<', new Date()).execute();
   }
 
-  async sweepStaleInProgress(db: OperationalDB): Promise<void> {
-    const threshold = new Date(Date.now() - 5 * 60 * 1000);
+  async sweepStaleInProgress(db: OperationalDB, thresholdMin: number = 5): Promise<void> {
+    const threshold = new Date(Date.now() - thresholdMin * 60 * 1000);
     await db
       .updateTable('idempotency')
       .set({ status: 'failed', error: { message: 'Request timed out' }, resolved_at: sql`now()` })

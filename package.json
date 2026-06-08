@@ -88,6 +88,8 @@
     "@nestjs/cli": "^11.0.16",
     "@nestjs/schematics": "^11.0.9",
     "@nestjs/testing": "^11.1.15",
+    "@testcontainers/postgresql": "^12.0.1",
+    "@testcontainers/redis": "^12.0.1",
     "@types/compression": "^1.8.1",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",

@@ -1,4 +1,4 @@
-import { ID_GENERATOR_PORT, IDGeneratorPort } from '@app/core/generators';
+import { ID_GENERATOR, IDGeneratorPort } from '@app/core/generators';
 import { DATABASE_CONTEXT, DatabaseContextPort } from '@app/database';
 import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
@@ -8,15 +8,15 @@ import {
   USER_REPOSITORY,
   UserRepository,
 } from '../../../domain/user/ports/repositories/user.repository';
-import { HASHING_PORT, HashingPort } from '../../ports/hashing.port';
+import { HASHING, HashingPort } from '../../ports/hashing.port';
 import { RegisterUserCommand } from './register-user.command';
 
 @CommandHandler(RegisterUserCommand)
 export class RegisterUserCommandHandler implements ICommandHandler<RegisterUserCommand> {
   constructor(
-    @Inject(HASHING_PORT) private readonly hashingPort: HashingPort,
+    @Inject(HASHING) private readonly hashingPort: HashingPort,
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
-    @Inject(ID_GENERATOR_PORT) private readonly idGenerator: IDGeneratorPort,
+    @Inject(ID_GENERATOR) private readonly idGenerator: IDGeneratorPort,
     @Inject(DATABASE_CONTEXT) private readonly db: DatabaseContextPort,
   ) {}
 

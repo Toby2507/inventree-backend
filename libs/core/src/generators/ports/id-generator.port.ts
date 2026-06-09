@@ -3,4 +3,4 @@ export interface IDGeneratorPort {
   generateUUIDV7(): string;
 }
 
-export const ID_GENERATOR_PORT = Symbol('ID_GENERATOR_PORT');
+export const ID_GENERATOR = Symbol('ID_GENERATOR');

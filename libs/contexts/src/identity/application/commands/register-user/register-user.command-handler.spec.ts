@@ -1,4 +1,4 @@
-import { ID_GENERATOR_PORT } from '@app/core/generators';
+import { ID_GENERATOR } from '@app/core/generators';
 import { DATABASE_CONTEXT } from '@app/database';
 import { makeIDGeneratorMock } from '@app/testing/core/generators';
 import { makeArgon2HasherMock, makeUserRepositoryMock } from '@app/testing/identity';
@@ -8,7 +8,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '../../../domain/user/aggregates/user.aggregate';
 import { UserEmailAlreadyExistsException } from '../../../domain/user/exceptions/registration.exceptions';
 import { USER_REPOSITORY } from '../../../domain/user/ports/repositories/user.repository';
-import { HASHING_PORT } from '../../ports/hashing.port';
+import { HASHING } from '../../ports/hashing.port';
 import { RegisterUserCommand } from './register-user.command';
 import { RegisterUserCommandHandler } from './register-user.command-handler';
 
@@ -33,9 +33,9 @@ describe('RegisterUserCommandHandler', () => {
     module = await Test.createTestingModule({
       providers: [
         RegisterUserCommandHandler,
-        { provide: HASHING_PORT, useValue: argon2Hasher },
+        { provide: HASHING, useValue: argon2Hasher },
         { provide: USER_REPOSITORY, useValue: userRepository },
-        { provide: ID_GENERATOR_PORT, useValue: idGenerator },
+        { provide: ID_GENERATOR, useValue: idGenerator },
         { provide: DATABASE_CONTEXT, useValue: dbContext },
       ],
     }).compile();

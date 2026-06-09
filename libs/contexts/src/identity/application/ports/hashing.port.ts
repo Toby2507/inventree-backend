@@ -3,4 +3,4 @@ export interface HashingPort {
   compare(plain: string, hash: string): Promise<boolean>;
 }
 
-export const HASHING_PORT = Symbol('HASHING_PORT');
+export const HASHING = Symbol('HASHING');

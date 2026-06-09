@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { v4, v7 } from 'uuid';
-import { IDGeneratorPort } from '../ports/uuid-generator.port';
+import type { IDGeneratorPort } from '../ports/id-generator.port.js';
 
 @Injectable()
 export class IDGeneratorAdapter implements IDGeneratorPort {

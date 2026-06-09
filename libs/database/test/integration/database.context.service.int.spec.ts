@@ -1,7 +1,7 @@
 import { DATABASE_CONTEXT, DatabaseModule, storeContextStorage } from '@app/database';
 import { DatabaseContextService } from '@app/database/services/database.context.service';
+import { faker } from '@app/testing';
 import { fsStoreContext } from '@app/testing/identity';
-import { faker } from '@app/testing/utils';
 import { UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { sql } from 'kysely';

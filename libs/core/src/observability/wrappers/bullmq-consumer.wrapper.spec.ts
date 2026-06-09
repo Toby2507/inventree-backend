@@ -1,7 +1,7 @@
 import { Fn } from '@app/common/types';
+import { faker } from '@app/testing';
 import { createOtelTestHarness, makeLoggerMock } from '@app/testing/core/observability';
 import { fsJob } from '@app/testing/system';
-import { faker } from '@app/testing/utils';
 import { SpanAttributes } from '../tracing/span-attributes';
 import { createObservedProcessor } from './bullmq-consumer.wrapper';
 

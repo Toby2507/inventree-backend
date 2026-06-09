@@ -1,5 +1,5 @@
 import 'tsconfig-paths/register';
-import { dropTestDB, MIGRATION_TEST_DB_NAME } from '@app/testing/utils';
+import { dropTestDB, MIGRATION_TEST_DB_NAME } from '@app/testing/database';
 
 export default async (): Promise<void> => {
   console.log('[Global Teardown] Dropping migration test database...');

@@ -4,7 +4,7 @@ import {
   recreateTestDB,
   runMigrations,
   TEMPLATE_DB_NAME,
-} from '@app/testing/utils';
+} from '@app/testing/database';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
 

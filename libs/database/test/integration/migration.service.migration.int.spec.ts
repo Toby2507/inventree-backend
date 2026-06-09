@@ -1,5 +1,5 @@
 import { MigrationModule, MigrationService } from '@app/database';
-import { MIGRATION_TEST_DB_NAME } from '@app/testing/utils';
+import { MIGRATION_TEST_DB_NAME } from '@app/testing/database';
 import { Test, TestingModule } from '@nestjs/testing';
 
 jest.setTimeout(60000); // Migrations can take longer than the default 5s Jest timeout, especially on CI. Adjust as needed.

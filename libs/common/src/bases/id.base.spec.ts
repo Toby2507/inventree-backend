@@ -1,4 +1,4 @@
-import { faker } from '@app/testing/utils';
+import { faker } from '@app/testing';
 import { InvalidUUIDException, UUIDCannotBeEmptyException } from '../exceptions';
 import { BaseUUID } from './id.base';
 

@@ -1,5 +1,5 @@
+import { faker } from '@app/testing';
 import { fsObservationContext } from '@app/testing/core/observability';
-import { faker } from '@app/testing/utils';
 import {
   getCorrelationId,
   getObservationContext,

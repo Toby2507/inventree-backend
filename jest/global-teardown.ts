@@ -1,5 +1,5 @@
 import 'tsconfig-paths/register';
-import { dropDatabasesByPrefix } from '@app/testing/utils';
+import { dropDatabasesByPrefix } from '@app/testing/database';
 
 const TEST_DBS_PREFIX = 'test_';
 

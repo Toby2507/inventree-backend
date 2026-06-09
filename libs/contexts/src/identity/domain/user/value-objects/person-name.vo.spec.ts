@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker';
+import { faker } from '@app/testing';
 import {
   PersonNameCannotBeEmptyException,
   PersonNameInvalidException,

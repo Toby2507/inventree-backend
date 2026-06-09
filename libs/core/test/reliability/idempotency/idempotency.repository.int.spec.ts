@@ -2,7 +2,7 @@ import { IdempotencyKyselyRepository } from '@app/core/reliability/idempotency/p
 import { CreateIdempotency } from '@app/core/reliability/idempotency/persistence/idempotency.persistence.types';
 import { OperationalDB, OperationalSchema } from '@app/database';
 import { fsCreateIdempotencyInput } from '@app/testing/core/reliability/idempotency';
-import { createTestContext, TestContext } from '@app/testing/utils';
+import { createTestContext, TestContext } from '@app/testing/database';
 
 describe('IdempotencyKyselyRepository (integration)', () => {
   let ctx: TestContext<OperationalSchema>;

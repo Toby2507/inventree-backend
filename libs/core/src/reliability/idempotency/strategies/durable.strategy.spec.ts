@@ -145,7 +145,7 @@ describe('DurableIdempotencyStrategy', () => {
       beforeEach(() => {
         redis.get.mockResolvedValue(null);
         idempotencyRepository.findActiveRecord.mockResolvedValue(null);
-        idempotencyRepository.create.mockResolvedValue({ created: true, record });
+        idempotencyRepository.tryClaim.mockResolvedValue(true);
       });
 
       it('should call next.handle to process the request', async () => {
@@ -225,7 +225,7 @@ describe('DurableIdempotencyStrategy', () => {
         it('should use custom ttl from options when creating record', async () => {
           const options = { ...OPTIONS, ttlSeconds: 3600 };
           await runStrategy(options);
-          expect(idempotencyRepository.create).toHaveBeenCalledWith(
+          expect(idempotencyRepository.tryClaim).toHaveBeenCalledWith(
             expect.anything(),
             expect.objectContaining({ ttl: 3600 }),
           );
@@ -369,7 +369,7 @@ describe('DurableIdempotencyStrategy', () => {
 
     describe('when db create indicates a conflict', () => {
       beforeEach(() => {
-        idempotencyRepository.create.mockResolvedValue({ created: false });
+        idempotencyRepository.tryClaim.mockResolvedValue(false);
       });
 
       it('should throw if record still not found after conflict', async () => {

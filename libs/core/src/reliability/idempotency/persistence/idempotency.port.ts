@@ -1,13 +1,9 @@
 import { JsonValue } from '@app/common/types';
 import { OperationalDB } from '@app/database';
-import {
-  CreateIdempotency,
-  CreateIdempotencyResult,
-  IdempotencyRecord,
-} from './idempotency.persistence.types';
+import { CreateIdempotency, IdempotencyRecord } from './idempotency.persistence.types';
 
 export interface IdempotencyRepository {
-  create(db: OperationalDB, record: CreateIdempotency): Promise<CreateIdempotencyResult>;
+  tryClaim(db: OperationalDB, record: CreateIdempotency): Promise<boolean>;
   findActiveRecord(
     db: OperationalDB,
     key: string,

@@ -40,11 +40,11 @@ describe('IdempotencyKyselyRepository (integration)', () => {
     await ctx.dispose();
   });
 
-  describe('IdempotencyKyselyRepository.create()', () => {
+  describe('IdempotencyKyselyRepository.tryClaim()', () => {
     it('should persist a new idempotency record correctly', async () => {
       const input = fsCreateIdempotencyInput.generate();
-      const result = await repo.create(db, input);
-      expect(result.created).toBe(true);
+      const claimed = await repo.tryClaim(db, input);
+      expect(claimed).toBe(true);
       const dbRecord = await getRecord(input);
       expect(dbRecord).toBeDefined();
       expect(dbRecord).toMatchObject({
@@ -53,22 +53,14 @@ describe('IdempotencyKyselyRepository (integration)', () => {
         request_hash: input.hash,
         status: 'in_progress',
       });
-      if (result.created) {
-        expect(result.record).toMatchObject({
-          idempotencyKey: input.key,
-          scope: input.scope,
-          requestHash: input.hash,
-          status: 'in_progress',
-        });
-      }
     });
 
     it('should do nothing on conflict with the same key and scope', async () => {
       const input = fsCreateIdempotencyInput.generate();
-      const firstResult = await repo.create(db, input);
-      expect(firstResult.created).toBe(true);
-      const secondResult = await repo.create(db, input);
-      expect(secondResult.created).toBe(false);
+      const firstClaimed = await repo.tryClaim(db, input);
+      expect(firstClaimed).toBe(true);
+      const secondClaimed = await repo.tryClaim(db, input);
+      expect(secondClaimed).toBe(false);
       const records = await db
         .selectFrom('idempotency')
         .selectAll()
@@ -82,9 +74,9 @@ describe('IdempotencyKyselyRepository (integration)', () => {
       const input = fsCreateIdempotencyInput.generate();
       // Subtract 1s to absorb clock skew between the Node process and Postgres
       const before = new Date(Date.now() - 1000);
-      const result = await repo.create(db, input);
+      const claimed = await repo.tryClaim(db, input);
       const after = new Date();
-      expect(result.created).toBe(true);
+      expect(claimed).toBe(true);
       const dbRecord = await getRecord(input);
       const { expires_at } = dbRecord!;
       const expectedMin = new Date(before.getTime() + input.ttl * 1000);
@@ -99,7 +91,7 @@ describe('IdempotencyKyselyRepository (integration)', () => {
 
     beforeEach(async () => {
       input = fsCreateIdempotencyInput.generate();
-      await repo.create(db, input);
+      await repo.tryClaim(db, input);
     });
 
     it('should return record if it exists', async () => {
@@ -137,7 +129,7 @@ describe('IdempotencyKyselyRepository (integration)', () => {
 
     beforeEach(async () => {
       input = fsCreateIdempotencyInput.generate();
-      await repo.create(db, input);
+      await repo.tryClaim(db, input);
     });
 
     it('should mark record as completed with response and resolved_at', async () => {
@@ -188,7 +180,7 @@ describe('IdempotencyKyselyRepository (integration)', () => {
 
     beforeEach(async () => {
       input = fsCreateIdempotencyInput.generate();
-      await repo.create(db, input);
+      await repo.tryClaim(db, input);
     });
 
     it('should mark record as failed with error and resolved_at', async () => {
@@ -237,7 +229,7 @@ describe('IdempotencyKyselyRepository (integration)', () => {
   describe('IdempotencyKyselyRepository.deleteRecord()', () => {
     it('should delete the record with the given key and scope', async () => {
       const input = fsCreateIdempotencyInput.generate();
-      await repo.create(db, input);
+      await repo.tryClaim(db, input);
       await repo.deleteRecord(db, input.key, input.scope);
       const dbRecord = await getRecord(input);
       expect(dbRecord).toBeUndefined();
@@ -255,7 +247,7 @@ describe('IdempotencyKyselyRepository (integration)', () => {
     it('should delete all expired records', async () => {
       const expiredInput = fsCreateIdempotencyInput.generate();
       const activeInput = fsCreateIdempotencyInput.generate();
-      await Promise.all([repo.create(db, expiredInput), repo.create(db, activeInput)]);
+      await Promise.all([repo.tryClaim(db, expiredInput), repo.tryClaim(db, activeInput)]);
       await expireRecord(expiredInput);
       await repo.deleteExpired(db);
       const expiredRecord = await getRecord(expiredInput);
@@ -279,7 +271,7 @@ describe('IdempotencyKyselyRepository (integration)', () => {
 
     beforeEach(async () => {
       input = fsCreateIdempotencyInput.generate();
-      await repo.create(db, input);
+      await repo.tryClaim(db, input);
     });
 
     it('should mark in_progress records that are older than threshold as failed', async () => {

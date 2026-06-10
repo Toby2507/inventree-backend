@@ -39,7 +39,3 @@ export interface CreateIdempotency {
   hash: string;
   ttl: number;
 }
-
-export type CreateIdempotencyResult =
-  | { created: true; record: IdempotencyRecord }
-  | { created: false };

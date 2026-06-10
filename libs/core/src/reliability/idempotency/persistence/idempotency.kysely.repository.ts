@@ -4,7 +4,6 @@ import { Injectable } from '@nestjs/common';
 import { sql } from 'kysely';
 import {
   CreateIdempotency,
-  CreateIdempotencyResult,
   IdempotencyRecord,
   IdempotencyRow,
 } from './idempotency.persistence.types';
@@ -12,8 +11,8 @@ import { IdempotencyRepository } from './idempotency.port';
 
 @Injectable()
 export class IdempotencyKyselyRepository implements IdempotencyRepository {
-  async create(db: OperationalDB, record: CreateIdempotency): Promise<CreateIdempotencyResult> {
-    const result = await db
+  async tryClaim(db: OperationalDB, record: CreateIdempotency): Promise<boolean> {
+    const row = await db
       .insertInto('idempotency')
       .values({
         idempotency_key: record.key,
@@ -23,10 +22,9 @@ export class IdempotencyKyselyRepository implements IdempotencyRepository {
         expires_at: sql`now() + (${record.ttl} * interval '1 second')`,
       })
       .onConflict((oc) => oc.columns(['idempotency_key', 'scope']).doNothing())
-      .returningAll()
-      .execute();
-    if (result.length > 0) return { created: true, record: this.toRecord(result[0]) };
-    return { created: false };
+      .returning('idempotency_key')
+      .executeTakeFirst();
+    return row !== undefined;
   }
 
   async findActiveRecord(

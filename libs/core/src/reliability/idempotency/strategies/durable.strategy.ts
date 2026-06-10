@@ -3,6 +3,7 @@ import { mapCodeToStatus } from '@app/common/exceptions';
 import { JsonValue } from '@app/common/types';
 import { REDIS, RedisPort } from '@app/core/infrastructure/redis';
 import { ObfuscationPort } from '@app/core/security';
+import { OBFUSCATION } from '@app/core/security/ports/obfuscation.port';
 import { DATABASE_CONTEXT, DatabaseContextPort } from '@app/database';
 import {
   BadRequestException,
@@ -17,13 +18,9 @@ import { Observable, catchError, defer, from, of, throwError } from 'rxjs';
 import { map, mergeMap, switchMap } from 'rxjs/operators';
 import { IdempotencyOptions } from '../decorators/idempotency.decorator';
 import { IdempotencyException } from '../exceptions/idempotency.exception';
-import {
-  CreateIdempotencyResult,
-  IdempotencyRecord,
-} from '../persistence/idempotency.persistence.types';
+import { IdempotencyRecord } from '../persistence/idempotency.persistence.types';
 import { IDEMPOTENCY_REPOSITORY, IdempotencyRepository } from '../persistence/idempotency.port';
 import { IdempotencyStrategy } from './interface';
-import { OBFUSCATION } from '@app/core/security/ports/obfuscation.port';
 
 @Injectable()
 export class DurableIdempotencyStrategy implements IdempotencyStrategy {
@@ -47,8 +44,8 @@ export class DurableIdempotencyStrategy implements IdempotencyStrategy {
         return this.replayRecord<T>(record);
       }
       const ttl = options.ttlSeconds ?? this.TTL_SECONDS;
-      const createResult = await this.createRecord(key, options.scope, hash, ttl);
-      if (createResult.created) {
+      const claimed = await this.claimRecord(key, options.scope, hash, ttl);
+      if (claimed) {
         return next.handle().pipe(
           switchMap((response) =>
             from(this.markCompleted(key, options.scope, response)).pipe(map(() => response)),
@@ -87,14 +84,16 @@ export class DurableIdempotencyStrategy implements IdempotencyStrategy {
     );
   }
 
-  private async createRecord(
+  private async claimRecord(
     key: string,
     scope: string,
     hash: string,
     ttl: number,
-  ): Promise<CreateIdempotencyResult> {
+  ): Promise<boolean> {
     const record = { key, scope: scope, hash, ttl };
-    return this.db.platformCommand(async (ctx) => this.repository.create(ctx.operational, record));
+    return this.db.platformCommand(async (ctx) =>
+      this.repository.tryClaim(ctx.operational, record),
+    );
   }
 
   private async deleteRecord(key: string, scope: string): Promise<void> {

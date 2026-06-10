@@ -2,7 +2,7 @@ import { IdempotencyRepository } from '@app/core/reliability/idempotency/persist
 
 export const makeIdempotencyRepositoryMock = () => {
   return {
-    create: jest.fn(),
+    tryClaim: jest.fn(),
     findActiveRecord: jest.fn(),
     markCompleted: jest.fn(),
     markFailed: jest.fn(),

@@ -10,17 +10,18 @@ const getRedisConfig = (): RedisOptions => ({
  * Creates a reusable Redis client for testing with:
  * - a unique key prefix to isolate test data
  * - a cleanup function to remove test keys after tests complete
+ * - a stop function to close the Redis connection
  *
  * @returns An object containing the Redis client, namespace, and cleanup function
  * @example ```
  * beforeAll(() => {
- *   ({ redis, cleanup } = createTestRedis());
+ *   ({ redis, cleanup, stop } = createTestRedis());
  * });
  * afterEach(async () => {
  *   await cleanup();
  * });
  * afterAll(async () => {
- *   await redis.quit();
+ *   await stop();
  * });
  * ```
  */

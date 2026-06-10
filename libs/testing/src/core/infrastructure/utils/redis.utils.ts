@@ -16,8 +16,11 @@ const getRedisConfig = (): RedisOptions => ({
  * beforeAll(() => {
  *   ({ redis, cleanup } = createTestRedis());
  * });
- * afterAll(async () => {
+ * afterEach(async () => {
  *   await cleanup();
+ * });
+ * afterAll(async () => {
+ *   await redis.quit();
  * });
  * ```
  */
@@ -31,11 +34,14 @@ export const createTestRedis = () => {
   const cleanup = async () => {
     let cursor = '0';
     do {
-      const [next, keys] = await redis.scan(cursor, 'MATCH', `${namespace}:*`);
-      if (keys.length) await redis.del(...keys);
+      const [next, keys] = await redis.scan(cursor, 'MATCH', '*');
+      if (keys.length) await redis.unlink(...keys);
       cursor = next;
     } while (cursor !== '0');
   };
+  const stop = async () => {
+    await redis.quit();
+  };
 
-  return { redis, namespace, cleanup };
+  return { redis, namespace, cleanup, stop };
 };

@@ -1,6 +1,7 @@
-import { makeCallHandlerMock, makeContextMock, makeMetricsMock } from '@app/testing';
+import { makeMetricsMock } from '@app/testing/core/observability';
+import { makeCallHandlerMock, makeContextMock } from '@app/testing/system';
 import { firstValueFrom, of, throwError } from 'rxjs';
-import { MetricNames } from '../metrics';
+import { MetricNames } from '../metrics/metric-names';
 import { MetricsInterceptor } from './metrics.interceptor';
 
 describe('MetricsInterceptor', () => {

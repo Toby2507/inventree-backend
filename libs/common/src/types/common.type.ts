@@ -17,3 +17,11 @@ export type Maybe<T> = T | null | undefined;
 export type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
 export type Fn = (...args: any) => any;
+
+export type JsonValue =
+  | JsonValue[]
+  | { [x: string]: JsonValue | undefined }
+  | boolean
+  | number
+  | string
+  | null;

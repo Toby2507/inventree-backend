@@ -1,7 +1,11 @@
-import { Fn } from '@app/common';
-import { createOtelTestHarness, fsObservationContext, makeLoggerMock } from '@app/testing';
-import { observationStorage } from '../context';
-import { LoggerPort } from '../ports';
+import { Fn } from '@app/common/types';
+import {
+  createOtelTestHarness,
+  fsObservationContext,
+  makeLoggerMock,
+} from '@app/testing/core/observability';
+import { observationStorage } from '../context/observation-context.storage';
+import { LoggerPort } from '../ports/logger.port';
 import { Observed } from './observed.decorator';
 
 class SomeService {
@@ -13,7 +17,7 @@ class SomeService {
     return 'done';
   }
 
-  @Observed({ logArgs: true, redactArgKeys: ['account'] })
+  @Observed({ logArgs: true, redactArgKeys: ['account', 'password'] })
   async doWorkAndLogArgs(args: {
     email: string;
     password: string;

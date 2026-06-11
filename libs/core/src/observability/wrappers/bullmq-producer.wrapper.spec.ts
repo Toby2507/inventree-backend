@@ -1,7 +1,8 @@
-import { fsObservationContext, makeLoggerMock, makeQueueMock } from '@app/testing';
+import { fsObservationContext, makeLoggerMock } from '@app/testing/core/observability';
+import { makeQueueMock } from '@app/testing/system';
+import { Queue } from 'bullmq';
 import { observationStorage } from '../context/observation-context.storage';
 import { ObservedQueueWrapper } from './bullmq-producer.wrapper';
-import { Queue } from 'bullmq';
 
 describe('ObservedQueueWrapper', () => {
   let queue: jest.Mocked<Queue>;

@@ -1,25 +1,28 @@
-import { Email } from '@app/common';
-import { faker, feUser, fsUser } from '@app/testing';
+import { Email } from '@app/common/value-objects';
+import { faker } from '@app/testing';
+import { feUser, fsUser } from '@app/testing/identity';
+import { AuthenticationBlockedEvent } from '../events/authentication-blocked.event';
+import { UserDisabledEvent } from '../events/user-disabled.event';
+import { UserEmailVerifiedEvent } from '../events/user-email-verified.event';
+import { UserEnabledEvent } from '../events/user-enabled.event';
+import { UserLockedOutEvent } from '../events/user-locked-out.event';
+import { UserLoggedInEvent } from '../events/user-logged-in.event';
+import { UserRegisteredEvent } from '../events/user-registered.event';
+import { UserSuspendedEvent } from '../events/user-suspended.event';
 import {
-  AuthenticationBlockedEvent,
-  UserDisabledEvent,
-  UserEmailVerifiedEvent,
-  UserEnabledEvent,
-  UserLockedOutEvent,
-  UserLoggedInEvent,
-  UserRegisteredEvent,
-  UserSuspendedEvent,
-} from '../events';
-import {
-  InvalidUserStatusTransitionException,
   MfaNotEnabledException,
   MfaSecretRequiredException,
   MfaSetupNotInProgressException,
   PhoneNotProvidedException,
+} from '../exceptions/security.exceptions';
+import {
+  InvalidUserStatusTransitionException,
   UserCannotAuthenticateException,
   UserNotActiveException,
-} from '../exceptions';
-import { PasswordHash, PersonName, UserID } from '../value-objects';
+} from '../exceptions/user.exceptions';
+import { PasswordHash } from '../value-objects/password-hash.vo';
+import { PersonName } from '../value-objects/person-name.vo';
+import { UserID } from '../value-objects/user-id.vo';
 import { User, UserSnapshot } from './user.aggregate';
 
 const generateActiveUser = (overrides: Partial<UserSnapshot> = {}): User => {

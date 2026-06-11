@@ -1,11 +1,12 @@
+import { faker } from '@app/testing';
 import {
   createOtelTestHarness,
-  faker,
   fsSerializedBusinessContext,
   fsSerializedOutboxContext,
-} from '@app/testing';
+} from '@app/testing/core/observability';
 import { ROOT_CONTEXT, SpanKind, SpanStatusCode } from '@opentelemetry/api';
-import { INVENTREE_TRACER, SpanAttributes } from '../tracing';
+import { SpanAttributes } from '../tracing/span-attributes';
+import { INVENTREE_TRACER } from '../tracing/tracer.provider';
 import { RestoredContextOptions, withRestoredObservationContext } from './restore-context';
 
 const generatedUUID = faker.string.uuid();

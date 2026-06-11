@@ -35,13 +35,6 @@ Related to #456
 - [ ] E2E tests added/updated
 - [ ] Manual testing completed
 
-### Test Cases
-
-- [x] User can register with valid credentials
-- [x] Registration fails with invalid email
-- [x] Email verification token is sent
-- [x] User cannot login before email verification
-
 ## Database Changes
 
 - [ ] Migrations added

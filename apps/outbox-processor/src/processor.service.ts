@@ -1,4 +1,4 @@
-import { LOGGER, LoggerPort } from '@app/core';
+import { LOGGER, LoggerPort } from '@app/core/observability';
 import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 
 @Injectable()

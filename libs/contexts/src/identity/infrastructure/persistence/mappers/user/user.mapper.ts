@@ -1,5 +1,5 @@
-import { Mapper } from '@app/common';
-import { User } from '../../../../domain';
+import { Mapper } from '@app/common/bases';
+import { User } from '../../../../domain/user/aggregates/user.aggregate';
 import { UserSecurityMapper } from './user-security.mapper';
 import { UserPersistence } from './user.persistence.types';
 

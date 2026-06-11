@@ -1,4 +1,4 @@
-import { EntityConstructor } from '@app/common';
+import { EntityConstructor } from '@app/common/bases';
 
 export function createFaker<T>(generator: () => T) {
   return {

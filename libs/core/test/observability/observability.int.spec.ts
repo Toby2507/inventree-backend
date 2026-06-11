@@ -1,5 +1,17 @@
-import { LOGGER, LoggerPort, METRICS, MetricsPort } from '@app/core/observability/ports';
-import { createOtelTestHarness, makeLoggerMock } from '@app/testing';
+import {
+  getOptionalObservationContext,
+  LOGGER,
+  LoggerPort,
+  Metered,
+  METRICS,
+  MetricsPort,
+  ObservationContextMiddleware,
+  Observed,
+} from '@app/core/observability';
+import { MetricsInterceptor } from '@app/core/observability/interceptors/metrics.interceptor';
+import { RequestLoggerInterceptor } from '@app/core/observability/interceptors/request-logger.interceptor';
+import { MetricsService } from '@app/core/observability/metrics/metrics.service';
+import { createOtelTestHarness, makeLoggerMock } from '@app/testing/core/observability';
 import {
   Controller,
   Get,
@@ -13,11 +25,6 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { Test, TestingModule } from '@nestjs/testing';
 import { SpanStatusCode } from '@opentelemetry/api';
 import request from 'supertest';
-import { getOptionalObservationContext } from '../../src/observability/context';
-import { Metered, Observed } from '../../src/observability/decorators';
-import { MetricsInterceptor, RequestLoggerInterceptor } from '../../src/observability/interceptors';
-import { MetricsService } from '../../src/observability/metrics';
-import { ObservationContextMiddleware } from '../../src/observability/middlewares';
 
 @Injectable()
 class TestService {

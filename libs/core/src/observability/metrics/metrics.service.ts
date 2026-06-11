@@ -9,9 +9,9 @@ import {
   ObservableResult,
   UpDownCounter,
 } from '@opentelemetry/api';
-import { getOptionalObservationContext } from '../context';
+import { getOptionalObservationContext } from '../context/observation-context.storage';
+import { MetricsPort } from '../ports/metrics.port';
 import { MetricName, MetricNames } from './metric-names';
-import { MetricsPort } from '../ports';
 
 type GaugeDefinition = {
   instrument?: ObservableGauge;

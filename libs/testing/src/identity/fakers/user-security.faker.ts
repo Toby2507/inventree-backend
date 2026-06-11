@@ -2,10 +2,10 @@ import {
   CreateUserSecurityProps,
   UserSecurity,
   UserSecuritySnapshot,
-} from '@app/contexts/identity/domain/user/entities';
+} from '@app/contexts/identity/domain/user/entities/user-security.entity';
 import { UserSecuritySnapRow } from '@app/contexts/identity/infrastructure/persistence/mappers/user/user.persistence.types';
+import { createEntityFaker, createFaker } from '@app/testing/faker-factory';
 import { faker } from '@faker-js/faker';
-import { createEntityFaker, createFaker } from '../../faker-factory';
 
 export const fsUserSecurity = createFaker<UserSecuritySnapshot>(() => ({
   userId: faker.string.uuid(),

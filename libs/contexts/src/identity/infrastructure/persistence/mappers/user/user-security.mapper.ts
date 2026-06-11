@@ -1,5 +1,5 @@
-import { Mapper } from '@app/common';
-import { UserSecuritySnapshot } from '../../../../domain/user/entities';
+import { Mapper } from '@app/common/bases';
+import { UserSecuritySnapshot } from '../../../../domain/user/entities/user-security.entity';
 import { UserSecuritySnapRow } from './user.persistence.types';
 
 export class UserSecurityMapper extends Mapper<UserSecuritySnapshot, UserSecuritySnapRow> {

@@ -1,4 +1,4 @@
-import { Fn } from '@app/common';
+import { Fn } from '@app/common/types';
 import { ArgumentsHost, CallHandler, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request, Response } from 'express';
@@ -58,6 +58,7 @@ export const makeContextMock = (): ContextMocks => {
 
 export const makeReflectorMock = () => {
   return {
+    get: jest.fn(),
     getAllAndOverride: jest.fn(),
   } as unknown as jest.Mocked<Reflector>;
 };
@@ -83,6 +84,7 @@ export const makeRequestMock = ({ method, path, headers }: MockRequestArgs = DEF
     path,
     headers,
     route: { path },
+    header: (key: string) => headers![key],
   } as unknown as jest.Mocked<Request>;
 };
 

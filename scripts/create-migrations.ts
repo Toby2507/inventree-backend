@@ -36,8 +36,8 @@ export async function down(db: Kysely<any>): Promise<void> {
 function validateMigrationName(name: string): void {
   if (!name) {
     console.error('❌ Migration name is required');
-    console.error('   Usage: pnpm migrate:create <migration_name>');
-    console.error('   Example: pnpm migrate:create identity_users');
+    console.error('   Usage: pnpm migrate:create <migration_type> <migration_name>');
+    console.error('   Example: pnpm migrate:create operational identity_users');
     process.exit(1);
   }
 
@@ -50,10 +50,26 @@ function validateMigrationName(name: string): void {
   }
 }
 
-function ensureMigrationsDir(): void {
-  if (!fs.existsSync(MIGRATIONS_DIR)) {
-    fs.mkdirSync(MIGRATIONS_DIR, { recursive: true });
-    console.log(`📁 Created migrations directory: ${MIGRATIONS_DIR}`);
+function validateMigrationType(type: string): void {
+  const validTypes = ['operational', 'analytics'];
+  if (!type) {
+    console.error('❌ Migration type is required');
+    console.error('   Usage: pnpm migrate:create <migration_type> <migration_name>');
+    console.error('   Example: pnpm migrate:create operational identity_users');
+    process.exit(1);
+  }
+  if (!validTypes.includes(type)) {
+    console.error(`❌ Invalid migration type: "${type}"`);
+    console.error(`   Valid types are: ${validTypes.join(', ')}`);
+    process.exit(1);
+  }
+}
+
+function ensureMigrationsDir(type: string): void {
+  const migPath = path.resolve(MIGRATIONS_DIR, type);
+  if (!fs.existsSync(migPath)) {
+    fs.mkdirSync(migPath, { recursive: true });
+    console.log(`📁 Created migrations directory: ${migPath}`);
   }
 }
 
@@ -62,12 +78,13 @@ function generateFileName(name: string): string {
   return `${timestamp}_${name}.ts`;
 }
 
-function createMigration(name: string): void {
+function createMigration(name: string, type: string): void {
   validateMigrationName(name);
-  ensureMigrationsDir();
+  validateMigrationType(type);
+  ensureMigrationsDir(type);
 
   const fileName = generateFileName(name);
-  const filePath = path.join(MIGRATIONS_DIR, fileName);
+  const filePath = path.join(MIGRATIONS_DIR, type, fileName);
 
   // Guard against duplicate names in the same millisecond (extremely unlikely
   // but worth handling cleanly)
@@ -82,12 +99,13 @@ function createMigration(name: string): void {
   console.log(`   Path: ${filePath}`);
   console.log('');
   console.log('⚠️  Remember to register this migration in:');
-  console.log('   libs/database/src/migrations/index.ts');
+  console.log(`   libs/database/src/migrations/${type}/index.ts`);
   console.log(`   import * as ${name} from './${fileName.replace('.ts', '')}';`);
-  console.log(`   Add to migrations object: `);
+  console.log(`   Add to ${type}Migrations object: `);
   console.log(`   '${fileName.replace('.ts', '')}': ${name},`);
 }
 
 // Entry point
-const migrationName = process.argv[2];
-createMigration(migrationName);
+const migrationType = process.argv[2];
+const migrationName = process.argv[3];
+createMigration(migrationName, migrationType);

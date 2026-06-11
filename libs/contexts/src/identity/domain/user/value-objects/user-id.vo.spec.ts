@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker';
+import { faker } from '@app/testing';
 import { UserID } from './user-id.vo';
 
 describe('UserID value object', () => {

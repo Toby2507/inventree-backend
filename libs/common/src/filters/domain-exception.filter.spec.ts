@@ -1,4 +1,4 @@
-import { makeHostMock } from '@app/testing';
+import { makeHostMock } from '@app/testing/system';
 import { HttpStatus } from '@nestjs/common';
 import { DomainException } from '../exceptions';
 import { DomainExceptionFilter } from './domain-exception.filter';

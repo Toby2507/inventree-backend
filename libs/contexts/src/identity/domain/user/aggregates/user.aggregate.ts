@@ -1,20 +1,21 @@
-import { AggregateRoot, Email, PhoneNumber } from '@app/common';
-import { MfaType, UserSecurity, UserSecuritySnapshot } from '../entities';
-import {
-  AuthenticationBlockedEvent,
-  UserDisabledEvent,
-  UserEmailVerifiedEvent,
-  UserEnabledEvent,
-  UserRegisteredEvent,
-  UserSuspendedEvent,
-} from '../events';
+import { AggregateRoot } from '@app/common/bases';
+import { Email, PhoneNumber } from '@app/common/value-objects';
+import { MfaType, UserSecurity, UserSecuritySnapshot } from '../entities/user-security.entity';
+import { AuthenticationBlockedEvent } from '../events/authentication-blocked.event';
+import { UserDisabledEvent } from '../events/user-disabled.event';
+import { UserEmailVerifiedEvent } from '../events/user-email-verified.event';
+import { UserEnabledEvent } from '../events/user-enabled.event';
+import { UserRegisteredEvent } from '../events/user-registered.event';
+import { UserSuspendedEvent } from '../events/user-suspended.event';
+import { PhoneNotProvidedException } from '../exceptions/security.exceptions';
 import {
   InvalidUserStatusTransitionException,
-  PhoneNotProvidedException,
   UserCannotAuthenticateException,
   UserNotActiveException,
-} from '../exceptions';
-import { PasswordHash, PersonName, UserID } from '../value-objects';
+} from '../exceptions/user.exceptions';
+import { PasswordHash } from '../value-objects/password-hash.vo';
+import { PersonName } from '../value-objects/person-name.vo';
+import { UserID } from '../value-objects/user-id.vo';
 
 type AuthenticationCheck =
   | { allowed: true }

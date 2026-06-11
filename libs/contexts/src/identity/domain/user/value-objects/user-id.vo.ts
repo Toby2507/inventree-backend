@@ -1,4 +1,4 @@
-import { BaseUUID } from '@app/common';
+import { BaseUUID } from '@app/common/bases';
 
 export class UserID extends BaseUUID {
   private constructor(value: string) {

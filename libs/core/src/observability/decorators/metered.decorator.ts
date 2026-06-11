@@ -1,5 +1,6 @@
-import { MetricName, MetricNames } from '../metrics';
-import { MetricsPort } from '../ports';
+import { copyMethodMetadata } from '@app/common/utils';
+import { MetricName, MetricNames } from '../metrics/metric-names';
+import { MetricsPort } from '../ports/metrics.port';
 
 type MeteredInstance = { metrics?: MetricsPort };
 export type MeteredKind = 'command' | 'query' | 'repository' | 'job' | 'custom';
@@ -70,6 +71,7 @@ export function Metered(options: MeteredOptions = {}): MethodDecorator {
       );
     };
 
+    copyMethodMetadata(original, descriptor.value);
     return descriptor;
   };
 }

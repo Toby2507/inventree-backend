@@ -1,6 +1,6 @@
 import { StoreContext } from '@app/database';
+import { createFaker } from '@app/testing/faker-factory';
 import { faker } from '@faker-js/faker';
-import { createFaker } from '../../faker-factory';
 
 export const fsStoreContext = createFaker<StoreContext>(() => ({
   storeId: faker.string.uuid(),

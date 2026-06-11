@@ -7,7 +7,8 @@ import {
   trace,
 } from '@opentelemetry/api';
 import { v4 as uuidV4 } from 'uuid';
-import { INVENTREE_TRACER, SpanAttributes } from '../tracing';
+import { SpanAttributes } from '../tracing/span-attributes';
+import { INVENTREE_TRACER } from '../tracing/tracer.provider';
 import { ObservationContext, SerializedOutboxContext } from './observation-context';
 import { observationStorage } from './observation-context.storage';
 

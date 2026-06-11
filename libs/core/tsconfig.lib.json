@@ -3,11 +3,7 @@
   "compilerOptions": {
     "declaration": true,
     "root": "src",
-<<<<<<<< HEAD:libs/contexts/tsconfig.lib.json
-    "outDir": "../../dist/libs/contexts"
-========
     "outDir": "../../dist/libs/core"
->>>>>>>> 8cf17d9b677252ff768777522435edc7d1305ade:libs/core/tsconfig.lib.json
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test"]

@@ -1,4 +1,4 @@
-import { ObservabilityModule } from '@app/core';
+import { ObservabilityModule } from '@app/core/observability';
 import { DatabaseModule } from '@app/database';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';

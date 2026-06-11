@@ -1,5 +1,5 @@
-import { ControllerResponse } from '@app/common';
-import { RegisterUserCommand } from '@app/contexts';
+import { ControllerResponse } from '@app/common/types';
+import { RegisterUserCommand } from '@app/contexts/identity';
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import {
@@ -9,7 +9,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { RegisterUserDTO } from '../dtos';
+import { RegisterUserDTO } from '../dtos/input/user.dtos';
 
 @ApiTags('Authentication')
 @Controller('auth')

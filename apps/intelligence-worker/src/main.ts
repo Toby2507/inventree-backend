@@ -1,4 +1,4 @@
-import { bootstrapTelemetry } from '@app/core';
+import { bootstrapTelemetry } from '@app/core/observability';
 bootstrapTelemetry({ serviceName: 'inventree-intelligence-worker', serviceVersion: '1.0.0' });
 
 import { Logger } from '@nestjs/common';

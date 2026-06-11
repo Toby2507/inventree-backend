@@ -1,7 +1,7 @@
 import { Injectable, LoggerService } from '@nestjs/common';
 import pino, { Logger } from 'pino';
 import { getOptionalObservationContext } from '../context/observation-context.storage';
-import { ContextLoggerPort, LoggerPort } from '../ports';
+import { ContextLoggerPort, LoggerPort } from '../ports/logger.port';
 
 type LogMeta = Record<string, unknown>;
 

@@ -1,7 +1,11 @@
-import { createOtelTestHarness, fsObservationContext, makeLoggerMock } from '@app/testing';
+import {
+  createOtelTestHarness,
+  fsObservationContext,
+  makeLoggerMock,
+} from '@app/testing/core/observability';
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api';
 import { observationStorage } from '../context/observation-context.storage';
-import { SpanAttributes } from '../tracing';
+import { SpanAttributes } from '../tracing/span-attributes';
 import { ObservedRepositoryWrapper } from './observed-repository.wrapper';
 
 interface FakeRepo {

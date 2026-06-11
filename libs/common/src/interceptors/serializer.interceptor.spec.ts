@@ -1,4 +1,4 @@
-import { makeCallHandlerMock, makeContextMock } from '@app/testing';
+import { makeCallHandlerMock, makeContextMock } from '@app/testing/system';
 import { Expose } from 'class-transformer';
 import { firstValueFrom, of } from 'rxjs';
 import { SerializerInterceptor } from './serializer.interceptor';

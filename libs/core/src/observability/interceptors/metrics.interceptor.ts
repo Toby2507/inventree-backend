@@ -1,9 +1,8 @@
 import { CallHandler, ExecutionContext, Inject, Injectable, NestInterceptor } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
-import { MetricNames } from '../metrics';
-import { METRICS, MetricsPort } from '../ports';
+import { catchError, Observable, tap, throwError } from 'rxjs';
+import { MetricNames } from '../metrics/metric-names';
+import { METRICS, MetricsPort } from '../ports/metrics.port';
 
 @Injectable()
 export class MetricsInterceptor implements NestInterceptor {

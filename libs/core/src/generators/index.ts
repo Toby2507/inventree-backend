@@ -1,2 +1,2 @@
-export * from './generator.module';
-export { UUIDGeneratorPort, UUID_GENERATOR_PORT } from './ports';
+export { GeneratorModule } from './generator.module';
+export { IDGeneratorPort, ID_GENERATOR } from './ports/id-generator.port';

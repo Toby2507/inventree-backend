@@ -1,15 +1,14 @@
-import { UUID_GENERATOR_PORT } from '@app/core';
+import { ID_GENERATOR } from '@app/core/generators';
 import { DATABASE_CONTEXT } from '@app/database';
-import {
-  faker,
-  makeArgon2HasherMock,
-  makeDatabaseContextMock,
-  makeUserRepositoryMock,
-  makeUUIDGeneratorMock,
-} from '@app/testing';
+import { faker } from '@app/testing';
+import { makeIDGeneratorMock } from '@app/testing/core/generators';
+import { makeArgon2HasherMock, makeUserRepositoryMock } from '@app/testing/identity';
+import { makeDatabaseContextMock } from '@app/testing/system';
 import { Test, TestingModule } from '@nestjs/testing';
-import { User, USER_REPOSITORY, UserEmailAlreadyExistsException } from '../../../domain';
-import { HASHING_PORT } from '../../ports';
+import { User } from '../../../domain/user/aggregates/user.aggregate';
+import { UserEmailAlreadyExistsException } from '../../../domain/user/exceptions/registration.exceptions';
+import { USER_REPOSITORY } from '../../../domain/user/ports/repositories/user.repository';
+import { HASHING } from '../../ports/hashing.port';
 import { RegisterUserCommand } from './register-user.command';
 import { RegisterUserCommandHandler } from './register-user.command-handler';
 
@@ -19,7 +18,7 @@ describe('RegisterUserCommandHandler', () => {
 
   const argon2Hasher = makeArgon2HasherMock();
   const dbContext = makeDatabaseContextMock();
-  const uuidGenerator = makeUUIDGeneratorMock();
+  const idGenerator = makeIDGeneratorMock();
   const userRepository = makeUserRepositoryMock();
 
   const command = new RegisterUserCommand({
@@ -34,9 +33,9 @@ describe('RegisterUserCommandHandler', () => {
     module = await Test.createTestingModule({
       providers: [
         RegisterUserCommandHandler,
-        { provide: HASHING_PORT, useValue: argon2Hasher },
+        { provide: HASHING, useValue: argon2Hasher },
         { provide: USER_REPOSITORY, useValue: userRepository },
-        { provide: UUID_GENERATOR_PORT, useValue: uuidGenerator },
+        { provide: ID_GENERATOR, useValue: idGenerator },
         { provide: DATABASE_CONTEXT, useValue: dbContext },
       ],
     }).compile();
@@ -46,7 +45,7 @@ describe('RegisterUserCommandHandler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    uuidGenerator.generateV7.mockReturnValue(faker.string.uuid());
+    idGenerator.generateUUIDV7.mockReturnValue(faker.string.uuid());
     argon2Hasher.hash.mockResolvedValue(faker.string.alphanumeric(32));
     userRepository.existsByEmail.mockResolvedValue(false);
   });
@@ -65,7 +64,7 @@ describe('RegisterUserCommandHandler', () => {
 
   it('should register a new user successfully', async () => {
     await handler.execute(command);
-    expect(uuidGenerator.generateV7).toHaveBeenCalled();
+    expect(idGenerator.generateUUIDV7).toHaveBeenCalled();
     expect(argon2Hasher.hash).toHaveBeenCalledWith(command.props.password);
     expect(dbContext.platformCommand).toHaveBeenCalledWith(expect.any(Function));
   });

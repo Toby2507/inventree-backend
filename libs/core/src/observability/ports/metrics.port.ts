@@ -1,5 +1,5 @@
 import { Attributes } from '@opentelemetry/api';
-import { MetricName } from '../metrics';
+import { MetricName } from '../metrics/metric-names';
 
 export interface MetricsPort {
   increment(name: MetricName, attributes?: Attributes, amount?: number): void;

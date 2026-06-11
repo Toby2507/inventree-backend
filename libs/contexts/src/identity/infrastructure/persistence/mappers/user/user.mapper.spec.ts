@@ -1,4 +1,4 @@
-import { fdUser, fdUserSecurity, feUser } from '@app/testing';
+import { fdUser, fdUserSecurity, feUser } from '@app/testing/identity';
 import { UserMapper } from './user.mapper';
 
 describe('User Mapper', () => {

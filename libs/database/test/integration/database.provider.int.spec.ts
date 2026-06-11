@@ -1,5 +1,5 @@
+import { DatabaseProvider } from '@app/database/database.provider';
 import { Test, TestingModule } from '@nestjs/testing';
-import { DatabaseProvider } from '../../src/database.provider';
 
 describe('DatabaseProvider (integration)', () => {
   let module: TestingModule;

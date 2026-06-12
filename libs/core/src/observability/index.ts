@@ -1,6 +1,7 @@
 // Context
 export {
   SerializedBusinessContext,
+  SerializedOutboxContext,
   serializeBusinessContext,
   serializeOutboxContext,
 } from './context/observation-context';

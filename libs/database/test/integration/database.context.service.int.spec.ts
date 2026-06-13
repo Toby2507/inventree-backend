@@ -1,3 +1,4 @@
+import { OUTBOX_SERVICE } from '@app/core/reliability/outbox';
 import { DATABASE_CONTEXT, DatabaseModule, storeContextStorage } from '@app/database';
 import { DatabaseContextService } from '@app/database/services/database.context.service';
 import { faker } from '@app/testing';
@@ -54,6 +55,25 @@ describe('DatabaseContextService (integration)', () => {
       });
       // SET LOCAL scopes the setting to the transaction — it must be null/empty outside
       expect(result?.store_id ?? '').toBe('');
+    });
+
+    it('should allow read and writes inside command()', async () => {
+      await storeContextStorage.run(storeContext, async () => {
+        const email = faker.internet.email();
+        const passwordHash = faker.string.alphanumeric(32);
+        await expect(
+          service.command(async (ctx) => {
+            await ctx.operational
+              .insertInto('users')
+              .values({
+                email,
+                password_hash: passwordHash,
+              })
+              .execute();
+            await ctx.operational.selectFrom('users').where('email', '=', email).executeTakeFirst();
+          }),
+        ).resolves.not.toThrow();
+      });
     });
   });
 
@@ -142,5 +162,103 @@ describe('DatabaseContextService (integration)', () => {
         expect(result?.store_id ?? '').toBe('');
       });
     });
+  });
+
+  describe('event handling', () => {
+    let publishAllSpy: jest.SpyInstance;
+
+    const createEvent = () => ({
+      eventType: 'TestEvent',
+      aggregateType: 'TestAggregate',
+      aggregateId: 'test-id',
+      occurredAt: new Date(),
+      payload: { foo: 'bar' },
+    });
+
+    beforeEach(() => {
+      const outbox = module.get(OUTBOX_SERVICE);
+      publishAllSpy = jest.spyOn(outbox, 'publishAll');
+      publishAllSpy.mockResolvedValue(undefined);
+    });
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it.each(['command', 'platformCommand'] as const)(
+      'should publish events emitted during %s()',
+      async (method) => {
+        const event = createEvent();
+        await storeContextStorage.run(storeContext, async () => {
+          await service[method](async (ctx) => {
+            ctx.events.emit(event);
+          });
+        });
+        expect(publishAllSpy).toHaveBeenCalledTimes(1);
+        expect(publishAllSpy).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.arrayContaining([
+            expect.objectContaining({ eventType: event.eventType, payload: event.payload }),
+          ]),
+        );
+      },
+    );
+
+    it.each(['command', 'platformCommand'] as const)(
+      'should not publish when no events were emitted during %s()',
+      async (method) => {
+        await storeContextStorage.run(storeContext, async () => {
+          await service[method](async () => {
+            // No events pushed to ctx.events
+          });
+        });
+        expect(publishAllSpy).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each(['command', 'platformCommand'] as const)(
+      'should not attempt to publish events if the transaction fails in %s()',
+      async (method) => {
+        const event = createEvent();
+        await expect(
+          storeContextStorage.run(storeContext, async () => {
+            await service[method](async (ctx) => {
+              ctx.events.emit(event);
+              // Simulate transaction failure by throwing an error
+              throw new Error('Simulated transaction failure');
+            });
+          }),
+        ).rejects.toThrow('Simulated transaction failure');
+        expect(publishAllSpy).not.toHaveBeenCalled();
+      },
+    );
+
+    it.each(['command', 'platformCommand'] as const)(
+      'should roll back transaction if event publishing fails in %s()',
+      async (method) => {
+        const event = createEvent();
+        const vals = {
+          email: faker.internet.email(),
+          password_hash: faker.string.alphanumeric(32),
+        };
+        publishAllSpy.mockRejectedValue(new Error('Outbox publish failed'));
+        await expect(
+          storeContextStorage.run(storeContext, async () => {
+            await service[method](async (ctx) => {
+              ctx.events.emit(event);
+              // Attempt to insert a record that would be rolled back
+              await ctx.operational.insertInto('users').values(vals).execute();
+            });
+          }),
+        ).rejects.toThrow('Outbox publish failed');
+        // Verify that the record was not inserted due to rollback
+        const result = await service.platformQuery(async (ctx) => {
+          return ctx.operational
+            .selectFrom('users')
+            .where('email', '=', vals.email)
+            .executeTakeFirst();
+        });
+        expect(result).toBeUndefined();
+      },
+    );
   });
 });

@@ -22,11 +22,11 @@ export class DatabaseContextService implements DatabaseContextPort {
     if (!context?.storeId) throw new UnauthorizedException('No store context found on request');
     return this.provider.operationalWrite.transaction().execute(async (trx) => {
       await sql`SELECT set_config( 'app.current_store_id', ${context.storeId}, true )`.execute(trx);
-      const events: DomainEvent[] = [];
+      const { emit, events } = this.eventHandler();
       const result = await operation({
         analytics: this.provider.analyticsWrite,
         operational: trx,
-        events: events,
+        events: { emit },
       });
       if (events.length > 0) await this.outbox.publishAll(trx, events);
       return result;
@@ -35,11 +35,11 @@ export class DatabaseContextService implements DatabaseContextPort {
 
   async platformCommand<T>(operation: (ctx: CommandDbContext) => Promise<T>): Promise<T> {
     return this.provider.operationalWrite.transaction().execute(async (trx) => {
-      const events: DomainEvent[] = [];
+      const { emit, events } = this.eventHandler();
       const result = await operation({
         analytics: this.provider.analyticsWrite,
         operational: trx,
-        events: events,
+        events: { emit },
       });
       if (events.length > 0) await this.outbox.publishAll(trx, events);
       return result;
@@ -68,5 +68,13 @@ export class DatabaseContextService implements DatabaseContextPort {
       analytics: this.provider.analyticsRead,
       operational: this.provider.operationalRead,
     });
+  }
+
+  private eventHandler() {
+    const events: DomainEvent[] = [];
+    const emit = (...es: DomainEvent[]) => {
+      events.push(...es);
+    };
+    return { events, emit };
   }
 }

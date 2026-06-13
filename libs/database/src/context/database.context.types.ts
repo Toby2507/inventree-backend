@@ -4,7 +4,7 @@ import { AnalyticsDB, OperationalDB } from '../types/db.schema.types';
 export interface CommandDbContext {
   operational: OperationalDB;
   analytics: AnalyticsDB;
-  events: DomainEvent[];
+  events: { emit: (...events: DomainEvent[]) => void };
 }
 
 export interface QueryDbContext {

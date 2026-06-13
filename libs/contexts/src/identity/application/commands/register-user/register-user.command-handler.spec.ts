@@ -6,6 +6,7 @@ import { makeArgon2HasherMock, makeUserRepositoryMock } from '@app/testing/ident
 import { makeDatabaseContextMock } from '@app/testing/system';
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '../../../domain/user/aggregates/user.aggregate';
+import { UserRegisteredEvent } from '../../../domain/user/events/user-registered.event';
 import { UserEmailAlreadyExistsException } from '../../../domain/user/exceptions/registration.exceptions';
 import { USER_REPOSITORY } from '../../../domain/user/ports/repositories/user.repository';
 import { HASHING } from '../../ports/hashing.port';
@@ -55,6 +56,15 @@ describe('RegisterUserCommandHandler', () => {
     await module.close();
   });
 
+  it('should check if email is already registered', async () => {
+    await handler.execute(command);
+    expect(dbContext.platformQuery).toHaveBeenCalled();
+    expect(userRepository.existsByEmail).toHaveBeenCalledWith(
+      expect.anything(),
+      command.props.email,
+    );
+  });
+
   it('should throw if email already exists', async () => {
     userRepository.existsByEmail.mockResolvedValueOnce(true);
     await expect(handler.execute(command)).rejects.toThrow(UserEmailAlreadyExistsException);
@@ -79,12 +89,9 @@ describe('RegisterUserCommandHandler', () => {
     expect(user.toSnapshot().email).toBe(command.props.email.trim().toLowerCase());
   });
 
-  it('should check if email is already registered', async () => {
+  it('should emit user domain event inside transactional context', async () => {
     await handler.execute(command);
-    expect(dbContext.platformQuery).toHaveBeenCalled();
-    expect(userRepository.existsByEmail).toHaveBeenCalledWith(
-      expect.anything(),
-      command.props.email,
-    );
+    expect(dbContext.events.emit).toHaveBeenCalledTimes(1);
+    expect(dbContext.events.emit).toHaveBeenCalledWith(expect.any(UserRegisteredEvent));
   });
 });

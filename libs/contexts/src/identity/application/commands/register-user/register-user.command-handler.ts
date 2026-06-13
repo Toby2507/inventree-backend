@@ -28,7 +28,7 @@ export class RegisterUserCommandHandler implements ICommandHandler<RegisterUserC
     const user = User.create({ id, email, passwordHash, firstName, lastName, displayName });
     await this.db.platformCommand(async (ctx) => {
       await this.userRepository.create(ctx.operational, user);
-      ctx.events.push(...user.pullDomainEvents());
+      ctx.events.emit(...user.pullDomainEvents());
     });
   }
 

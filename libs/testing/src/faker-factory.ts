@@ -45,3 +45,17 @@ export function createEntityFaker<T, C, S>(
     },
   };
 }
+
+export function createClassFaker<T, S>(ClassRef: new (prop: S) => T, defaultArgs: () => S) {
+  return {
+    generate(overrides: Partial<S> = {}): T {
+      return new ClassRef({ ...defaultArgs(), ...overrides });
+    },
+    generateMany(count: number, overrides: Partial<S> | ((index: number) => Partial<S>) = {}): T[] {
+      return Array.from({ length: count }, (_, i) => {
+        const resolvedOverrides = typeof overrides === 'function' ? overrides(i) : overrides;
+        return new ClassRef({ ...defaultArgs(), ...resolvedOverrides });
+      });
+    },
+  };
+}

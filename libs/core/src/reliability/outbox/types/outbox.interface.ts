@@ -4,23 +4,10 @@ import { SerializedOutboxContext } from '@app/core/observability';
 import { OperationalSchema } from '@app/database';
 import { Insertable, Selectable } from 'kysely';
 
-// export enum OutboxEventStatus {
-//   PENDING = 'pending',
-//   LOCKED = 'locked',
-//   PUBLISHED = 'published',
-//   FAILED = 'failed',
-//   CANCELLED = 'cancelled',
-// }
-// export enum OutboxEventDestination {
-//   BULLMQ = 'bullmq',
-//   // KAFKA = 'kafka',
-//   // SNS = 'sns',
-// }
-
-export type OutboxEventStatus = 'pending' | 'locked' | 'published' | 'failed' | 'cancelled';
-export type OutboxEventDestination = 'bullmq'; // | 'kafka' | 'sns';
 export type OutboxEventRow = Omit<Selectable<OperationalSchema['outbox_events']>, 'updated_at'>;
 export type NewOutboxEventRow = Insertable<OperationalSchema['outbox_events']>;
+export type OutboxEventStatus = OutboxEventRow['status'];
+export type OutboxEventDestination = OutboxEventRow['destination'];
 
 export interface OutboxEvent {
   id: string;

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OutboxService } from './outbox.service';
 import { feOutboxEvent, makeOutboxRepositoryMock } from '@app/testing/core/reliability/outbox';
-import { OUTBOX_REPOSITORY } from '../persistence/outbox.repository.port';
+import { OUTBOX_REPOSITORY } from '../ports/repository.port';
 import { makeDatabaseContextMock } from '@app/testing/system';
 import { createOtelTestHarness, fsObservationContext } from '@app/testing/core/observability';
 import { observationStorage } from '@app/core/observability/context/observation-context.storage';

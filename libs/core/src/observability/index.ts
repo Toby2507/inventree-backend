@@ -20,6 +20,7 @@ export { ObservabilityModule } from './observability.module';
 export { LOGGER, LoggerPort } from './ports/logger.port';
 export { METRICS, MetricsPort } from './ports/metrics.port';
 // Tracing
+export { SpanAttributes } from './tracing/span-attributes';
 export { bootstrapTelemetry } from './tracing/tracer.provider';
 // Wrappers
 export { createObservedProcessor } from './wrappers/bullmq-consumer.wrapper';

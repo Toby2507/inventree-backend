@@ -41,7 +41,7 @@ describe('OutboxKyselyRepository (integration)', () => {
       const [event] = record.events;
       expect(row.payload).toEqual(
         expect.objectContaining({
-          ...event.payload,
+          data: event.payload,
           _obs: expect.objectContaining({ correlationId: record.ctx.serialized.correlationId }),
         }),
       );

@@ -3,8 +3,8 @@ import { getOptionalObservationContext, serializeOutboxContext } from '@app/core
 import { OperationalDB } from '@app/database';
 import { Inject, Injectable } from '@nestjs/common';
 import { trace } from '@opentelemetry/api';
-import { OutboxServicePort } from '../types/outbox.port';
-import { OUTBOX_REPOSITORY, OutboxRepository } from '../persistence/outbox.repository.port';
+import { OutboxServicePort } from '../ports/outbox.port';
+import { OUTBOX_REPOSITORY, OutboxRepository } from '../ports/repository.port';
 
 @Injectable()
 export class OutboxService implements OutboxServicePort {

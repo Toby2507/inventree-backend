@@ -121,7 +121,7 @@ describe('Outbox Event Mapper', () => {
         causation_id: ctx.serialized.causationId,
         partition_key: ctx.serialized.correlationId,
         payload: {
-          ...events[0].payload,
+          data: events[0].payload,
           _obs: ctx.serialized,
         },
         publish_attempts: 0,

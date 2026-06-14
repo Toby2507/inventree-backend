@@ -82,7 +82,7 @@ export class OutboxEventMapper extends Mapper<OutboxEvent, OutboxEventRow> {
       partition_key:
         ctx.serialized?.correlationId ?? ctx.serialized?.actorStoreId ?? event.aggregateId,
       payload: {
-        ...event.payload,
+        data: event.payload,
         _obs: ctx.serialized,
       } as unknown as JsonValue,
       publish_attempts: 0,

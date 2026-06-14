@@ -1,9 +1,9 @@
 import { OperationalDB } from '@app/database';
 import { Injectable } from '@nestjs/common';
 import { sql } from 'kysely';
+import { OutboxRepository } from '../ports/repository.port';
 import { CreateOutboxEvent, OutboxEvent, OutboxEventRow } from '../types/outbox.interface';
 import { OutboxEventMapper } from './outbox.mapper';
-import { OutboxRepository } from './outbox.repository.port';
 
 @Injectable()
 export class OutboxKyselyRepository implements OutboxRepository {

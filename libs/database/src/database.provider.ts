@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { Kysely, PostgresDialect } from 'kysely';
-import { Pool, PoolConfig } from 'pg';
+import { Client, Pool, PoolConfig } from 'pg';
 import { AnalyticsDB, OperationalDB } from './types/db.schema.types';
 
 @Injectable()
@@ -14,6 +14,8 @@ export class DatabaseProvider implements OnApplicationBootstrap, OnApplicationSh
   private _analyticsWrite!: AnalyticsDB;
   private _operationalRead!: OperationalDB;
   private _operationalWrite!: OperationalDB;
+
+  private _notificationClient!: Client;
 
   async onApplicationBootstrap(): Promise<void> {
     this._operationalPrimary = this.createDbInstance({
@@ -45,18 +47,30 @@ export class DatabaseProvider implements OnApplicationBootstrap, OnApplicationSh
       idleTimeoutMillis: 60_000,
       connectionTimeoutMillis: 10_000,
     });
+    /**
+     * Notification client for LISTEN/NOTIFY events.
+     */
+    this._notificationClient = new Client({
+      user: process.env.DB_USER,
+      host: process.env.DB_HOST,
+      database: process.env.DB_NAME,
+      password: process.env.DB_PASSWORD,
+      port: Number(process.env.DB_PORT) || 5432,
+    });
 
     await this.verifyConnections();
     this._analyticsRead = this._analyticsPrimary.withSchema('analytics');
     this._analyticsWrite = this._analyticsPrimary.withSchema('analytics');
     this._operationalRead = this._operationalReplica.withSchema('operational');
     this._operationalWrite = this._operationalPrimary.withSchema('operational');
+    await this.connectNotificationClient();
   }
 
   async onApplicationShutdown(): Promise<void> {
     await Promise.all([
       this.destroyDbInstance(this._operationalPrimary, 'operational'),
       this.destroyDbInstance(this._analyticsPrimary, 'analytics'),
+      this.disconnectNotificationClient(),
     ]);
   }
 
@@ -88,6 +102,34 @@ export class DatabaseProvider implements OnApplicationBootstrap, OnApplicationSh
         error instanceof Error ? error.stack : String(error),
       );
       throw error;
+    }
+  }
+
+  private async connectNotificationClient(): Promise<void> {
+    try {
+      await this._notificationClient.connect();
+      this.logger.log('Notification client connected');
+      this._notificationClient.on('error', (err) => {
+        this.logger.error('Notification client error', err.message);
+      });
+    } catch (error) {
+      this.logger.error(
+        'Failed to connect notification client',
+        error instanceof Error ? error.stack : String(error),
+      );
+      throw error;
+    }
+  }
+
+  private async disconnectNotificationClient(): Promise<void> {
+    try {
+      await this._notificationClient.end();
+      this.logger.log('Notification client disconnected');
+    } catch (error) {
+      this.logger.error(
+        'Error disconnecting notification client',
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -124,5 +166,15 @@ export class DatabaseProvider implements OnApplicationBootstrap, OnApplicationSh
   get operationalWrite(): OperationalDB {
     if (!this._operationalWrite) throw new Error('Operational database not initialised');
     return this._operationalWrite;
+  }
+
+  /**
+   * The persistent pg.Client used for LISTEN/NOTIFY.
+   * Call client.query('LISTEN channel') and attach a 'notification'
+   * listener. Do not use this for regular queries.
+   */
+  get notificationClient(): Client {
+    if (!this._notificationClient) throw new Error('Notification client not initialised');
+    return this._notificationClient;
   }
 }

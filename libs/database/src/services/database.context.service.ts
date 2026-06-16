@@ -2,19 +2,15 @@ import { DomainEvent } from '@app/common/bases';
 import { OUTBOX_SERVICE, OutboxServicePort } from '@app/core/reliability/outbox';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { sql } from 'kysely';
-import {
-  CommandDbContext,
-  DatabaseContextPort,
-  QueryDbContext,
-} from '../context/database.context.types';
 import { storeContextStorage } from '../context/store-context';
-import { DatabaseProvider } from '../database.provider';
+import { CommandDbContext, DatabaseContextPort, QueryDbContext } from '../ports/context.port';
+import { DATABASE_PROVIDER, DatabaseProviderPort } from '../ports/provider.port';
 
 @Injectable()
 export class DatabaseContextService implements DatabaseContextPort {
   constructor(
     @Inject(OUTBOX_SERVICE) private readonly outbox: OutboxServicePort,
-    private readonly provider: DatabaseProvider,
+    @Inject(DATABASE_PROVIDER) private readonly provider: DatabaseProviderPort,
   ) {}
 
   async command<T>(operation: (ctx: CommandDbContext) => Promise<T>): Promise<T> {

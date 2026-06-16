@@ -1,7 +1,7 @@
-import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { Migration, MigrationProvider, Migrator } from 'kysely';
-import { DatabaseProvider } from '../database.provider';
 import { analyticsMigrations, bootstrapMigrations, operationalMigrations } from '../migrations';
+import { DATABASE_PROVIDER, DatabaseProviderPort } from '../ports/provider.port';
 
 type MigrationTarget = 'analytics' | 'bootstrap' | 'operational';
 
@@ -17,7 +17,7 @@ class StaticMigrationProvider implements MigrationProvider {
 export class MigrationService implements OnApplicationBootstrap {
   private readonly logger = new Logger(MigrationService.name);
 
-  constructor(private readonly provider: DatabaseProvider) {}
+  constructor(@Inject(DATABASE_PROVIDER) private readonly provider: DatabaseProviderPort) {}
 
   async onApplicationBootstrap(): Promise<void> {
     await this.migrateToLatest('bootstrap');

@@ -1,10 +1,13 @@
 import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { Kysely, PostgresDialect } from 'kysely';
 import { Client, Pool, PoolConfig } from 'pg';
+import { DatabaseProviderPort } from './ports/provider.port';
 import { AnalyticsDB, OperationalDB } from './types/db.schema.types';
 
 @Injectable()
-export class DatabaseProvider implements OnApplicationBootstrap, OnApplicationShutdown {
+export class DatabaseProvider
+  implements OnApplicationBootstrap, OnApplicationShutdown, DatabaseProviderPort
+{
   private readonly logger = new Logger(DatabaseProvider.name);
   private _operationalPrimary!: OperationalDB;
   private _operationalReplica!: OperationalDB;

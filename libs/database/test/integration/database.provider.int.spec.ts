@@ -11,13 +11,17 @@ describe('DatabaseProvider (integration)', () => {
     }).compile();
     provider = module.get(DatabaseProvider);
   });
-
+  beforeEach(async () => {
+    await provider.onApplicationBootstrap();
+  });
+  afterEach(async () => {
+    await provider.onApplicationShutdown();
+  });
   afterAll(async () => {
     await module.close();
   });
 
   it('should initialise all database pools on bootstrap', async () => {
-    await provider.onApplicationBootstrap();
     expect(provider.operationalRead).toBeDefined();
     expect(provider.operationalWrite).toBeDefined();
     expect(provider.analyticsRead).toBeDefined();
@@ -28,7 +32,6 @@ describe('DatabaseProvider (integration)', () => {
   });
 
   it('should execute a simple query successfully', async () => {
-    await provider.onApplicationBootstrap();
     const result = await provider.operationalRead
       .selectNoFrom((eb: any) => [eb.val(1).as('one')])
       .executeTakeFirst();
@@ -36,7 +39,6 @@ describe('DatabaseProvider (integration)', () => {
   });
 
   it('should close pools on shutdown', async () => {
-    await provider.onApplicationBootstrap();
     await provider.onApplicationShutdown();
     expect(() =>
       provider.operationalRead.selectNoFrom((eb: any) => [eb.val(1).as('one')]).executeTakeFirst(),
@@ -44,7 +46,6 @@ describe('DatabaseProvider (integration)', () => {
   });
 
   it('should expose analytics and operational schemas separately', async () => {
-    await provider.onApplicationBootstrap();
     expect(provider.analyticsRead).toBeDefined();
     expect(provider.operationalWrite).toBeDefined();
   });

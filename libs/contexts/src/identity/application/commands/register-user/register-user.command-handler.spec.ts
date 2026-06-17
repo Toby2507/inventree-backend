@@ -1,9 +1,9 @@
 import { ID_GENERATOR } from '@app/core/generators';
 import { DATABASE_CONTEXT } from '@app/database';
 import { faker } from '@app/testing';
-import { makeIDGeneratorMock } from '@app/testing/core/generators';
+import { makeIdGeneratorMock } from '@app/testing/core/generators';
+import { makeDatabaseContextMock } from '@app/testing/database';
 import { makeArgon2HasherMock, makeUserRepositoryMock } from '@app/testing/identity';
-import { makeDatabaseContextMock } from '@app/testing/system';
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '../../../domain/user/aggregates/user.aggregate';
 import { UserRegisteredEvent } from '../../../domain/user/events/user-registered.event';
@@ -19,7 +19,7 @@ describe('RegisterUserCommandHandler', () => {
 
   const argon2Hasher = makeArgon2HasherMock();
   const dbContext = makeDatabaseContextMock();
-  const idGenerator = makeIDGeneratorMock();
+  const idGenerator = makeIdGeneratorMock();
   const userRepository = makeUserRepositoryMock();
 
   const command = new RegisterUserCommand({

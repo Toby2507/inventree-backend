@@ -8,7 +8,8 @@ import {
   makeIdempotencyRepositoryMock,
 } from '@app/testing/core/reliability/idempotency';
 import { makeObfuscationMock } from '@app/testing/core/security';
-import { makeCallHandlerMock, makeDatabaseContextMock, makeRequestMock } from '@app/testing/system';
+import { makeDatabaseContextMock } from '@app/testing/database';
+import { makeCallHandlerMock, makeRequestMock } from '@app/testing/system';
 import {
   BadRequestException,
   ConflictException,

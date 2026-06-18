@@ -8,6 +8,10 @@ jest.mock('@opentelemetry/api', () => ({
   metrics: { getMeter: jest.fn() },
   ROOT_CONTEXT: {},
 }));
+jest.mock('p-limit', () => ({
+  __esModule: true,
+  default: jest.fn(() => (fn: any) => fn()),
+}));
 // Suppress expected error logs during tests to keep output clean
 beforeEach(() => {
   jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});

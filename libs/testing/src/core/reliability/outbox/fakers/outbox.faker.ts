@@ -17,7 +17,10 @@ export const fsOutboxEvent = createFaker<OutboxEvent>(() => ({
   correlationId: faker.string.uuid(),
   causationId: faker.string.uuid(),
   partitionKey: faker.string.uuid(),
-  payload: { message: faker.lorem.sentence() },
+  payload: {
+    data: { message: faker.lorem.sentence() },
+    _obs: { correlationId: faker.string.uuid() },
+  },
   lockedAt: faker.date.recent(),
   lockedBy: faker.string.uuid(),
   lockExpiresAt: faker.date.recent(),
@@ -44,7 +47,10 @@ export const fdOutboxEvent = createFaker<OutboxEventRow>(() => ({
   correlation_id: faker.string.uuid(),
   causation_id: faker.string.uuid(),
   partition_key: faker.string.uuid(),
-  payload: { message: faker.lorem.sentence() },
+  payload: {
+    data: { message: faker.lorem.sentence() },
+    _obs: { correlationId: faker.string.uuid() },
+  },
   locked_at: faker.date.recent(),
   locked_by: faker.string.uuid(),
   lock_expires_at: faker.date.recent(),

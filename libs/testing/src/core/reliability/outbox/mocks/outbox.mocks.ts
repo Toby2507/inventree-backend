@@ -11,6 +11,6 @@ export const makeQueueMapperMock = () => {
 
 export const makeEventRouterMock = () => {
   return {
-    route: jest.fn(),
+    resolve: jest.fn(),
   } as unknown as jest.Mocked<EventRouterPort>;
 };

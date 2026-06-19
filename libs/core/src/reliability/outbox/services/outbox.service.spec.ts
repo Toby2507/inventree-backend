@@ -1,11 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { OutboxService } from './outbox.service';
-import { feOutboxEvent, makeOutboxRepositoryMock } from '@app/testing/core/reliability/outbox';
-import { OUTBOX_REPOSITORY } from '../ports/repository.port';
-import { makeDatabaseContextMock } from '@app/testing/system';
-import { createOtelTestHarness, fsObservationContext } from '@app/testing/core/observability';
 import { observationStorage } from '@app/core/observability/context/observation-context.storage';
 import { faker } from '@app/testing';
+import { createOtelTestHarness, fsObservationContext } from '@app/testing/core/observability';
+import { feOutboxEvent, makeOutboxRepositoryMock } from '@app/testing/core/reliability/outbox';
+import { makeDatabaseContextMock } from '@app/testing/database';
+import { Test, TestingModule } from '@nestjs/testing';
+import { OUTBOX_REPOSITORY } from '../ports/repository.port';
+import { OutboxService } from './outbox.service';
 
 describe('OutboxService', () => {
   let module: TestingModule;

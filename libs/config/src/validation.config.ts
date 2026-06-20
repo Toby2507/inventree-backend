@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validateSync, ValidationError } from 'class-validator';
 import { config as dotenvConfig } from 'dotenv';
-import { Environment } from './config.schema';
+import { Environment } from './schema.config';
 
 export function validate(config: Record<string, unknown>) {
   const validatedConfig = plainToInstance(Environment, config, {

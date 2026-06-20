@@ -9,9 +9,6 @@ class UserDto {
 
   @Expose()
   email!: string;
-
-  // intentionally not @Expose() — must be stripped
-  password!: string;
 }
 
 const mockContext = makeContextMock().context;

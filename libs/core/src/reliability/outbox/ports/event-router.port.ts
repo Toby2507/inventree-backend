@@ -1,5 +1,7 @@
+import { QueueName } from '@app/core/infrastructure/queue';
+
 export interface EventRoute {
-  queue: string;
+  queue: QueueName;
   jobName?: string;
 }
 

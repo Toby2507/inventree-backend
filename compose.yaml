@@ -35,8 +35,7 @@ services:
       redis-server
       --requirepass ${REDIS_PASSWORD:-secret}
       --appendonly yes
-      --maxmemory 512mb
-      --maxmemory-policy volatile-lru
+      --maxmemory-policy noeviction
     security_opt:
       - no-new-privileges:true
     healthcheck:

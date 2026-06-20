@@ -9,6 +9,6 @@ import { OutboxService } from './services/outbox.service';
     { provide: OUTBOX_SERVICE, useClass: OutboxService },
     { provide: OUTBOX_REPOSITORY, useClass: OutboxKyselyRepository },
   ],
-  exports: [OUTBOX_SERVICE],
+  exports: [OUTBOX_SERVICE, OUTBOX_REPOSITORY],
 })
 export class OutboxModule {}

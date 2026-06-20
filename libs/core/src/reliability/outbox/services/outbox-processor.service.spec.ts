@@ -17,6 +17,7 @@ import { QUEUE_MAPPER } from '../ports/queue-mapper.port';
 import { OUTBOX_REPOSITORY } from '../ports/repository.port';
 import { OutboxEvent } from '../types/outbox.interface';
 import { OutboxProcessorService } from './outbox-processor.service';
+import { QUEUE_NAMES } from '@app/core/infrastructure/queue';
 
 const FIXED_UUID = faker.string.uuid();
 
@@ -153,7 +154,9 @@ describe('OutboxProcessorService', () => {
 
       describe('when atleast one route is configured for the event type', () => {
         beforeEach(() => {
-          eventRouter.resolve.mockReturnValue([{ queue: 'default', jobName: 'user.created' }]);
+          eventRouter.resolve.mockReturnValue([
+            { queue: QUEUE_NAMES.NOTIFICATIONS, jobName: 'user.created' },
+          ]);
         });
 
         it('should add the event to the resolved queue', async () => {
@@ -166,7 +169,7 @@ describe('OutboxProcessorService', () => {
         });
 
         it('should add the event to the resolved queue with event name if job name is absent', async () => {
-          eventRouter.resolve.mockReturnValue([{ queue: 'default' }]);
+          eventRouter.resolve.mockReturnValue([{ queue: QUEUE_NAMES.NOTIFICATIONS }]);
           await service.poll();
           expect(queue.add).toHaveBeenCalledWith(
             event.eventType,
@@ -186,8 +189,8 @@ describe('OutboxProcessorService', () => {
 
         it('should dispatch to multiple queues when router returns several routes', async () => {
           eventRouter.resolve.mockReturnValue([
-            { queue: 'notifications', jobName: 'notify.user.created' },
-            { queue: 'analytics', jobName: 'track.user.created' },
+            { queue: QUEUE_NAMES.NOTIFICATIONS, jobName: 'notify.user.created' },
+            { queue: QUEUE_NAMES.ANALYTICS, jobName: 'track.user.created' },
           ]);
           await service.poll();
           expect(queue.add).toHaveBeenCalledTimes(2);
@@ -222,7 +225,9 @@ describe('OutboxProcessorService', () => {
 
   describe('when outbox event processing fails', () => {
     beforeEach(() => {
-      eventRouter.resolve.mockReturnValue([{ queue: 'default', jobName: 'user.created' }]);
+      eventRouter.resolve.mockReturnValue([
+        { queue: QUEUE_NAMES.NOTIFICATIONS, jobName: 'user.created' },
+      ]);
       queue.add.mockRejectedValue(new Error('Queue unavailable'));
     });
 
@@ -351,7 +356,9 @@ describe('OutboxProcessorService', () => {
 
     it('should process all rows in the batch even when some fail', async () => {
       repository.claimBatch.mockResolvedValue(fsOutboxEvent.generateMany(3));
-      eventRouter.resolve.mockReturnValue([{ queue: 'default', jobName: 'user.created' }]);
+      eventRouter.resolve.mockReturnValue([
+        { queue: QUEUE_NAMES.NOTIFICATIONS, jobName: 'user.created' },
+      ]);
       queue.add
         .mockResolvedValueOnce('ok' as any)
         .mockRejectedValueOnce(new Error('Transient'))
@@ -365,12 +372,12 @@ describe('OutboxProcessorService', () => {
       const [success1, failure, unrouted, success2] = fsOutboxEvent.generateMany(4);
       repository.claimBatch.mockResolvedValue([success1, failure, unrouted, success2]);
       eventRouter.resolve
-        .mockReturnValueOnce([{ queue: 'default', jobName: 'success1' }])
-        .mockReturnValueOnce([{ queue: 'default', jobName: 'failure' }])
+        .mockReturnValueOnce([{ queue: QUEUE_NAMES.NOTIFICATIONS, jobName: 'success1' }])
+        .mockReturnValueOnce([{ queue: QUEUE_NAMES.NOTIFICATIONS, jobName: 'failure' }])
         .mockReturnValueOnce([])
         .mockReturnValueOnce([
-          { queue: 'default', jobName: 'success2' },
-          { queue: 'notification', jobName: 'success2' },
+          { queue: QUEUE_NAMES.NOTIFICATIONS, jobName: 'success2' },
+          { queue: QUEUE_NAMES.ANALYTICS, jobName: 'success2' },
         ]);
       queue.add
         .mockResolvedValueOnce('ok' as any)

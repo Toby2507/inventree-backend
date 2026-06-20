@@ -1,6 +1,10 @@
-import { DatabaseProviderPort } from '@app/database';
-
 export const makeDatabaseConnectionMock = () => ({});
+
+export const makeDatabaseClienMock = () => ({
+  on: jest.fn().mockReturnValue(undefined),
+  query: jest.fn().mockResolvedValue(undefined),
+  connect: jest.fn().mockResolvedValue(undefined),
+});
 
 export const makeDatabaseProviderMock = () => {
   return {
@@ -11,10 +15,6 @@ export const makeDatabaseProviderMock = () => {
     analyticsWrite: makeDatabaseConnectionMock(),
     operationalRead: makeDatabaseConnectionMock(),
     operationalWrite: makeDatabaseConnectionMock(),
-    notificationClient: {
-      on: jest.fn().mockResolvedValue(undefined),
-      query: jest.fn().mockResolvedValue(undefined),
-      connect: jest.fn().mockResolvedValue(undefined),
-    },
-  } as unknown as jest.Mocked<DatabaseProviderPort>;
+    notificationClient: makeDatabaseClienMock(),
+  };
 };

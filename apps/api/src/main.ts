@@ -1,8 +1,8 @@
-import { bootstrapTelemetry } from '@app/core/observability';
+import { bootstrapTelemetry, LOGGER, LoggerPort } from '@app/core/observability';
 bootstrapTelemetry({ serviceName: 'inventree-api', serviceVersion: '1.0.0' });
 
 import { setupSwagger } from '@app/config';
-import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -11,8 +11,8 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const logger = new Logger('bootstrap');
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const logger = app.get<LoggerPort>(LOGGER).forContext('ApiService');
 
   app.use(helmet());
   app.use(compression());

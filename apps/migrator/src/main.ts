@@ -1,16 +1,13 @@
-import { bootstrapTelemetry } from '@app/core/observability';
+import { bootstrapTelemetry, LOGGER, LoggerPort } from '@app/core/observability';
 bootstrapTelemetry({ serviceName: 'inventree-migrator-service', serviceVersion: '1.0.0' });
 
 import { MigrationService } from '@app/database';
-import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const logger = new Logger('Migrator');
-  const app = await NestFactory.createApplicationContext(AppModule, {
-    logger: ['error', 'warn', 'log'],
-  });
+  const app = await NestFactory.createApplicationContext(AppModule);
+  const logger = app.get<LoggerPort>(LOGGER).forContext('Migrator');
 
   try {
     logger.log('Starting database migration');
@@ -19,7 +16,7 @@ async function bootstrap() {
     logger.log('All migrations completed successfully');
     process.exit(0);
   } catch (error) {
-    logger.log('Migration failed', error);
+    logger.error('Migration failed', { error });
     process.exit(1);
   }
 }

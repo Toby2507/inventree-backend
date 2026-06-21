@@ -1,15 +1,14 @@
-import { bootstrapTelemetry } from '@app/core/observability';
+import { bootstrapTelemetry, LOGGER, LoggerPort } from '@app/core/observability';
 bootstrapTelemetry({ serviceName: 'inventree-worker-core', serviceVersion: '1.0.0' });
 
-import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const logger = new Logger('WorkerCore');
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: ['error', 'warn', 'log'],
   });
+  const logger = app.get<LoggerPort>(LOGGER).forContext('WorkerCore');
 
   app.enableShutdownHooks();
   logger.log('Worker core started');

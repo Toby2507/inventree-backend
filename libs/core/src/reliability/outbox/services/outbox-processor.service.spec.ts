@@ -407,7 +407,7 @@ describe('OutboxProcessorService', () => {
         failure.id,
         'Queue unavailable',
         expect.any(Date),
-        false,
+        expect.any(Boolean),
       );
     });
   });

@@ -72,10 +72,6 @@ CREATE INDEX idx_pos_transaction_lines_store_txn
   ON operational.pos_transaction_lines (store_id, transaction_id)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_pos_transaction_lines_product_variants
-  ON operational.pos_transaction_lines (store_id, product_variant_id)
-  WHERE deleted_at IS NULL;
-
 -- Prevent accidental duplicate exact product lines? (optional)
 -- Many POS systems allow multiple lines for same product (e.g., different discounts),
 -- so we do NOT enforce uniqueness here.

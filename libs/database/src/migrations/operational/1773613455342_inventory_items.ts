@@ -36,12 +36,6 @@ CREATE TABLE operational.inventory_items (
 CREATE UNIQUE INDEX ux_inventory_items_product_location_active
   ON operational.inventory_items (store_id, product_variant_id, location_id);
 
-CREATE INDEX idx_inventory_items_store_product
-  ON operational.inventory_items (store_id, product_variant_id);
-
-CREATE INDEX idx_inventory_items_store_location
-  ON operational.inventory_items (store_id, location_id);
-
 -- Triggers
 CREATE TRIGGER trg_set_inventory_items_updated_at
 BEFORE UPDATE ON operational.inventory_items

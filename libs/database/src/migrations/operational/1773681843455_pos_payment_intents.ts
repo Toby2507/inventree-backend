@@ -110,18 +110,6 @@ CREATE UNIQUE INDEX ux_pos_payment_intents_one_payment_per_txn
   ON operational.pos_payment_intents (transaction_id)
   WHERE deleted_at IS NULL AND type = 'payment';
 
-CREATE INDEX idx_pos_payment_intents_store_id_id
-  ON operational.pos_payment_intents (store_id, id DESC)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_pos_payment_intents_store_status_time
-  ON operational.pos_payment_intents (store_id, status, created_at DESC)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_pos_payment_intents_store_method_time
-  ON operational.pos_payment_intents (store_id, method, created_at DESC)
-  WHERE deleted_at IS NULL;
-
 -- Triggers
 CREATE TRIGGER trg_set_pos_payment_intents_updated_at
 BEFORE UPDATE ON operational.pos_payment_intents

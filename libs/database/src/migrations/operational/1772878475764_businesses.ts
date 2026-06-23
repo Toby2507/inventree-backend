@@ -44,18 +44,6 @@ CREATE INDEX idx_businesses_owned_by_user_id
   ON operational.businesses (owned_by_user_id)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_businesses_status
-  ON operational.businesses (status)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_businesses_registration_number
-  ON operational.businesses (registration_number)
-  WHERE registration_number IS NOT NULL AND deleted_at IS NULL;
-
-CREATE INDEX idx_businesses_geo_location
-  ON operational.businesses USING GIST (geo_location)
-  WHERE geo_location IS NOT NULL;
-
 CREATE TRIGGER trg_set_businesses_updated_at
 BEFORE UPDATE ON operational.businesses
 FOR EACH ROW

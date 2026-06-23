@@ -38,8 +38,6 @@ CREATE TABLE operational.product_variants (
   deleted_at TIMESTAMPTZ,
 
   -- Constraints
-  CONSTRAINT ux_product_variants_store_id_id
-    UNIQUE (store_id, id),
   CONSTRAINT chk_product_variants_attributes_object
     CHECK (jsonb_typeof(attributes) = 'object'),
   CONSTRAINT chk_product_variants_metadata_object
@@ -60,18 +58,6 @@ CREATE UNIQUE INDEX ux_product_variants_store_sku_active
 CREATE UNIQUE INDEX ux_product_variants_store_barcode_active
   ON operational.product_variants (store_id, barcode)
   WHERE deleted_at IS NULL AND barcode IS NOT NULL;
-
-CREATE INDEX idx_product_variants_barcode_registry
-  ON operational.product_variants (barcode_registry_id)
-  WHERE deleted_at IS NULL AND barcode_registry_id IS NOT NULL;
-
-CREATE INDEX idx_product_variants_store_active
-  ON operational.product_variants (store_id, is_active, sort_order ASC NULLS LAST)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_product_variants_store_display_name_active
-  ON operational.product_variants (store_id, normalized_display_name)
-  WHERE deleted_at IS NULL;
 
 -- Triggers
 CREATE TRIGGER trg_set_product_variants_updated_at

@@ -46,11 +46,6 @@ CREATE TABLE operational.product_uoms (
 );
 
 -- Indexes
-CREATE INDEX idx_product_uoms_store_id_id
-  ON operational.product_uoms (store_id, id DESC)
-  WHERE deleted_at IS NULL;
-
--- One row per product per uom (active)
 CREATE UNIQUE INDEX ux_product_uoms_product_uom_active
   ON operational.product_uoms (product_id, uom_id)
   WHERE deleted_at IS NULL;
@@ -63,11 +58,6 @@ CREATE UNIQUE INDEX ux_product_uoms_default_sales_active
 CREATE UNIQUE INDEX ux_product_uoms_default_purchase_active
   ON operational.product_uoms (product_id)
   WHERE deleted_at IS NULL AND is_default_for_purchase = TRUE;
-
--- Useful for quick lookups during POS/purchasing
-CREATE INDEX idx_product_uoms_store_uom
-  ON operational.product_uoms (store_id, uom_id)
-  WHERE deleted_at IS NULL;
 
 -- Triggers
 CREATE TRIGGER trg_set_product_uoms_updated_at

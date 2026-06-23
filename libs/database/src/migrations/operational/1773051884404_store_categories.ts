@@ -37,8 +37,8 @@ CREATE TABLE operational.store_categories (
 );
 
 -- Indexes
-CREATE INDEX idx_store_categories_store_created
-  ON operational.store_categories (store_id, created_at DESC)
+CREATE INDEX idx_store_categories_store
+  ON operational.store_categories (store_id)
   WHERE deleted_at IS NULL;
 
 CREATE INDEX idx_store_categories_store_parent
@@ -48,10 +48,6 @@ CREATE INDEX idx_store_categories_store_parent
 CREATE UNIQUE INDEX ux_store_categories_store_normalized_name_active
   ON operational.store_categories (store_id, normalized_name)
   WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_store_categories_store_active
-  ON operational.store_categories (store_id, sort_order ASC NULLS LAST)
-  WHERE deleted_at IS NULL AND is_active = TRUE;
 
 -- Gist index required for ltree operators (@>, <@, ~, ?)
 CREATE INDEX idx_store_categories_path

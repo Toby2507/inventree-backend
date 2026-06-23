@@ -64,10 +64,6 @@ CREATE TABLE operational.notifications (
 );
 
 -- Indexes
-CREATE INDEX idx_notifications_store_time
-  ON operational.notifications (store_id, created_at DESC)
-  WHERE deleted_at IS NULL;
-
 CREATE INDEX idx_notifications_store_status_time
   ON operational.notifications (store_id, status, created_at DESC)
   WHERE deleted_at IS NULL;

@@ -30,10 +30,6 @@ CREATE TABLE operational.store_uoms (
 );
 
 -- Indexes
-CREATE INDEX idx_store_uoms_store_created
-  ON operational.store_uoms (store_id, created_at DESC)
-  WHERE deleted_at IS NULL;
-
 CREATE UNIQUE INDEX ux_store_uoms_store_normalized_name_active
   ON operational.store_uoms (store_id, normalized_name)
   WHERE deleted_at IS NULL;
@@ -41,10 +37,6 @@ CREATE UNIQUE INDEX ux_store_uoms_store_normalized_name_active
 CREATE UNIQUE INDEX ux_store_uoms_store_symbol_active
   ON operational.store_uoms (store_id, symbol)
   WHERE deleted_at IS NULL AND symbol IS NOT NULL;
-
-CREATE INDEX idx_store_uoms_store_active
-  ON operational.store_uoms (store_id, sort_order ASC NULLS LAST)
-  WHERE deleted_at IS NULL AND is_active = TRUE;
 
 -- Triggers
 CREATE TRIGGER trg_set_store_uoms_updated_at

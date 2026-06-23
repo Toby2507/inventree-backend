@@ -31,14 +31,6 @@ CREATE UNIQUE INDEX ux_inventory_lots_product_variants_lot_active
   ON operational.inventory_lots (store_id, product_variant_id, lot_code)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_inventory_lots_product_variants
-  ON operational.inventory_lots (store_id, product_variant_id)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_inventory_lots_expiry
-  ON operational.inventory_lots (store_id, product_variant_id, expires_at ASC NULLS LAST)
-  WHERE deleted_at IS NULL AND expires_at IS NOT NULL;
-
 -- Triggers
 CREATE TRIGGER trg_set_inventory_lots_updated_at
 BEFORE UPDATE ON operational.inventory_lots

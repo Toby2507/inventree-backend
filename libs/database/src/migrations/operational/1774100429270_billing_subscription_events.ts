@@ -29,12 +29,6 @@ CREATE TABLE operational.billing_subscription_events (
 CREATE INDEX idx_billing_subscription_events_subscription
   ON operational.billing_subscription_events (subscription_id, created_at DESC);
 
-CREATE INDEX idx_billing_subscription_events_business_time
-  ON operational.billing_subscription_events (business_id, created_at DESC);
-
-CREATE INDEX idx_billing_subscription_events_type_time
-  ON operational.billing_subscription_events (event_type, created_at DESC);
-
 -- Immutability enforced at application layer in SubscriptionService.
 -- Never update or delete subscription events.
       `,

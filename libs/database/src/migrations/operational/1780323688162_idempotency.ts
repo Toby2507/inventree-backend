@@ -35,7 +35,7 @@ CREATE INDEX idx_idempotency_expires
   ON operational.idempotency (expires_at);
 
 CREATE INDEX idx_idempotency_in_progress
-  ON operational.idempotency (created_at)
+  ON operational.idempotency (status, created_at)
   WHERE status = 'in_progress';
       `,
     )

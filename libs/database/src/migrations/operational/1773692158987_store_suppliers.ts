@@ -42,17 +42,9 @@ CREATE TABLE operational.store_suppliers (
 );
 
 -- Indexes
-CREATE INDEX idx_store_suppliers_store_id_id
-  ON operational.store_suppliers (store_id, id DESC)
-  WHERE deleted_at IS NULL;
-
 CREATE UNIQUE INDEX ux_store_suppliers_store_normalized_name_active
   ON operational.store_suppliers (store_id, normalized_name)
   WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_store_suppliers_store_active
-  ON operational.store_suppliers (store_id, normalized_name)
-  WHERE deleted_at IS NULL AND is_active = TRUE;
 
 -- Triggers
 CREATE TRIGGER trg_set_store_suppliers_updated_at

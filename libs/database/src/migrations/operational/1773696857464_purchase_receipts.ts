@@ -63,18 +63,6 @@ CREATE TABLE operational.purchase_receipts (
 );
 
 -- Indexes
-CREATE INDEX idx_purchase_receipts_store_id_id
-  ON operational.purchase_receipts (store_id, id DESC)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_purchase_receipts_store_status_time
-  ON operational.purchase_receipts (store_id, status, received_at DESC)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_purchase_receipts_store_po
-  ON operational.purchase_receipts (store_id, purchase_order_id)
-  WHERE deleted_at IS NULL AND purchase_order_id IS NOT NULL;
-
 CREATE UNIQUE INDEX ux_purchase_receipts_store_receipt_number_active
   ON operational.purchase_receipts (store_id, receipt_number)
   WHERE deleted_at IS NULL AND receipt_number IS NOT NULL;

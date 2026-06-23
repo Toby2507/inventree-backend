@@ -11,7 +11,6 @@ export async function up(db: Kysely<any>): Promise<void> {
 CREATE TYPE operational.barcode_status AS ENUM ('active', 'deprecated');
 CREATE TYPE operational.barcode_type AS ENUM ('ean_13', 'ean_8', 'upc_a', 'upc_e','code_128', 'code_39', 'qr', 'data_matrix', 'other');
 
-
 CREATE TABLE operational.barcode_registry (
   id UUID PRIMARY KEY DEFAULT uuidv7(),
 
@@ -59,14 +58,6 @@ CREATE TABLE operational.barcode_registry (
 CREATE UNIQUE INDEX ux_barcode_registry_barcode_active
   ON operational.barcode_registry (barcode)
   WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_barcode_registry_status
-  ON operational.barcode_registry (status)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_barcode_registry_suggested_name_trgm
-  ON operational.barcode_registry USING GIN (suggested_name gin_trgm_ops)
-  WHERE deleted_at IS NULL AND suggested_name IS NOT NULL;
 
 -- Triggers
 CREATE TRIGGER trg_set_barcode_registry_updated_at

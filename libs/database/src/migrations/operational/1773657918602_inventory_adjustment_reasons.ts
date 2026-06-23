@@ -39,10 +39,6 @@ CREATE TABLE operational.inventory_adjustment_reasons (
 );
 
 -- Indexes
-CREATE INDEX idx_adj_reasons_store_id_id
-  ON operational.inventory_adjustment_reasons (store_id, id DESC)
-  WHERE deleted_at IS NULL;
-
 CREATE UNIQUE INDEX ux_adj_reasons_store_code_active
   ON operational.inventory_adjustment_reasons (store_id, code)
   WHERE deleted_at IS NULL;

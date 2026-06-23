@@ -46,10 +46,6 @@ CREATE INDEX idx_store_members_store_role
   ON operational.store_members (store_id, role)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_store_members_store_status
-  ON operational.store_members (store_id, status)
-  WHERE deleted_at IS NULL;
-
 CREATE INDEX idx_store_members_user
   ON operational.store_members (user_id)
   WHERE deleted_at IS NULL;

@@ -40,15 +40,6 @@ CREATE TABLE operational.inventory_stocktakes (
   )
 );
 
--- Indexes
-CREATE INDEX idx_inventory_stocktakes_store_id_id
-  ON operational.inventory_stocktakes (store_id, id DESC)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_inventory_stocktakes_store_status
-  ON operational.inventory_stocktakes (store_id, status)
-  WHERE deleted_at IS NULL;
-
 -- Triggers
 CREATE TRIGGER trg_set_inventory_stocktakes_updated_at
 BEFORE UPDATE ON operational.inventory_stocktakes

@@ -35,10 +35,6 @@ CREATE TABLE operational.inventory_item_settings (
   updated_at TIMESTAMPTZ,
 
   -- Constraints
-  CONSTRAINT fk_inventory_item_settings_product_variants
-    FOREIGN KEY (store_id, product_variant_id)
-    REFERENCES operational.product_variants(store_id, id)
-    ON DELETE CASCADE,
   CONSTRAINT ux_inventory_item_settings_product_variant_id
     UNIQUE (product_variant_id),
   CONSTRAINT chk_store_products_shelf_life_nonnegative

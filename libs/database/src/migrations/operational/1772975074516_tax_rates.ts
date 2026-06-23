@@ -44,10 +44,6 @@ CREATE UNIQUE INDEX ux_tax_rates_store_name
   ON operational.tax_rates (store_id, normalized_name)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_tax_rates_store_scope_active
-  ON operational.tax_rates (store_id, scope, is_active)
-  WHERE deleted_at IS NULL;
-
 -- Triggers
 CREATE TRIGGER trg_tax_rates_set_updated_at
 BEFORE UPDATE ON operational.tax_rates

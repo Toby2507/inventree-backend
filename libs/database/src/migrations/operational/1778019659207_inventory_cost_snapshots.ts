@@ -29,9 +29,6 @@ CREATE TABLE operational.inventory_cost_snapshots (
   computed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
   -- Constraints
-  CONSTRAINT fk_inventory_cost_snapshots_product_variants
-    FOREIGN KEY (store_id, product_variant_id)
-    REFERENCES operational.product_variants(store_id, id),
   CONSTRAINT chk_cost_snapshots_nonnegative 
     CHECK (average_cost >= 0 AND quantity_on_hand_at_snap >= -999999) 
     -- Allows small negative buffer for "sell before receive" scenarios
@@ -40,6 +37,9 @@ CREATE TABLE operational.inventory_cost_snapshots (
 -- Index for point-in-time financial reporting
 CREATE INDEX idx_cost_snapshots_variant_time 
   ON operational.inventory_cost_snapshots (product_variant_id, computed_at DESC);
+
+CREATE INDEX idx_cost_snapshots_store_time
+  ON operational.inventory_cost_snapshots (store_id, computed_at DESC);
 
 -- RLS: (tenant-scoped)
 ALTER TABLE operational.inventory_cost_snapshots ENABLE ROW LEVEL SECURITY;

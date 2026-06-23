@@ -35,10 +35,6 @@ CREATE UNIQUE INDEX ux_tax_classes_store_normalized_name
   ON operational.tax_classes (store_id, normalized_name)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_tax_classes_store_active
-  ON operational.tax_classes (store_id, is_active, name)
-  WHERE deleted_at IS NULL;
-
 -- Triggers
 CREATE TRIGGER trg_set_tax_classes_updated_at
 BEFORE UPDATE ON operational.tax_classes

@@ -46,10 +46,6 @@ CREATE TABLE operational.pos_sessions (
 );
 
 -- Indexes
-CREATE INDEX idx_pos_sessions_store_id_id
-  ON operational.pos_sessions (store_id, id DESC)
-  WHERE deleted_at IS NULL;
-
 CREATE INDEX idx_pos_sessions_store_terminal_status
   ON operational.pos_sessions (store_id, terminal_id, status)
   WHERE deleted_at IS NULL;

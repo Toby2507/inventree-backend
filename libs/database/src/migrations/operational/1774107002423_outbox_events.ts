@@ -38,9 +38,9 @@ CREATE TABLE operational.outbox_events (
 
   -- Ordering + correlation
   occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), -- time of domain event
-  trace_id UUID,                       -- request trace/correlation
-  correlation_id UUID,                 -- business flow correlation (optional)
-  causation_id UUID,                   -- parent event id (optional)
+  trace_id TEXT,                       -- request trace/correlation
+  correlation_id TEXT,                 -- business flow correlation (optional)
+  causation_id TEXT,                   -- parent event id (optional)
 
   -- Routing
   partition_key TEXT,                  -- e.g. store_id::text or aggregate_id::text (helps ordered processing per key)
@@ -78,23 +78,14 @@ CREATE TABLE operational.outbox_events (
 );
 
 -- Indexes
-CREATE INDEX idx_outbox_publish_queue
-  ON operational.outbox_events (destination, status, next_attempt_at, occurred_at, id)
-  WHERE status IN ('pending', 'locked') AND next_attempt_at IS NOT NULL;
+CREATE INDEX idx_outbox_claim
+  ON operational.outbox_events (status, next_attempt_at, occurred_at, id)
+  INCLUDE (id)
+  WHERE status = 'pending';
 
-CREATE INDEX idx_outbox_store_time
-  ON operational.outbox_events (store_id, occurred_at DESC)
-  WHERE store_id IS NOT NULL;
-
-CREATE INDEX idx_outbox_aggregate
-  ON operational.outbox_events (aggregate_type, aggregate_id, occurred_at DESC)
-  WHERE aggregate_type IS NOT NULL AND aggregate_id IS NOT NULL;
-
-CREATE INDEX idx_outbox_event_type_time
-  ON operational.outbox_events (event_type, occurred_at DESC);
-
--- Optional: search inside payload (enable only if you truly need it)
--- CREATE INDEX idx_outbox_payload_gin ON operational.outbox_events USING GIN (payload);
+CREATE INDEX idx_outbox_expired_locks
+  ON operational.outbox_events (lock_expires_at)
+  WHERE status = 'locked';
 
 -- No tenant RLS here by default.
 -- Reason: outbox processor must read/publish across all stores.

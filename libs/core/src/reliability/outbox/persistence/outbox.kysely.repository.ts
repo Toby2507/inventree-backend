@@ -29,8 +29,7 @@ export class OutboxKyselyRepository implements OutboxRepository {
       WHERE id IN (
         SELECT id
         FROM operational.outbox_events
-        WHERE status = 'pending'
-          AND (next_attempt_at IS NULL OR next_attempt_at <= now())
+        WHERE status = 'pending' AND next_attempt_at <= now()
         ORDER BY occurred_at ASC
         LIMIT ${limit}
         FOR UPDATE SKIP LOCKED

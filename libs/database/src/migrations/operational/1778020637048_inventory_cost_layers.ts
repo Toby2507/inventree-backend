@@ -36,7 +36,7 @@ CREATE TABLE operational.inventory_cost_layers (
 
 -- Index for FIFO: Finding the oldest non-empty bucket quickly
 CREATE INDEX idx_cost_layers_fifo_lookup 
-  ON operational.inventory_cost_layers (product_variant_id, created_at ASC) 
+  ON operational.inventory_cost_layers (store_id, product_variant_id, created_at ASC) 
   WHERE (quantity_remaining > 0);
 
 -- RLS: (tenant-scoped)

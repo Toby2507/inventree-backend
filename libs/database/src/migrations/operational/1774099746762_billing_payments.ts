@@ -67,10 +67,6 @@ CREATE INDEX idx_billing_payments_business_time
   ON operational.billing_payments (business_id, created_at DESC)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_billing_payments_provider_ref
-  ON operational.billing_payments (provider_name, provider_payment_ref)
-  WHERE deleted_at IS NULL AND provider_payment_ref IS NOT NULL;
-
 -- Triggers
 CREATE TRIGGER trg_set_billing_payments_updated_at
 BEFORE UPDATE ON operational.billing_payments

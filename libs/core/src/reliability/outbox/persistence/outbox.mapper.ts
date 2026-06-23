@@ -76,6 +76,7 @@ export class OutboxEventMapper extends Mapper<OutboxEvent, OutboxEventRow> {
       aggregate_type: event.aggregateType,
       aggregate_id: event.aggregateId,
       occurred_at: event.occurredAt,
+      next_attempt_at: event.occurredAt, // initial attempt can be made immediately
       trace_id: ctx.traceId ?? null,
       correlation_id: ctx.serialized?.correlationId ?? null,
       causation_id: ctx.serialized?.causationId ?? ctx.spanId ?? null,

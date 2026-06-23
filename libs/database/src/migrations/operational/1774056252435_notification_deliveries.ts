@@ -38,10 +38,6 @@ CREATE TABLE operational.notification_deliveries (
 );
 
 -- Indexes
-CREATE INDEX idx_notification_deliveries_store_member
-  ON operational.notification_deliveries (store_id, store_member_id, created_at DESC)
-  WHERE deleted_at IS NULL;
-
 CREATE INDEX idx_notification_deliveries_store_status_next
   ON operational.notification_deliveries (store_id, status, next_attempt_at, id)
   WHERE deleted_at IS NULL AND status IN ('pending', 'failed') AND next_attempt_at IS NOT NULL;

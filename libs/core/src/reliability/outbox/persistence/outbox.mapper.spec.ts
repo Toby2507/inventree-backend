@@ -116,7 +116,6 @@ describe('Outbox Event Mapper', () => {
         aggregate_type: events[0].aggregateType,
         aggregate_id: events[0].aggregateId,
         occurred_at: events[0].occurredAt,
-        next_attempt_at: events[0].occurredAt,
         trace_id: ctx.traceId,
         correlation_id: ctx.serialized.correlationId,
         causation_id: ctx.serialized.causationId,

@@ -12,6 +12,7 @@ export function validate(config: Record<string, unknown>) {
     skipMissingProperties: false,
     stopAtFirstError: false,
   });
+  console.log('Validated config errors:', errors);
 
   if (errors.length > 0) {
     Logger.error(parseError(errors), 'Config validation error');

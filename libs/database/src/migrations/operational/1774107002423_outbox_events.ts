@@ -54,7 +54,7 @@ CREATE TABLE operational.outbox_events (
   lock_expires_at TIMESTAMPTZ,         -- lease timeout
 
   publish_attempts INT NOT NULL DEFAULT 0,
-  next_attempt_at TIMESTAMPTZ, -- NULL when no further attempts planned
+  next_attempt_at TIMESTAMPTZ DEFAULT NOW(), -- NULL when no further attempts planned
 
   published_at TIMESTAMPTZ,
   publish_ref TEXT,                    -- provider/queue ref (optional)

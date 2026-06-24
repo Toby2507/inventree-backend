@@ -1,3 +1,4 @@
+import { BullMQInstrumentation } from '@appsignal/opentelemetry-instrumentation-bullmq';
 import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import {
@@ -22,7 +23,6 @@ import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
 } from '@opentelemetry/semantic-conventions';
-import { BullMQInstrumentation } from '@appsignal/opentelemetry-instrumentation-bullmq';
 
 interface ObservabilityConfig {
   serviceName: string;

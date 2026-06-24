@@ -73,21 +73,9 @@ CREATE TABLE operational.supplier_returns (
 );
 
 -- Indexes
-CREATE INDEX idx_supplier_returns_store_id_id
-  ON operational.supplier_returns (store_id, id DESC)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_supplier_returns_store_status_time
-  ON operational.supplier_returns (store_id, status, created_at DESC)
-  WHERE deleted_at IS NULL;
-
 CREATE UNIQUE INDEX ux_supplier_returns_store_return_number_active
   ON operational.supplier_returns (store_id, return_number)
   WHERE deleted_at IS NULL AND return_number IS NOT NULL;
-
-CREATE INDEX idx_supplier_returns_store_staging_transfer
-  ON operational.supplier_returns (store_id, staging_transfer_id)
-  WHERE deleted_at IS NULL AND staging_transfer_id IS NOT NULL;
 
 CREATE INDEX idx_supplier_returns_store_receipt
   ON operational.supplier_returns (store_id, purchase_receipt_id)

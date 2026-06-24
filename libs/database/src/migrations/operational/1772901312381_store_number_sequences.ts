@@ -12,7 +12,6 @@ CREATE TYPE operational.sequence_scope AS ENUM ('store'); -- future-proof if bus
 CREATE TYPE operational.sequence_reset_policy AS ENUM ('never', 'daily', 'monthly', 'yearly');
 
 CREATE TABLE operational.store_number_sequences (
-  id UUID PRIMARY KEY DEFAULT uuidv7(),
   store_id UUID NOT NULL REFERENCES operational.stores(id) ON DELETE CASCADE,
   sequence_key TEXT NOT NULL, -- e.g., 'transaction', 'stock_adjustment', 'inventory_transfer', 'purchase_order'
   scope operational.sequence_scope NOT NULL DEFAULT 'store',
@@ -28,7 +27,6 @@ CREATE TABLE operational.store_number_sequences (
   include_month BOOLEAN NOT NULL DEFAULT FALSE,
   include_day   BOOLEAN NOT NULL DEFAULT FALSE,
 
-
   -- current_value is incremented atomically via UPDATE...RETURNING at application layer.
   -- Never read then write in two separate statements — use atomic UPDATE SET current_value = current_value + 1 RETURNING current_value.
   current_value BIGINT NOT NULL DEFAULT 0,
@@ -42,6 +40,8 @@ CREATE TABLE operational.store_number_sequences (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ,
 
+  PRIMARY KEY (store_id, sequence_key),
+
   CONSTRAINT chk_padding_positive CHECK (padding > 0),
   CONSTRAINT chk_current_value_nonnegative CHECK (current_value >= 0),
   CONSTRAINT chk_reset_consistency
@@ -51,20 +51,6 @@ CREATE TABLE operational.store_number_sequences (
       reset_policy <> 'never'
     )
 );
-
--- Uniqueness per store
-CREATE UNIQUE INDEX ux_store_sequences_store_key_active
-  ON operational.store_number_sequences (store_id, sequence_key)
-  WHERE is_active = TRUE;
-
--- Tenant-leading indexes
-CREATE INDEX idx_store_sequences_store
-  ON operational.store_number_sequences (store_id)
-  WHERE is_active = TRUE;
-
-CREATE INDEX idx_store_sequences_reset_policy
-  ON operational.store_number_sequences (store_id, reset_policy)
-  WHERE is_active = TRUE;
 
 CREATE TRIGGER trg_set_store_number_sequences_updated_at
 BEFORE UPDATE ON operational.store_number_sequences

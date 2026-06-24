@@ -75,10 +75,6 @@ CREATE UNIQUE INDEX ux_billing_invoices_number
   ON operational.billing_invoices (invoice_number)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_billing_invoices_business_time
-  ON operational.billing_invoices (business_id, issued_at DESC)
-  WHERE deleted_at IS NULL;
-
 CREATE INDEX idx_billing_invoices_provider_ref
   ON operational.billing_invoices (provider_name, provider_invoice_ref)
   WHERE deleted_at IS NULL AND provider_invoice_ref IS NOT NULL;

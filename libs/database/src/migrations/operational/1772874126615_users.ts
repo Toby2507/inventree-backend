@@ -27,15 +27,6 @@ CREATE UNIQUE INDEX ux_users_email_active
   ON operational.users (email)
   WHERE deleted_at IS NULL;
 
--- Additional indexes for common query patterns
-CREATE INDEX idx_users_status
-  ON operational.users (status)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_users_phone
-  ON operational.users (phone)
-  WHERE phone IS NOT NULL AND deleted_at IS NULL;
-
 -- Trigger to update updated_at on row modification
 CREATE TRIGGER trg_set_users_updated_at
 BEFORE UPDATE ON operational.users

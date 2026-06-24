@@ -81,20 +81,8 @@ CREATE TABLE operational.products (
 );
 
 -- Indexes
-CREATE INDEX idx_products_store_id_id
-  ON operational.products (store_id, id DESC)
-  WHERE deleted_at IS NULL;
-
 CREATE UNIQUE INDEX ux_products_store_normalized_name_active
   ON operational.products (store_id, normalized_name)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_products_store_status
-  ON operational.products (store_id, status)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_products_store_brand
-  ON operational.products (store_id, normalized_brand_name)
   WHERE deleted_at IS NULL;
 
 CREATE INDEX idx_products_search_vector

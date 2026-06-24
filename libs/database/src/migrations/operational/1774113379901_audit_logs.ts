@@ -49,8 +49,8 @@ CREATE TABLE operational.audit_logs (
   entity_display TEXT,                -- optional human-friendly label (e.g., "Indomie Noodles 70g")
 
   -- Request correlation (helps tracing across services and retries)
-  request_id UUID,                    -- one per inbound request (API gateway/middleware)
-  correlation_id UUID,                -- one per business flow across services
+  request_id TEXT,                    -- one per inbound request (API gateway/middleware)
+  correlation_id TEXT,                -- one per business flow across services
   idempotency_key TEXT,               -- if you use idempotency for safe retries
 
   -- Where it came from
@@ -86,16 +86,6 @@ CREATE INDEX idx_audit_logs_store_time
 
 CREATE INDEX idx_audit_logs_store_entity
   ON operational.audit_logs (store_id, entity_table, entity_id, created_at DESC);
-
-CREATE INDEX idx_audit_logs_store_actor_time
-  ON operational.audit_logs (store_id, actor_store_member_id, created_at DESC)
-  WHERE actor_store_member_id IS NOT NULL;
-
-CREATE INDEX idx_audit_logs_store_action_time
-  ON operational.audit_logs (store_id, action, created_at DESC);
-
-CREATE INDEX idx_audit_logs_changed_fields_gin
-  ON operational.audit_logs USING GIN (changed_fields);
 
 -- RLS (store-scoped)
 ALTER TABLE operational.audit_logs ENABLE ROW LEVEL SECURITY;

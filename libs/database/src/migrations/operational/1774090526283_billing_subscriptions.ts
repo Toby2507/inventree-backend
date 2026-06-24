@@ -59,7 +59,7 @@ CREATE TABLE operational.billing_subscriptions (
 -- Indexes
 -- A business can have many historical subscriptions, but typically one "current" non-cancelled or non-expired.
 CREATE INDEX idx_billing_subs_business_status
-  ON operational.billing_subscriptions (business_id, status, created_at DESC)
+  ON operational.billing_subscriptions (business_id, status)
   WHERE deleted_at IS NULL;
 
 CREATE INDEX idx_billing_subs_provider_ref

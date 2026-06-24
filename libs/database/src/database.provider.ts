@@ -1,11 +1,16 @@
-import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
+import { DATABASE_CONFIG, DatabaseConfig } from '@app/config';
+import { LOGGER, LoggerPort } from '@app/core/observability';
+import { Inject, Injectable, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { Kysely, PostgresDialect } from 'kysely';
-import { Pool, PoolConfig } from 'pg';
+import { Client, Pool, PoolConfig } from 'pg';
+import { DatabaseProviderPort } from './ports/provider.port';
 import { AnalyticsDB, OperationalDB } from './types/db.schema.types';
 
 @Injectable()
-export class DatabaseProvider implements OnApplicationBootstrap, OnApplicationShutdown {
-  private readonly logger = new Logger(DatabaseProvider.name);
+export class DatabaseProvider
+  implements OnApplicationBootstrap, OnApplicationShutdown, DatabaseProviderPort
+{
+  private readonly logger;
   private _operationalPrimary!: OperationalDB;
   private _operationalReplica!: OperationalDB;
   private _analyticsPrimary!: AnalyticsDB;
@@ -15,13 +20,22 @@ export class DatabaseProvider implements OnApplicationBootstrap, OnApplicationSh
   private _operationalRead!: OperationalDB;
   private _operationalWrite!: OperationalDB;
 
+  private _notificationClient!: Client;
+
+  constructor(
+    @Inject(DATABASE_CONFIG) private readonly config: DatabaseConfig,
+    @Inject(LOGGER) logger: LoggerPort,
+  ) {
+    this.logger = logger.forContext(DatabaseProvider.name);
+  }
+
   async onApplicationBootstrap(): Promise<void> {
     this._operationalPrimary = this.createDbInstance({
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT) || 5432,
-      database: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
+      host: this.config.host,
+      port: this.config.port,
+      database: this.config.name,
+      user: this.config.user,
+      password: this.config.password,
       max: 20,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 5_000,
@@ -36,14 +50,24 @@ export class DatabaseProvider implements OnApplicationBootstrap, OnApplicationSh
      * Can later be moved to a dedicated analytics database.
      */
     this._analyticsPrimary = this.createDbInstance({
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT) || 5432,
-      database: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
+      host: this.config.host,
+      port: this.config.port,
+      database: this.config.name,
+      user: this.config.user,
+      password: this.config.password,
       max: 5,
       idleTimeoutMillis: 60_000,
       connectionTimeoutMillis: 10_000,
+    });
+    /**
+     * Notification client for LISTEN/NOTIFY events.
+     */
+    this._notificationClient = new Client({
+      user: this.config.user,
+      host: this.config.host,
+      database: this.config.name,
+      password: this.config.password,
+      port: this.config.port,
     });
 
     await this.verifyConnections();
@@ -51,12 +75,14 @@ export class DatabaseProvider implements OnApplicationBootstrap, OnApplicationSh
     this._analyticsWrite = this._analyticsPrimary.withSchema('analytics');
     this._operationalRead = this._operationalReplica.withSchema('operational');
     this._operationalWrite = this._operationalPrimary.withSchema('operational');
+    await this.connectNotificationClient();
   }
 
   async onApplicationShutdown(): Promise<void> {
     await Promise.all([
       this.destroyDbInstance(this._operationalPrimary, 'operational'),
       this.destroyDbInstance(this._analyticsPrimary, 'analytics'),
+      this.disconnectNotificationClient(),
     ]);
   }
 
@@ -83,11 +109,36 @@ export class DatabaseProvider implements OnApplicationBootstrap, OnApplicationSh
       await db.selectNoFrom((eb) => [eb.val(1).as('one')]).executeTakeFirst();
       this.logger.log(`Connected to ${name} database successfully`);
     } catch (error) {
-      this.logger.error(
-        `Failed to connect to ${name} database`,
-        error instanceof Error ? error.stack : String(error),
-      );
+      this.logger.error(`Failed to connect to ${name} database`, {
+        error: error instanceof Error ? error.stack : String(error),
+      });
       throw error;
+    }
+  }
+
+  private async connectNotificationClient(): Promise<void> {
+    try {
+      await this._notificationClient.connect();
+      this.logger.log('Notification client connected');
+      this._notificationClient.on('error', (err) => {
+        this.logger.error('Notification client error', { error: err.message });
+      });
+    } catch (error) {
+      this.logger.error('Failed to connect notification client', {
+        error: error instanceof Error ? error.stack : String(error),
+      });
+      throw error;
+    }
+  }
+
+  private async disconnectNotificationClient(): Promise<void> {
+    try {
+      await this._notificationClient.end();
+      this.logger.log('Notification client disconnected');
+    } catch (error) {
+      this.logger.error('Error disconnecting notification client', {
+        error: error instanceof Error ? error.stack : String(error),
+      });
     }
   }
 
@@ -124,5 +175,15 @@ export class DatabaseProvider implements OnApplicationBootstrap, OnApplicationSh
   get operationalWrite(): OperationalDB {
     if (!this._operationalWrite) throw new Error('Operational database not initialised');
     return this._operationalWrite;
+  }
+
+  /**
+   * The persistent pg.Client used for LISTEN/NOTIFY.
+   * Call client.query('LISTEN channel') and attach a 'notification'
+   * listener. Do not use this for regular queries.
+   */
+  get notificationClient(): Client {
+    if (!this._notificationClient) throw new Error('Notification client not initialised');
+    return this._notificationClient;
   }
 }

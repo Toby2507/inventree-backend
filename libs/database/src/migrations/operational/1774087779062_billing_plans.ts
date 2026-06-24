@@ -47,11 +47,6 @@ CREATE TABLE operational.billing_plans (
   CONSTRAINT chk_billing_plans_price_nonneg CHECK (price_amount >= 0)
 );
 
--- Indexes
-CREATE INDEX idx_billing_plans_price_sort
-  ON operational.billing_plans (sort_order, price_amount)
-  WHERE deleted_at IS NULL and is_active = TRUE;
-
 -- Triggers
 CREATE TRIGGER trg_set_billing_plans_updated_at
 BEFORE UPDATE ON operational.billing_plans

@@ -72,10 +72,6 @@ CREATE INDEX idx_purchase_order_lines_store_po
   ON operational.purchase_order_lines (store_id, purchase_order_id)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_purchase_order_lines_store_product
-  ON operational.purchase_order_lines (store_id, product_variant_id)
-  WHERE deleted_at IS NULL;
-
 -- Triggers
 CREATE TRIGGER trg_set_purchase_order_lines_updated_at
 BEFORE UPDATE ON operational.purchase_order_lines

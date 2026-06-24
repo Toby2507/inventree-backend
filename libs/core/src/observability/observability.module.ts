@@ -1,4 +1,6 @@
+import { observabilityConfig } from '@app/config';
 import { Global, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { MetricsInterceptor } from './interceptors/metrics.interceptor';
 import { RequestLoggerInterceptor } from './interceptors/request-logger.interceptor';
@@ -9,6 +11,7 @@ import { METRICS } from './ports/metrics.port';
 
 @Global()
 @Module({
+  imports: [ConfigModule.forFeature(observabilityConfig)],
   providers: [
     { provide: LOGGER, useClass: AppLoggerService },
     { provide: METRICS, useClass: MetricsService },

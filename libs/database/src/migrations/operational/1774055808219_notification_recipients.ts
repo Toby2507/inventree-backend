@@ -31,17 +31,9 @@ CREATE INDEX idx_notification_receipts_store_member_time
   ON operational.notification_receipts (store_id, store_member_id, delivered_at DESC)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_notification_receipts_store_notification
-  ON operational.notification_receipts (store_id, notification_id)
-  WHERE deleted_at IS NULL;
-
 CREATE UNIQUE INDEX ux_notification_receipts_notification_member
   ON operational.notification_receipts (notification_id, store_member_id)
   WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_notification_receipts_store_member_unread
-  ON operational.notification_receipts (store_id, store_member_id)
-  WHERE deleted_at IS NULL AND is_read = FALSE;
 
 -- RLS: (tenant-scoped)
 ALTER TABLE operational.notification_receipts ENABLE ROW LEVEL SECURITY;

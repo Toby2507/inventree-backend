@@ -64,14 +64,6 @@ CREATE INDEX idx_inventory_adjustment_lines_store_adjustment
   ON operational.inventory_adjustment_lines (store_id, adjustment_id)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_inventory_adjustment_lines_store_product
-  ON operational.inventory_adjustment_lines (store_id, product_variant_id)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_inventory_adjustment_lines_store_location
-  ON operational.inventory_adjustment_lines (store_id, location_id)
-  WHERE deleted_at IS NULL AND location_id IS NOT NULL;
-
 -- Triggers
 CREATE TRIGGER trg_set_inventory_adjustment_lines_updated_at
 BEFORE UPDATE ON operational.inventory_adjustment_lines

@@ -40,10 +40,6 @@ CREATE TABLE operational.inventory_transfers (
 );
 
 -- Indexes
-CREATE INDEX idx_inventory_transfers_store_id_id
-  ON operational.inventory_transfers (store_id, id DESC)
-  WHERE deleted_at IS NULL;
-
 CREATE INDEX idx_inventory_transfers_store_status
   ON operational.inventory_transfers (store_id, status)
   WHERE deleted_at IS NULL;

@@ -60,10 +60,6 @@ CREATE UNIQUE INDEX ux_billing_customers_business
   ON operational.billing_customers (business_id)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_billing_customers_provider_ref
-  ON operational.billing_customers (provider_name, provider_customer_ref)
-  WHERE deleted_at IS NULL AND provider_customer_ref IS NOT NULL;
-
 -- Triggers
 CREATE TRIGGER trg_set_billing_customers_updated_at
 BEFORE UPDATE ON operational.billing_customers

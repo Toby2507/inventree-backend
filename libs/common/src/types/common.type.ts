@@ -25,3 +25,7 @@ export type JsonValue =
   | number
   | string
   | null;
+
+export interface ClassConstructor<T = any> {
+  new (...args: unknown[]): T;
+}

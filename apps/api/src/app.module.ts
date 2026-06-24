@@ -1,5 +1,5 @@
 import { DomainExceptionFilter } from '@app/common/filters';
-import { validate } from '@app/config';
+import { appConfig } from '@app/config';
 import { GeneratorModule } from '@app/core/generators';
 import { RedisModule } from '@app/core/infrastructure/redis';
 import { ObservabilityModule, ObservationContextMiddleware } from '@app/core/observability';
@@ -11,13 +11,11 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ScheduleModule } from '@nestjs/schedule';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { IdentityModule } from './identity';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, validate }),
+    ConfigModule.forRoot({ isGlobal: true, cache: true, load: [appConfig] }),
     CqrsModule.forRoot(),
     ScheduleModule.forRoot(),
     // Globals
@@ -30,8 +28,7 @@ import { IdentityModule } from './identity';
     // Modules
     IdentityModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, { provide: APP_FILTER, useClass: DomainExceptionFilter }],
+  providers: [{ provide: APP_FILTER, useClass: DomainExceptionFilter }],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

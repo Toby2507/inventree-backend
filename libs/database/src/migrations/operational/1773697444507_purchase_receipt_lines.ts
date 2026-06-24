@@ -71,14 +71,6 @@ CREATE INDEX idx_purchase_receipt_lines_store_receipt
   ON operational.purchase_receipt_lines (store_id, purchase_receipt_id)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_purchase_receipt_lines_store_product
-  ON operational.purchase_receipt_lines (store_id, product_variant_id)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_purchase_receipt_lines_store_po_line
-  ON operational.purchase_receipt_lines (store_id, purchase_order_line_id)
-  WHERE deleted_at IS NULL AND purchase_order_line_id IS NOT NULL;
-
 -- Triggers
 CREATE TRIGGER trg_set_purchase_receipt_lines_updated_at
 BEFORE UPDATE ON operational.purchase_receipt_lines

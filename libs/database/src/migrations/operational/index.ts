@@ -71,6 +71,7 @@ import * as inventory_item_settings from './1778015283849_inventory_item_setting
 import * as inventory_cost_snapshots from './1778019659207_inventory_cost_snapshots';
 import * as inventory_cost_layers from './1778020637048_inventory_cost_layers';
 import * as idempotency from './1780323688162_idempotency';
+import * as outbox_event_notifications from './1781629703031_outbox_event_notifications';
 
 export const operationalMigrations: Record<string, Migration> = {
   '1772874126615_users': users,
@@ -145,4 +146,5 @@ export const operationalMigrations: Record<string, Migration> = {
   '1778019659207_inventory_cost_snapshots': inventory_cost_snapshots,
   '1778020637048_inventory_cost_layers': inventory_cost_layers,
   '1780323688162_idempotency': idempotency,
+  '1781629703031_outbox_event_notifications': outbox_event_notifications,
 };

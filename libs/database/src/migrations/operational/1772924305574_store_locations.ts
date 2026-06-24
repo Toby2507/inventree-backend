@@ -64,8 +64,8 @@ CREATE TABLE operational.store_locations (
 );
 
 -- Indexes
-CREATE INDEX idx_store_locations_store_created
-  ON operational.store_locations (store_id, created_at DESC)
+CREATE INDEX idx_store_locations_store
+  ON operational.store_locations (store_id)
   WHERE deleted_at IS NULL;
 
 CREATE INDEX idx_store_locations_store_parent
@@ -107,10 +107,6 @@ CREATE POLICY tenant_isolation_store_locations_ins ON operational.store_location
 -- Enforced at application layer.
 ALTER TABLE operational.store_settings
 ADD COLUMN IF NOT EXISTS default_location_id UUID REFERENCES operational.store_locations(id) ON DELETE SET NULL;
-
-CREATE INDEX idx_store_settings_default_location
-  ON operational.store_settings (default_location_id)
-  WHERE default_location_id IS NOT NULL;
       `,
     )
     .execute(db);
@@ -120,7 +116,6 @@ export async function down(db: Kysely<any>): Promise<void> {
   await sql
     .raw(
       `
-DROP INDEX IF EXISTS operational.idx_store_settings_default_location;
 ALTER TABLE operational.store_settings DROP COLUMN IF EXISTS default_location_id;
 DROP TABLE IF EXISTS operational.store_locations;
 DROP TYPE IF EXISTS operational.location_type;

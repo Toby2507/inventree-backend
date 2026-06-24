@@ -27,10 +27,6 @@ CREATE TABLE operational.product_variant_prices (
   updated_at TIMESTAMPTZ,
 
   -- Constraints
-  CONSTRAINT fk_product_variant_prices_variants
-    FOREIGN KEY (store_id, product_variant_id)
-    REFERENCES operational.product_variants(store_id, id)
-    ON DELETE CASCADE,
   CONSTRAINT chk_product_variants_prices_nonnegative
     CHECK (
       selling_price >= 0
@@ -51,22 +47,8 @@ CREATE TABLE operational.product_variant_prices (
 );
 
 -- Indexes
-CREATE INDEX idx_product_variant_prices_store
-  ON operational.product_variant_prices (store_id, product_variant_id);
-
-CREATE INDEX idx_product_variant_active_price
-  ON operational.product_variant_prices (product_variant_id)
-  WHERE valid_to IS NULL;
-
-CREATE INDEX idx_product_variant_prices_active_lookup
-  ON operational.product_variant_prices (store_id, product_variant_id, valid_from DESC)
-  WHERE valid_to IS NULL;
-
-CREATE INDEX idx_product_variant_prices_validity
-  ON operational.product_variant_prices (product_variant_id, valid_from, valid_to);
-
 CREATE UNIQUE INDEX ux_product_variant_single_active_price
-  ON operational.product_variant_prices (product_variant_id)
+  ON operational.product_variant_prices (store_id, product_variant_id)
   WHERE valid_to IS NULL;
 
 -- Functions

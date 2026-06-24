@@ -1,7 +1,8 @@
-import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import { LOGGER, LoggerPort } from '@app/core/observability';
+import { Inject, Injectable } from '@nestjs/common';
 import { Migration, MigrationProvider, Migrator } from 'kysely';
-import { DatabaseProvider } from '../database.provider';
 import { analyticsMigrations, bootstrapMigrations, operationalMigrations } from '../migrations';
+import { DATABASE_PROVIDER, DatabaseProviderPort } from '../ports/provider.port';
 
 type MigrationTarget = 'analytics' | 'bootstrap' | 'operational';
 
@@ -14,12 +15,17 @@ class StaticMigrationProvider implements MigrationProvider {
 }
 
 @Injectable()
-export class MigrationService implements OnApplicationBootstrap {
-  private readonly logger = new Logger(MigrationService.name);
+export class MigrationService {
+  private readonly logger;
 
-  constructor(private readonly provider: DatabaseProvider) {}
+  constructor(
+    @Inject(LOGGER) logger: LoggerPort,
+    @Inject(DATABASE_PROVIDER) private readonly provider: DatabaseProviderPort,
+  ) {
+    this.logger = logger.forContext(MigrationService.name);
+  }
 
-  async onApplicationBootstrap(): Promise<void> {
+  async migrateAllToLatest(): Promise<void> {
     await this.migrateToLatest('bootstrap');
     await this.migrateToLatest('operational');
     await this.migrateToLatest('analytics');
@@ -40,7 +46,7 @@ export class MigrationService implements OnApplicationBootstrap {
     });
 
     if (error) {
-      this.logger.error(`[${target}] Migration run failed`, error);
+      this.logger.error(`[${target}] Migration run failed`, { error });
       throw error;
     }
     if (!results?.length) this.logger.log(`[${target}] Database schema is up to date`);
@@ -63,7 +69,7 @@ export class MigrationService implements OnApplicationBootstrap {
     });
 
     if (error) {
-      this.logger.error(`[${target}] Migration rollback failed`, error);
+      this.logger.error(`[${target}] Migration rollback failed`, { error });
       throw error;
     }
   }

@@ -37,30 +37,6 @@ CREATE UNIQUE INDEX ux_stores_business_code_active
   ON operational.stores (business_id, code)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_stores_business
-  ON operational.stores (business_id)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_stores_status
-  ON operational.stores (status)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_stores_country
-  ON operational.stores (country_code)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_stores_state
-  ON operational.stores (state)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_stores_city
-  ON operational.stores (city)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_stores_geo_location
-  ON operational.stores USING GIST (geo_location)
-  WHERE geo_location IS NOT NULL;
-
 CREATE TRIGGER trg_set_stores_updated_at
 BEFORE UPDATE ON operational.stores
 FOR EACH ROW
@@ -71,10 +47,6 @@ EXECUTE FUNCTION operational.set_updated_at();
 -- Enforced at application layer.
 ALTER TABLE operational.businesses
 ADD COLUMN primary_store_id UUID REFERENCES operational.stores(id) ON DELETE SET NULL;
-
-CREATE INDEX idx_businesses_primary_store
-  ON operational.businesses (primary_store_id)
-  WHERE deleted_at IS NULL AND primary_store_id IS NOT NULL;
       `,
     )
     .execute(db);
@@ -84,7 +56,6 @@ export async function down(db: Kysely<any>): Promise<void> {
   await sql
     .raw(
       `
-DROP INDEX IF EXISTS idx_businesses_primary_store;
 ALTER TABLE operational.businesses DROP COLUMN IF EXISTS primary_store_id;
 DROP TABLE IF EXISTS operational.stores;
 DROP TYPE IF EXISTS operational.store_status;

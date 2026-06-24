@@ -38,14 +38,6 @@ CREATE UNIQUE INDEX ux_product_images_primary_active
   ON operational.product_media (product_id)
   WHERE deleted_at IS NULL AND is_primary = TRUE;
 
-CREATE INDEX idx_product_images_product
-  ON operational.product_media (product_id)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_product_images_media
-  ON operational.product_media (media_asset_id)
-  WHERE deleted_at IS NULL;
-
 -- Triggers
 CREATE TRIGGER trg_set_product_media_updated_at
 BEFORE UPDATE ON operational.product_media

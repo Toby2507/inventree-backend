@@ -1,3 +1,3 @@
-export * from './config.schema';
-export * from './config.validation';
+export * from './bullmq.config';
+export * from './environments';
 export * from './swagger.config';

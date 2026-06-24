@@ -30,10 +30,6 @@ CREATE TABLE operational.product_variant_options (
 );
 
 -- Indexes
-CREATE INDEX idx_variant_options_store_id_id
-  ON operational.product_variant_options (store_id, id DESC)
-  WHERE deleted_at IS NULL;
-
 CREATE INDEX idx_variant_options_product_group
   ON operational.product_variant_options (store_id, product_variant_group_id)
   WHERE deleted_at IS NULL;

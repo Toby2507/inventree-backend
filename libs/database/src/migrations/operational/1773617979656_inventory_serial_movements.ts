@@ -8,7 +8,6 @@ export async function up(db: Kysely<any>): Promise<void> {
 -- For serial-tracked products, quantity should match number of serials allocated (application invariant).
 
 CREATE TABLE operational.inventory_serial_movements (
-  id UUID PRIMARY KEY DEFAULT uuidv7(),
   store_id UUID NOT NULL REFERENCES operational.stores(id) ON DELETE CASCADE,
   movement_id UUID NOT NULL REFERENCES operational.inventory_movements(id) ON DELETE RESTRICT,
   serial_id UUID NOT NULL REFERENCES operational.inventory_serials(id) ON DELETE RESTRICT,
@@ -16,18 +15,10 @@ CREATE TABLE operational.inventory_serial_movements (
   status_before operational.inventory_serial_status, -- NULL for first movement (purchase receipt)
   status_after operational.inventory_serial_status NOT NULL,
 
+  PRIMARY KEY (movement_id, serial_id),
+
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
--- Indexes
-CREATE UNIQUE INDEX ux_inventory_serial_movements_unique_active
-  ON operational.inventory_serial_movements (movement_id, serial_id);
-
-CREATE INDEX idx_inventory_serial_movements_store_movement
-  ON operational.inventory_serial_movements (store_id, movement_id);
-
-CREATE INDEX idx_inventory_serial_movements_store_serial
-  ON operational.inventory_serial_movements (store_id, serial_id);
 
 -- RLS: (tenant-scoped)
 ALTER TABLE operational.inventory_serial_movements ENABLE ROW LEVEL SECURITY;

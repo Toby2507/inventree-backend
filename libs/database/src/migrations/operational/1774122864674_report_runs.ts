@@ -59,14 +59,6 @@ CREATE INDEX idx_report_runs_store_time
   ON operational.report_runs (store_id, created_at DESC)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_report_runs_store_status_time
-  ON operational.report_runs (store_id, status, created_at DESC)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_report_runs_store_report_key_time
-  ON operational.report_runs (store_id, report_key, created_at DESC)
-  WHERE deleted_at IS NULL;
-
 -- Triggers
 CREATE TRIGGER trg_set_report_runs_updated_at
 BEFORE UPDATE ON operational.report_runs

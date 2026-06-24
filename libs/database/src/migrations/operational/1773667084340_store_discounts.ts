@@ -73,22 +73,6 @@ CREATE UNIQUE INDEX ux_store_discounts_store_code_active
   ON operational.store_discounts (store_id, code)
   WHERE deleted_at IS NULL;
 
-CREATE UNIQUE INDEX ux_store_discounts_store_normalized_name_active
-  ON operational.store_discounts (store_id, normalized_name)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_store_discounts_store_active
-  ON operational.store_discounts (store_id, is_active)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_store_discounts_store_scope
-  ON operational.store_discounts (store_id, scope)
-  WHERE deleted_at IS NULL AND is_active = TRUE;
-
-CREATE INDEX idx_store_discounts_validity
-  ON operational.store_discounts (store_id, valid_from, valid_to)
-  WHERE deleted_at IS NULL AND is_active = TRUE;
-
 -- Triggers
 CREATE TRIGGER trg_set_store_discounts_updated_at
 BEFORE UPDATE ON operational.store_discounts

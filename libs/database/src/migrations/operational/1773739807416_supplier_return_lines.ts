@@ -61,10 +61,6 @@ CREATE INDEX idx_supplier_return_lines_store_return
   ON operational.supplier_return_lines (store_id, supplier_return_id)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_supplier_return_lines_store_product
-  ON operational.supplier_return_lines (store_id, product_variant_id)
-  WHERE deleted_at IS NULL;
-
 -- Triggers
 CREATE TRIGGER trg_set_supplier_return_lines_updated_at
 BEFORE UPDATE ON operational.supplier_return_lines

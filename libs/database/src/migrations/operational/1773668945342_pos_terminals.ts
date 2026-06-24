@@ -32,10 +32,6 @@ CREATE TABLE operational.pos_terminals (
 );
 
 -- Indexes
-CREATE INDEX idx_pos_terminals_store_id_id
-  ON operational.pos_terminals (store_id, id DESC)
-  WHERE deleted_at IS NULL;
-
 CREATE UNIQUE INDEX ux_pos_terminals_store_terminal_code_active
   ON operational.pos_terminals (store_id, terminal_code)
   WHERE deleted_at IS NULL;

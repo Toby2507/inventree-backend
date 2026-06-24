@@ -2,11 +2,15 @@ import { Logger } from '@nestjs/common';
 
 jest.mock('@opentelemetry/api', () => ({
   ...jest.requireActual('@opentelemetry/api'),
-  trace: { getTracer: jest.fn(), getSpan: jest.fn(), setSpan: jest.fn() },
+  trace: { getTracer: jest.fn(), getSpan: jest.fn(), setSpan: jest.fn(), getActiveSpan: jest.fn() },
   context: { with: jest.fn(), active: jest.fn() },
   propagation: { extract: jest.fn(), inject: jest.fn() },
   metrics: { getMeter: jest.fn() },
   ROOT_CONTEXT: {},
+}));
+jest.mock('p-limit', () => ({
+  __esModule: true,
+  default: jest.fn(() => (fn: any) => fn()),
 }));
 // Suppress expected error logs during tests to keep output clean
 beforeEach(() => {

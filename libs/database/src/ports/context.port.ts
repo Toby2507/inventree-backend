@@ -1,8 +1,10 @@
+import { DomainEvent } from '@app/common/bases';
 import { AnalyticsDB, OperationalDB } from '../types/db.schema.types';
 
 export interface CommandDbContext {
   operational: OperationalDB;
   analytics: AnalyticsDB;
+  events: { emit: (...events: DomainEvent[]) => void };
 }
 
 export interface QueryDbContext {

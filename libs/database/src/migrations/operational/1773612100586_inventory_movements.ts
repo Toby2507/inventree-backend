@@ -68,19 +68,9 @@ CREATE INDEX idx_inventory_movements_store_time
 CREATE INDEX idx_inventory_movements_store_product_time
   ON operational.inventory_movements (store_id, product_variant_id, occurred_at DESC);
 
-CREATE INDEX idx_inventory_movements_store_location_time
-  ON operational.inventory_movements (store_id, location_id, occurred_at DESC);
-
-CREATE INDEX idx_inventory_movements_source
-  ON operational.inventory_movements (store_id, source_type, source_id)
-  WHERE source_type IS NOT NULL AND source_id IS NOT NULL;
-
 CREATE INDEX idx_inventory_movements_reversed
   ON operational.inventory_movements (store_id, reversed_movement_id)
   WHERE reversed_movement_id IS NOT NULL;
-
-CREATE INDEX idx_inventory_movements_store_type_time
-  ON operational.inventory_movements (store_id, movement_type, occurred_at DESC);
 
 -- No UPDATE policy on purpose: keep ledger immutable at the DB permission layer.
 

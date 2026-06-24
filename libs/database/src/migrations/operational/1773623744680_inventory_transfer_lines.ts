@@ -43,10 +43,6 @@ CREATE INDEX idx_inventory_transfer_lines_transfer
   ON operational.inventory_transfer_lines (store_id, transfer_id)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_inventory_transfer_lines_product
-  ON operational.inventory_transfer_lines (store_id, product_variant_id)
-  WHERE deleted_at IS NULL;
-
 -- Triggers
 CREATE TRIGGER trg_set_inventory_transfer_lines_updated_at
 BEFORE UPDATE ON operational.inventory_transfer_lines

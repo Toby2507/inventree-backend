@@ -8,7 +8,6 @@ export async function up(db: Kysely<any>): Promise<void> {
 -- Required when store_product.requires_lot_tracking = true (application invariant).
 
 CREATE TABLE operational.inventory_lot_movements (
-  id UUID PRIMARY KEY DEFAULT uuidv7(),
   store_id UUID NOT NULL REFERENCES operational.stores(id) ON DELETE CASCADE,
   movement_id UUID NOT NULL REFERENCES operational.inventory_movements(id) ON DELETE RESTRICT,
   lot_id UUID NOT NULL REFERENCES operational.inventory_lots(id) ON DELETE RESTRICT,
@@ -19,19 +18,11 @@ CREATE TABLE operational.inventory_lot_movements (
   -- Immutable join between inventory_movements and inventory_lots.
   -- No updates or deletes. Reversals create new lot movement rows referencing the reversal movement.
 
+  PRIMARY KEY (movement_id, lot_id),
+
   CONSTRAINT chk_inventory_lot_movements_qty_positive
     CHECK (quantity > 0)
 );
-
--- Indexes
-CREATE UNIQUE INDEX ux_inventory_lot_movements_unique_active
-  ON operational.inventory_lot_movements (movement_id, lot_id);
-
-CREATE INDEX idx_inventory_lot_movements_store_movement
-  ON operational.inventory_lot_movements (store_id, movement_id);
-
-CREATE INDEX idx_inventory_lot_movements_store_lot
-  ON operational.inventory_lot_movements (store_id, lot_id);
 
 -- RLS: (tenant-scoped)
 ALTER TABLE operational.inventory_lot_movements ENABLE ROW LEVEL SECURITY;

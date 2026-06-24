@@ -39,17 +39,13 @@ CREATE TABLE operational.media_assets (
 );
 
 -- Indexes
-CREATE INDEX idx_media_assets_store_created
-  ON operational.media_assets (store_id, created_at DESC)
+CREATE INDEX idx_media_assets_store_id
+  ON operational.media_assets (store_id, id)
   WHERE deleted_at IS NULL;
 
 CREATE UNIQUE INDEX ux_media_assets_provider_key_active
   ON operational.media_assets (storage_provider, storage_key)
   WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_media_assets_checksum
-  ON operational.media_assets (store_id, checksum)
-  WHERE deleted_at IS NULL AND checksum IS NOT NULL;
 
 -- RLS
 ALTER TABLE operational.media_assets ENABLE ROW LEVEL SECURITY;

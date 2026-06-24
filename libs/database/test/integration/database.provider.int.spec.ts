@@ -1,14 +1,22 @@
+import { databaseConfig } from '@app/config';
+import { LOGGER } from '@app/core/observability';
 import { DatabaseProvider } from '@app/database/database.provider';
+import { makeLoggerMock } from '@app/testing/core/observability';
+import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
 describe('DatabaseProvider (integration)', () => {
   let module: TestingModule;
   let provider: DatabaseProvider;
 
+  const { logger } = makeLoggerMock();
+
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      providers: [DatabaseProvider],
+      imports: [ConfigModule.forRoot({ load: [databaseConfig] })],
+      providers: [DatabaseProvider, { provide: LOGGER, useValue: logger }],
     }).compile();
+    await module.init();
     provider = module.get(DatabaseProvider);
   });
 
@@ -17,7 +25,6 @@ describe('DatabaseProvider (integration)', () => {
   });
 
   it('should initialise all database pools on bootstrap', async () => {
-    await provider.onApplicationBootstrap();
     expect(provider.operationalRead).toBeDefined();
     expect(provider.operationalWrite).toBeDefined();
     expect(provider.analyticsRead).toBeDefined();
@@ -25,27 +32,52 @@ describe('DatabaseProvider (integration)', () => {
     expect(provider.forBootstrapMigration).toBeDefined();
     expect(provider.forOperationalMigration).toBeDefined();
     expect(provider.forAnalyticsMigration).toBeDefined();
+    expect(provider.notificationClient).toBeDefined();
   });
 
   it('should execute a simple query successfully', async () => {
-    await provider.onApplicationBootstrap();
     const result = await provider.operationalRead
       .selectNoFrom((eb: any) => [eb.val(1).as('one')])
       .executeTakeFirst();
     expect(result?.one).toBe('1');
   });
 
-  it('should close pools on shutdown', async () => {
-    await provider.onApplicationBootstrap();
-    await provider.onApplicationShutdown();
-    expect(() =>
-      provider.operationalRead.selectNoFrom((eb: any) => [eb.val(1).as('one')]).executeTakeFirst(),
-    ).rejects.toThrow();
-  });
-
   it('should expose analytics and operational schemas separately', async () => {
-    await provider.onApplicationBootstrap();
     expect(provider.analyticsRead).toBeDefined();
     expect(provider.operationalWrite).toBeDefined();
+  });
+
+  it('should connect the notification client and subscribe to a channel', async () => {
+    await expect(provider.notificationClient.query('LISTEN outbox_pending')).resolves.not.toThrow();
+  });
+
+  it('should handle notification client errors without throwing', () => {
+    expect(() => {
+      provider.notificationClient.emit('error', new Error('simulated disconnect'));
+    }).not.toThrow();
+  });
+
+  describe('shutdown', () => {
+    let shutdownModule: TestingModule;
+    let shutdownProvider: DatabaseProvider;
+
+    beforeAll(async () => {
+      shutdownModule = await Test.createTestingModule({
+        imports: [ConfigModule.forRoot({ load: [databaseConfig] })],
+        providers: [DatabaseProvider, { provide: LOGGER, useValue: logger }],
+      }).compile();
+      shutdownProvider = shutdownModule.get(DatabaseProvider);
+      await shutdownModule.init();
+    });
+
+    it('should close all pools and the notification client on shutdown', async () => {
+      await shutdownProvider.onApplicationShutdown();
+      await expect(
+        shutdownProvider.operationalRead
+          .selectNoFrom((eb: any) => [eb.val(1).as('one')])
+          .executeTakeFirst(),
+      ).rejects.toThrow();
+      await expect(shutdownProvider.notificationClient.query('SELECT 1')).rejects.toThrow();
+    });
   });
 });

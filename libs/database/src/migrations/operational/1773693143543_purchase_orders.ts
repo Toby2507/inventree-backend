@@ -77,14 +77,6 @@ CREATE INDEX idx_purchase_orders_store_id_id
   ON operational.purchase_orders (store_id, id DESC)
   WHERE deleted_at IS NULL;
 
-CREATE INDEX idx_purchase_orders_store_status_time
-  ON operational.purchase_orders (store_id, status, created_at DESC)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_purchase_orders_store_supplier_time
-  ON operational.purchase_orders (store_id, supplier_id, created_at DESC)
-  WHERE deleted_at IS NULL AND supplier_id IS NOT NULL;
-
 CREATE UNIQUE INDEX ux_purchase_orders_store_po_number_active
   ON operational.purchase_orders (store_id, po_number)
   WHERE deleted_at IS NULL AND po_number IS NOT NULL;

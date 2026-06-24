@@ -33,12 +33,6 @@ CREATE TABLE operational.inventory_lot_items (
 CREATE UNIQUE INDEX ux_inventory_lot_items_lot_location_active
   ON operational.inventory_lot_items (store_id, lot_id, location_id);
 
-CREATE INDEX idx_inventory_lot_items_location
-  ON operational.inventory_lot_items (store_id, location_id);
-
-CREATE INDEX idx_inventory_lot_items_lot
-  ON operational.inventory_lot_items (store_id, lot_id);
-
 CREATE INDEX idx_inventory_lot_items_store_variant
   ON operational.inventory_lot_items (store_id, product_variant_id)
   WHERE on_hand_qty > 0;

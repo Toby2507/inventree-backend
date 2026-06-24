@@ -53,6 +53,10 @@ CREATE UNIQUE INDEX ux_inventory_serials_store_product_serial_active
   ON operational.inventory_serials (store_id, product_variant_id, serial_number)
   WHERE deleted_at IS NULL;
 
+CREATE INDEX idx_inventory_serials_store_serial
+  ON operational.inventory_serials (store_id, serial_number)
+  WHERE deleted_at IS NULL;
+
 CREATE INDEX idx_inventory_serials_store_product_status
   ON operational.inventory_serials (store_id, product_variant_id, status)
   WHERE deleted_at IS NULL;

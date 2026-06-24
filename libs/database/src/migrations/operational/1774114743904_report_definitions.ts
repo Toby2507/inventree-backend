@@ -37,10 +37,6 @@ CREATE TABLE operational.report_definitions (
 );
 
 -- Indexes
-CREATE INDEX idx_report_definitions_store_time
-  ON operational.report_definitions (store_id, created_at DESC)
-  WHERE deleted_at IS NULL;
-
 CREATE INDEX idx_report_definitions_store_key
   ON operational.report_definitions (store_id, report_key)
   WHERE deleted_at IS NULL;

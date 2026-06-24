@@ -54,10 +54,6 @@ CREATE TABLE operational.inventory_adjustments (
 );
 
 -- Indexes
-CREATE INDEX idx_inventory_adjustments_store_id_id
-  ON operational.inventory_adjustments (store_id, id DESC)
-  WHERE deleted_at IS NULL;
-
 CREATE INDEX idx_inventory_adjustments_store_status_time
   ON operational.inventory_adjustments (store_id, status, occurred_at DESC)
   WHERE deleted_at IS NULL;

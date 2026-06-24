@@ -1,9 +1,15 @@
+import { ObservabilityModule } from '@app/core/observability';
+import { DatabaseModule } from '@app/database';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { DatabaseModule } from '@app/database';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), ScheduleModule.forRoot(), DatabaseModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true, cache: true }),
+    ScheduleModule.forRoot(),
+    DatabaseModule,
+    ObservabilityModule,
+  ],
 })
 export class AppModule {}

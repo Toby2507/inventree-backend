@@ -30,12 +30,12 @@ CREATE TABLE operational.billing_payment_methods (
 
 -- Indexes
 CREATE INDEX idx_billing_payment_methods_business
-  ON operational.billing_payment_methods (business_id, is_default, created_at DESC)
+  ON operational.billing_payment_methods (business_id)
   WHERE deleted_at IS NULL;
 
 CREATE UNIQUE INDEX ux_billing_payment_methods_default_per_business
   ON operational.billing_payment_methods (business_id)
-  WHERE deleted_at IS NULL AND is_default = TRUE;
+  WHERE deleted_at IS NULL AND is_default;
 
 -- No RLS: platform-scoped table. Access controlled at application layer.
 -- A business owner can only access their own payment methods.

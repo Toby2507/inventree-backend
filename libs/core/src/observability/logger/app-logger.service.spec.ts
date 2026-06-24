@@ -1,3 +1,5 @@
+import { LogLevel } from '@app/common/types';
+import { ObservabilityConfig } from '@app/config';
 import { fsObservationContext, makeMockPino } from '@app/testing/core/observability';
 import { observationStorage } from '../context/observation-context.storage';
 import { AppLoggerService, ContextLogger } from './app-logger.service';
@@ -20,6 +22,10 @@ describe('AppLoggerService', () => {
   let service: AppLoggerService;
   const ctx = fsObservationContext.generate();
 
+  const obsConfig: ObservabilityConfig = {
+    prettyPrint: false,
+    logLevel: LogLevel.INFO,
+  };
   const callMixin = (): Record<string, unknown> => {
     const mixin = capturedPinoConfig['mixin'] as () => Record<string, unknown>;
     if (typeof mixin !== 'function') throw new Error('mixin not found in pino config');
@@ -29,7 +35,7 @@ describe('AppLoggerService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedPinoConfig = {};
-    service = new AppLoggerService();
+    service = new AppLoggerService(obsConfig);
   });
 
   describe('Pino constructor configuration', () => {
@@ -54,16 +60,19 @@ describe('AppLoggerService', () => {
       );
     });
 
-    it('should set log level to the LOG_LEVEL env var if it is set', () => {
-      const original = process.env.LOG_LEVEL;
-      try {
-        process.env.LOG_LEVEL = 'debug';
-        new AppLoggerService();
-        expect(capturedPinoConfig['level']).toBe('debug');
-        delete process.env.LOG_LEVEL;
-      } finally {
-        process.env.LOG_LEVEL = original;
-      }
+    it('should set a prettyPrint transport when config.prettyPrint is true', () => {
+      const config = { ...obsConfig, prettyPrint: true };
+      new AppLoggerService(config);
+      expect(capturedPinoConfig['transport']).toEqual(
+        expect.objectContaining({
+          target: 'pino-pretty',
+          options: expect.objectContaining({
+            colorize: true,
+            translateTime: false,
+            singleLine: true,
+          }),
+        }),
+      );
     });
 
     it('should include a formatters.level function that returns { level: label }', () => {

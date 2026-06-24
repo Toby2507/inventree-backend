@@ -45,9 +45,6 @@ CREATE TABLE operational.store_discount_conditions (
 CREATE INDEX idx_store_discount_conditions_discount
   ON operational.store_discount_conditions (store_id, discount_id);
 
-CREATE INDEX idx_store_discount_conditions_type
-  ON operational.store_discount_conditions (store_id, condition_type);
-
 -- RLS: (tenant-scoped)
 ALTER TABLE operational.store_discount_conditions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE operational.store_discount_conditions FORCE ROW LEVEL SECURITY;

@@ -73,24 +73,8 @@ CREATE TABLE operational.pos_transactions (
 );
 
 -- Indexes
-CREATE INDEX idx_pos_transactions_store_id_id
-  ON operational.pos_transactions (store_id, id DESC)
-  WHERE deleted_at IS NULL;
-
 CREATE INDEX idx_pos_transactions_store_session
   ON operational.pos_transactions (store_id, session_id)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_pos_transactions_store_status_time
-  ON operational.pos_transactions (store_id, status, opened_at DESC)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_pos_transactions_store_terminal_time
-  ON operational.pos_transactions (store_id, terminal_id, opened_at DESC)
-  WHERE deleted_at IS NULL;
-
-CREATE INDEX idx_pos_transactions_store_attendant_time
-  ON operational.pos_transactions (store_id, attendant_store_member_id, opened_at DESC)
   WHERE deleted_at IS NULL;
 
 CREATE UNIQUE INDEX ux_pos_transactions_store_receipt_number

@@ -1,5 +1,5 @@
 import { LOGGER, LoggerPort } from '@app/core/observability';
-import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Migration, MigrationProvider, Migrator } from 'kysely';
 import { analyticsMigrations, bootstrapMigrations, operationalMigrations } from '../migrations';
 import { DATABASE_PROVIDER, DatabaseProviderPort } from '../ports/provider.port';
@@ -15,7 +15,7 @@ class StaticMigrationProvider implements MigrationProvider {
 }
 
 @Injectable()
-export class MigrationService implements OnApplicationBootstrap {
+export class MigrationService {
   private readonly logger;
 
   constructor(
@@ -25,7 +25,7 @@ export class MigrationService implements OnApplicationBootstrap {
     this.logger = logger.forContext(MigrationService.name);
   }
 
-  async onApplicationBootstrap(): Promise<void> {
+  async migrateAllToLatest(): Promise<void> {
     await this.migrateToLatest('bootstrap');
     await this.migrateToLatest('operational');
     await this.migrateToLatest('analytics');

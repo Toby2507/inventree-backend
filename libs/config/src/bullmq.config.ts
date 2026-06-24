@@ -1,13 +1,15 @@
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
+import { CACHE_CONFIG, CacheConfig, cacheConfig } from './environments';
 
 export const bullmqConfig = {
   provide: 'BULL_MQ',
-  inject: [ConfigService],
-  useFactory: (configService: ConfigService) => ({
+  imports: [ConfigModule.forFeature(cacheConfig)],
+  inject: [CACHE_CONFIG],
+  useFactory: (config: CacheConfig) => ({
     connection: {
-      host: configService.get<string>('REDIS_HOST', 'redis_cache'),
-      port: configService.get<number>('REDIS_PORT', 6379),
-      password: configService.get<string>('REDIS_PASSWORD'),
+      host: config.host,
+      port: config.port,
+      password: config.password,
     },
   }),
 };

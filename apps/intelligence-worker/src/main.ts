@@ -5,9 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.createApplicationContext(AppModule, {
-    logger: ['error', 'warn', 'log'],
-  });
+  const app = await NestFactory.createApplicationContext(AppModule);
   const logger = app.get<LoggerPort>(LOGGER).forContext('IntelligenceWorker');
 
   app.enableShutdownHooks();

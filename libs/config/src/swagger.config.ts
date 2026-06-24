@@ -1,15 +1,14 @@
 import { INestApplication } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
+import { APP_CONFIG, AppConfig } from './environments';
 
 const DOCUMENTATION_URL_PATH = 'api/docs';
 
 export const setupSwagger = (app: INestApplication): OpenAPIObject => {
-  const configService = app.get(ConfigService);
-  const appName = configService.get<string>('SYSTEM_NAME')!;
+  const appConfig = app.get<AppConfig>(APP_CONFIG);
 
   const documentationOptions = new DocumentBuilder()
-    .setTitle(appName)
+    .setTitle(appConfig.name)
     .setDescription('InvenTree Backend API Open Host Service (OHS) Documentation')
     .setVersion('1.0')
     .addBearerAuth(
@@ -20,7 +19,7 @@ export const setupSwagger = (app: INestApplication): OpenAPIObject => {
 
   const document = SwaggerModule.createDocument(app, documentationOptions);
   SwaggerModule.setup(DOCUMENTATION_URL_PATH, app, document, {
-    customSiteTitle: appName,
+    customSiteTitle: appConfig.name,
     jsonDocumentUrl: `${DOCUMENTATION_URL_PATH}/json`,
     swaggerOptions: { persistAuthorization: true, docExpansion: 'none' },
   });

@@ -1,4 +1,5 @@
-import { Injectable, LoggerService } from '@nestjs/common';
+import { OBSERVABILITY_CONFIG, ObservabilityConfig } from '@app/config';
+import { Inject, Injectable, LoggerService } from '@nestjs/common';
 import pino, { Logger } from 'pino';
 import { getOptionalObservationContext } from '../context/observation-context.storage';
 import { ContextLoggerPort, LoggerPort } from '../ports/logger.port';
@@ -9,10 +10,9 @@ type LogMeta = Record<string, unknown>;
 export class AppLoggerService implements LoggerPort, LoggerService {
   private readonly pino: Logger;
 
-  constructor() {
-    const isDev = process.env.NODE_ENV !== 'production';
+  constructor(@Inject(OBSERVABILITY_CONFIG) config: ObservabilityConfig) {
     this.pino = pino({
-      level: process.env.LOG_LEVEL ?? 'info',
+      level: config.logLevel,
       base: undefined, // strip pid/hostname — use OTEL resource attributes instead
       timestamp: pino.stdTimeFunctions.isoTime,
       formatters: {
@@ -22,7 +22,7 @@ export class AppLoggerService implements LoggerPort, LoggerService {
         paths: ['*.password', '*.passwordHash', '*.mfaSecret', '*.token', '*.secret'],
         censor: '[REDACTED]',
       },
-      ...(isDev && {
+      ...(config.prettyPrint && {
         transport: {
           target: 'pino-pretty',
           options: { colorize: true, translateTime: false, singleLine: true },

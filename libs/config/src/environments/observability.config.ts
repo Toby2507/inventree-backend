@@ -19,7 +19,6 @@ class ObservabilityEnvConfig {
 
 export const observabilityConfig = createConfig('observability', ObservabilityEnvConfig, (cfg) => ({
   logLevel: cfg.LOG_LEVEL ?? 'info',
-  otelExporterEndpoint: cfg.OTEL_EXPORTER_OTLP_ENDPOINT,
   prettyPrint: cfg.NODE_ENV !== EnvironmentType.PRODUCTION,
 }));
 

@@ -1,18 +1,13 @@
+import { Environment } from '@app/common/types';
+import { ConfigType } from '@nestjs/config';
 import { Transform } from 'class-transformer';
 import { IsDefined, IsEnum, IsNumber, IsString } from 'class-validator';
 import { createConfig } from '../utils/factory.config';
-import { ConfigType } from '@nestjs/config';
-
-export enum EnvironmentType {
-  DEVELOPMENT = 'development',
-  PRODUCTION = 'production',
-  TEST = 'test',
-}
 
 class AppEnvConfig {
   @IsDefined()
-  @IsEnum(EnvironmentType)
-  NODE_ENV!: EnvironmentType;
+  @IsEnum(Environment)
+  NODE_ENV!: Environment;
 
   @IsDefined()
   @IsNumber()

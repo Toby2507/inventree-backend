@@ -1,4 +1,6 @@
+import { ObservabilityModule } from '@app/core/observability';
 import { MigrationModule, MigrationService } from '@app/database';
+import { createOtelTestHarness } from '@app/testing/core/observability';
 import { MIGRATION_TEST_DB_NAME } from '@app/testing/database';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -7,13 +9,15 @@ describe('MigrationService (integration)', () => {
   let module: TestingModule;
   let service: MigrationService;
 
+  createOtelTestHarness();
+
   beforeAll(async () => {
     // Point both pools at the isolated migration DB before NestJS initialises.
     // DatabaseService reads process.env directly — this must happen before module.init().
     process.env['DB_NAME'] = MIGRATION_TEST_DB_NAME;
 
     module = await Test.createTestingModule({
-      imports: [MigrationModule],
+      imports: [MigrationModule, ObservabilityModule],
     }).compile();
 
     await module.init();

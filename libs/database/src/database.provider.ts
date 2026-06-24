@@ -1,11 +1,6 @@
 import { DATABASE_CONFIG, DatabaseConfig } from '@app/config';
-import {
-  Inject,
-  Injectable,
-  Logger,
-  OnApplicationBootstrap,
-  OnApplicationShutdown,
-} from '@nestjs/common';
+import { LOGGER, LoggerPort } from '@app/core/observability';
+import { Inject, Injectable, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { Kysely, PostgresDialect } from 'kysely';
 import { Client, Pool, PoolConfig } from 'pg';
 import { DatabaseProviderPort } from './ports/provider.port';
@@ -15,7 +10,7 @@ import { AnalyticsDB, OperationalDB } from './types/db.schema.types';
 export class DatabaseProvider
   implements OnApplicationBootstrap, OnApplicationShutdown, DatabaseProviderPort
 {
-  private readonly logger = new Logger(DatabaseProvider.name);
+  private readonly logger;
   private _operationalPrimary!: OperationalDB;
   private _operationalReplica!: OperationalDB;
   private _analyticsPrimary!: AnalyticsDB;
@@ -27,7 +22,12 @@ export class DatabaseProvider
 
   private _notificationClient!: Client;
 
-  constructor(@Inject(DATABASE_CONFIG) private readonly config: DatabaseConfig) {}
+  constructor(
+    @Inject(DATABASE_CONFIG) private readonly config: DatabaseConfig,
+    @Inject(LOGGER) logger: LoggerPort,
+  ) {
+    this.logger = logger.forContext(DatabaseProvider.name);
+  }
 
   async onApplicationBootstrap(): Promise<void> {
     this._operationalPrimary = this.createDbInstance({
@@ -109,10 +109,9 @@ export class DatabaseProvider
       await db.selectNoFrom((eb) => [eb.val(1).as('one')]).executeTakeFirst();
       this.logger.log(`Connected to ${name} database successfully`);
     } catch (error) {
-      this.logger.error(
-        `Failed to connect to ${name} database`,
-        error instanceof Error ? error.stack : String(error),
-      );
+      this.logger.error(`Failed to connect to ${name} database`, {
+        error: error instanceof Error ? error.stack : String(error),
+      });
       throw error;
     }
   }
@@ -122,13 +121,12 @@ export class DatabaseProvider
       await this._notificationClient.connect();
       this.logger.log('Notification client connected');
       this._notificationClient.on('error', (err) => {
-        this.logger.error('Notification client error', err.message);
+        this.logger.error('Notification client error', { error: err.message });
       });
     } catch (error) {
-      this.logger.error(
-        'Failed to connect notification client',
-        error instanceof Error ? error.stack : String(error),
-      );
+      this.logger.error('Failed to connect notification client', {
+        error: error instanceof Error ? error.stack : String(error),
+      });
       throw error;
     }
   }
@@ -138,10 +136,9 @@ export class DatabaseProvider
       await this._notificationClient.end();
       this.logger.log('Notification client disconnected');
     } catch (error) {
-      this.logger.error(
-        'Error disconnecting notification client',
-        error instanceof Error ? error.message : String(error),
-      );
+      this.logger.error('Error disconnecting notification client', {
+        error: error instanceof Error ? error.stack : String(error),
+      });
     }
   }
 

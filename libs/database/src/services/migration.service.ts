@@ -1,4 +1,5 @@
-import { Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import { LOGGER, LoggerPort } from '@app/core/observability';
+import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { Migration, MigrationProvider, Migrator } from 'kysely';
 import { analyticsMigrations, bootstrapMigrations, operationalMigrations } from '../migrations';
 import { DATABASE_PROVIDER, DatabaseProviderPort } from '../ports/provider.port';
@@ -15,9 +16,14 @@ class StaticMigrationProvider implements MigrationProvider {
 
 @Injectable()
 export class MigrationService implements OnApplicationBootstrap {
-  private readonly logger = new Logger(MigrationService.name);
+  private readonly logger;
 
-  constructor(@Inject(DATABASE_PROVIDER) private readonly provider: DatabaseProviderPort) {}
+  constructor(
+    @Inject(LOGGER) logger: LoggerPort,
+    @Inject(DATABASE_PROVIDER) private readonly provider: DatabaseProviderPort,
+  ) {
+    this.logger = logger.forContext(MigrationService.name);
+  }
 
   async onApplicationBootstrap(): Promise<void> {
     await this.migrateToLatest('bootstrap');
@@ -40,7 +46,7 @@ export class MigrationService implements OnApplicationBootstrap {
     });
 
     if (error) {
-      this.logger.error(`[${target}] Migration run failed`, error);
+      this.logger.error(`[${target}] Migration run failed`, { error });
       throw error;
     }
     if (!results?.length) this.logger.log(`[${target}] Database schema is up to date`);
@@ -63,7 +69,7 @@ export class MigrationService implements OnApplicationBootstrap {
     });
 
     if (error) {
-      this.logger.error(`[${target}] Migration rollback failed`, error);
+      this.logger.error(`[${target}] Migration rollback failed`, { error });
       throw error;
     }
   }

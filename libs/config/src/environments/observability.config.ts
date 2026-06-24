@@ -1,25 +1,21 @@
+import { Environment, LogLevel } from '@app/common/types';
 import { ConfigType } from '@nestjs/config';
-import { IsDefined, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsDefined, IsEnum, IsOptional } from 'class-validator';
 import { createConfig } from '../utils/factory.config';
-import { EnvironmentType } from './app.config';
 
 class ObservabilityEnvConfig {
   @IsDefined()
-  @IsEnum(EnvironmentType)
-  NODE_ENV!: EnvironmentType;
-
-  @IsDefined()
-  @IsString()
-  OTEL_EXPORTER_OTLP_ENDPOINT!: string;
+  @IsEnum(Environment)
+  NODE_ENV!: Environment;
 
   @IsOptional()
-  @IsString()
-  LOG_LEVEL?: string;
+  @IsEnum(LogLevel)
+  LOG_LEVEL?: LogLevel;
 }
 
 export const observabilityConfig = createConfig('observability', ObservabilityEnvConfig, (cfg) => ({
-  logLevel: cfg.LOG_LEVEL ?? 'info',
-  prettyPrint: cfg.NODE_ENV !== EnvironmentType.PRODUCTION,
+  logLevel: cfg.LOG_LEVEL ?? LogLevel.INFO,
+  prettyPrint: cfg.NODE_ENV !== Environment.PRODUCTION,
 }));
 
 export const OBSERVABILITY_CONFIG = observabilityConfig.KEY;

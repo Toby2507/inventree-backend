@@ -1,7 +1,9 @@
+import { ObservabilityModule } from '@app/core/observability';
 import { OUTBOX_SERVICE } from '@app/core/reliability/outbox';
 import { DATABASE_CONTEXT, DatabaseModule, storeContextStorage } from '@app/database';
 import { DatabaseContextService } from '@app/database/services/database.context.service';
 import { faker } from '@app/testing';
+import { createOtelTestHarness } from '@app/testing/core/observability';
 import { fsStoreContext } from '@app/testing/identity';
 import { UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -13,9 +15,10 @@ describe('DatabaseContextService (integration)', () => {
   let module: TestingModule;
   let service: DatabaseContextService;
 
+  createOtelTestHarness();
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      imports: [DatabaseModule],
+      imports: [DatabaseModule, ObservabilityModule],
     }).compile();
     await module.init();
     service = module.get<DatabaseContextService>(DATABASE_CONTEXT);

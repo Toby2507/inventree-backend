@@ -1,5 +1,7 @@
 import { databaseConfig } from '@app/config';
+import { LOGGER } from '@app/core/observability';
 import { DatabaseProvider } from '@app/database/database.provider';
+import { makeLoggerMock } from '@app/testing/core/observability';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -7,10 +9,12 @@ describe('DatabaseProvider (integration)', () => {
   let module: TestingModule;
   let provider: DatabaseProvider;
 
+  const { logger } = makeLoggerMock();
+
   beforeAll(async () => {
     module = await Test.createTestingModule({
       imports: [ConfigModule.forRoot({ load: [databaseConfig] })],
-      providers: [DatabaseProvider],
+      providers: [DatabaseProvider, { provide: LOGGER, useValue: logger }],
     }).compile();
     await module.init();
     provider = module.get(DatabaseProvider);
@@ -60,7 +64,7 @@ describe('DatabaseProvider (integration)', () => {
     beforeAll(async () => {
       shutdownModule = await Test.createTestingModule({
         imports: [ConfigModule.forRoot({ load: [databaseConfig] })],
-        providers: [DatabaseProvider],
+        providers: [DatabaseProvider, { provide: LOGGER, useValue: logger }],
       }).compile();
       shutdownProvider = shutdownModule.get(DatabaseProvider);
       await shutdownModule.init();

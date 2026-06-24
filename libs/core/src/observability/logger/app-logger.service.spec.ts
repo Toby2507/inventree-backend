@@ -1,7 +1,8 @@
+import { LogLevel } from '@app/common/types';
+import { ObservabilityConfig } from '@app/config';
 import { fsObservationContext, makeMockPino } from '@app/testing/core/observability';
 import { observationStorage } from '../context/observation-context.storage';
 import { AppLoggerService, ContextLogger } from './app-logger.service';
-import { ObservabilityConfig } from '@app/config';
 
 let capturedPinoConfig: Record<string, unknown> = {};
 const mockPinoInstance = makeMockPino();
@@ -23,7 +24,7 @@ describe('AppLoggerService', () => {
 
   const obsConfig: ObservabilityConfig = {
     prettyPrint: false,
-    logLevel: 'info',
+    logLevel: LogLevel.INFO,
   };
   const callMixin = (): Record<string, unknown> => {
     const mixin = capturedPinoConfig['mixin'] as () => Record<string, unknown>;

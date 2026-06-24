@@ -1,5 +1,4 @@
 import { DomainExceptionFilter } from '@app/common/filters';
-import { validate } from '@app/config';
 import { GeneratorModule } from '@app/core/generators';
 import { RedisModule } from '@app/core/infrastructure/redis';
 import { ObservabilityModule, ObservationContextMiddleware } from '@app/core/observability';
@@ -17,7 +16,7 @@ import { IdentityModule } from './identity';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, validate }),
+    ConfigModule.forRoot({ isGlobal: true, cache: true }),
     CqrsModule.forRoot(),
     ScheduleModule.forRoot(),
     // Globals

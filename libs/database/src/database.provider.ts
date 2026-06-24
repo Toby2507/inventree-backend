@@ -1,4 +1,11 @@
-import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
+import { DATABASE_CONFIG, DatabaseConfig } from '@app/config';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  OnApplicationBootstrap,
+  OnApplicationShutdown,
+} from '@nestjs/common';
 import { Kysely, PostgresDialect } from 'kysely';
 import { Client, Pool, PoolConfig } from 'pg';
 import { DatabaseProviderPort } from './ports/provider.port';
@@ -20,13 +27,15 @@ export class DatabaseProvider
 
   private _notificationClient!: Client;
 
+  constructor(@Inject(DATABASE_CONFIG) private readonly config: DatabaseConfig) {}
+
   async onApplicationBootstrap(): Promise<void> {
     this._operationalPrimary = this.createDbInstance({
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT) || 5432,
-      database: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
+      host: this.config.host,
+      port: this.config.port,
+      database: this.config.name,
+      user: this.config.user,
+      password: this.config.password,
       max: 20,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 5_000,
@@ -41,11 +50,11 @@ export class DatabaseProvider
      * Can later be moved to a dedicated analytics database.
      */
     this._analyticsPrimary = this.createDbInstance({
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT) || 5432,
-      database: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
+      host: this.config.host,
+      port: this.config.port,
+      database: this.config.name,
+      user: this.config.user,
+      password: this.config.password,
       max: 5,
       idleTimeoutMillis: 60_000,
       connectionTimeoutMillis: 10_000,
@@ -54,11 +63,11 @@ export class DatabaseProvider
      * Notification client for LISTEN/NOTIFY events.
      */
     this._notificationClient = new Client({
-      user: process.env.DB_USER,
-      host: process.env.DB_HOST,
-      database: process.env.DB_NAME,
-      password: process.env.DB_PASSWORD,
-      port: Number(process.env.DB_PORT) || 5432,
+      user: this.config.user,
+      host: this.config.host,
+      database: this.config.name,
+      password: this.config.password,
+      port: this.config.port,
     });
 
     await this.verifyConnections();

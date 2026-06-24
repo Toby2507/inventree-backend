@@ -16,7 +16,7 @@ import { QueueMapper } from './queue-mapper';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, cache: true }),
     ScheduleModule.forRoot(),
     ObservabilityModule,
     DatabaseModule,

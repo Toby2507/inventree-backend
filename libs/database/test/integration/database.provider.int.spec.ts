@@ -1,4 +1,6 @@
+import { databaseConfig } from '@app/config';
 import { DatabaseProvider } from '@app/database/database.provider';
+import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 
 describe('DatabaseProvider (integration)', () => {
@@ -7,6 +9,7 @@ describe('DatabaseProvider (integration)', () => {
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
+      imports: [ConfigModule.forRoot({ load: [databaseConfig] })],
       providers: [DatabaseProvider],
     }).compile();
     await module.init();
@@ -56,6 +59,7 @@ describe('DatabaseProvider (integration)', () => {
 
     beforeAll(async () => {
       shutdownModule = await Test.createTestingModule({
+        imports: [ConfigModule.forRoot({ load: [databaseConfig] })],
         providers: [DatabaseProvider],
       }).compile();
       shutdownProvider = shutdownModule.get(DatabaseProvider);

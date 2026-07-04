@@ -1,4 +1,3 @@
-import { JsonValue } from '@app/common/types';
 import { ID_GENERATOR, IDGeneratorPort } from '@app/core/generators';
 import {
   getOptionalObservationContext,
@@ -14,6 +13,7 @@ import {
   DatabaseContextPort,
   DatabaseProviderPort,
 } from '@app/database';
+import { JsonValue } from '@app/shared-kernel';
 import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { SpanKind } from '@opentelemetry/api';

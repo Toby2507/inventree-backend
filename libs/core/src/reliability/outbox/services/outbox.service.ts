@@ -1,6 +1,6 @@
-import { DomainEvent } from '@app/common/bases';
 import { getOptionalObservationContext, serializeOutboxContext } from '@app/core/observability';
 import { OperationalDB } from '@app/database';
+import { DomainEvent } from '@app/shared-kernel';
 import { Inject, Injectable } from '@nestjs/common';
 import { trace } from '@opentelemetry/api';
 import { OutboxServicePort } from '../ports/outbox.port';

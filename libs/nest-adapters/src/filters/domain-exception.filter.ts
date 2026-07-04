@@ -1,6 +1,7 @@
+import { DomainException } from '@app/shared-kernel';
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
 import { Response } from 'express';
-import { DomainException, mapCodeToStatus } from '../exceptions';
+import { mapCodeToStatus } from '../utils';
 
 @Catch(DomainException)
 export class DomainExceptionFilter implements ExceptionFilter {

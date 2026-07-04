@@ -1,6 +1,6 @@
-import { Fn } from '@app/common/types';
 import { REDIS_CLIENT } from '@app/core/infrastructure/redis/redis.provider';
 import { RedisService } from '@app/core/infrastructure/redis/redis.service';
+import { Fn } from '@app/shared-kernel';
 import { createTestRedis } from '@app/testing/core/infrastructure';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Redis } from 'ioredis';

@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { mapCodeToStatus } from './map-code-to-status';
+import { mapCodeToStatus } from './map-code-to-status.util';
 
 describe('mapCodeToStatus', () => {
   describe('INVALID substring -> 400', () => {

@@ -1,4 +1,4 @@
-import { Email } from '@app/common/value-objects';
+import { Email } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { feUser, fsUser } from '@app/testing/identity';
 import { AuthenticationBlockedEvent } from '../events/authentication-blocked.event';

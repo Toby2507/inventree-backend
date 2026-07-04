@@ -1,5 +1,5 @@
-import { LogLevel } from '@app/common/types';
 import { ObservabilityConfig } from '@app/config';
+import { LogLevel } from '@app/shared-kernel';
 import { fsObservationContext, makeMockPino } from '@app/testing/core/observability';
 import { observationStorage } from '../context/observation-context.storage';
 import { AppLoggerService, ContextLogger } from './app-logger.service';

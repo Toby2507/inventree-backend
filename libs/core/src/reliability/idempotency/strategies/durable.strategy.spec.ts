@@ -1,7 +1,7 @@
-import { IDEMPOTENCY_HEADER } from '@app/common/constants';
 import { REDIS } from '@app/core/infrastructure/redis';
 import { OBFUSCATION } from '@app/core/security';
 import { DATABASE_CONTEXT } from '@app/database';
+import { IDEMPOTENCY_HEADER } from '@app/nest-adapters/constants';
 import { makeRedisMock } from '@app/testing/core/infrastructure';
 import {
   fsIdempotencyRecord,

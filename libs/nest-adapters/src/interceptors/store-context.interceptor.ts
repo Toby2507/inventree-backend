@@ -3,12 +3,6 @@ import { Request } from 'express';
 import { Observable } from 'rxjs';
 import { storeContextStorage, StoreContext } from '@app/database';
 
-/**
- * The minimum shape StoreContextInterceptor requires from req.user.
- * JwtStrategy in the identity context must produce a payload that satisfies
- * this interface. The interceptor deliberately avoids importing JwtPayload
- * from identity to keep libs/common free of bounded context dependencies.
- */
 interface StoreAwareUser {
   sub: string;
   storeId: string;

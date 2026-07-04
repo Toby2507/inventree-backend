@@ -1,4 +1,4 @@
-import { DomainEvent } from '@app/common/bases';
+import { DomainEvent } from '@app/shared-kernel';
 import { AnalyticsDB, OperationalDB } from '../types/db.schema.types';
 
 export interface CommandDbContext {

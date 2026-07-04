@@ -1,4 +1,4 @@
-import { DomainException } from '@app/common/exceptions';
+import { DomainException } from '@app/shared-kernel';
 import { UserStatus } from '../aggregates/user.aggregate';
 
 export class UserCannotAuthenticateException extends DomainException {

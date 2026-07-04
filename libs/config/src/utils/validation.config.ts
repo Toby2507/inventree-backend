@@ -1,4 +1,4 @@
-import { ClassConstructor } from '@app/common/types';
+import { ClassConstructor } from '@app/shared-kernel';
 import { plainToInstance } from 'class-transformer';
 import { validateSync, ValidationError } from 'class-validator';
 

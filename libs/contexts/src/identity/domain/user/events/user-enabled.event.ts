@@ -1,4 +1,4 @@
-import { DomainEvent } from '@app/common/bases';
+import { DomainEvent } from '@app/shared-kernel';
 
 export interface UserEnabledPayload {
   userId: string;

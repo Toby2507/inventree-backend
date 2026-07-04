@@ -1,4 +1,4 @@
-import { Environment, LogLevel } from '@app/common/types';
+import { Environment, LogLevel } from '@app/shared-kernel';
 import { ConfigType } from '@nestjs/config';
 import { IsDefined, IsEnum, IsOptional } from 'class-validator';
 import { createConfig } from '../utils/factory.config';

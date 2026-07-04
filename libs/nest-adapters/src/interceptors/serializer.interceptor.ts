@@ -1,7 +1,7 @@
+import { ClassConstructor } from '@app/shared-kernel';
 import { CallHandler, ExecutionContext, NestInterceptor, UseInterceptors } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { map, Observable } from 'rxjs';
-import { ClassConstructor } from '../types';
 
 export function Serialize(dto: ClassConstructor) {
   return UseInterceptors(new SerializerInterceptor(dto));

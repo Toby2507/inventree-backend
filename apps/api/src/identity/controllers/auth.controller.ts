@@ -1,5 +1,5 @@
-import { ControllerResponse } from '@app/common/types';
 import { RegisterUserCommand } from '@app/contexts/identity';
+import { ControllerResponse } from '@app/shared-kernel';
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import {

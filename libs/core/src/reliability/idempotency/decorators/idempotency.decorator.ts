@@ -1,4 +1,4 @@
-import { IDEMPOTENCY_HEADER } from '@app/common/constants';
+import { IDEMPOTENCY_HEADER } from '@app/nest-adapters/constants';
 import { applyDecorators, SetMetadata } from '@nestjs/common';
 import { ApiHeader } from '@nestjs/swagger';
 

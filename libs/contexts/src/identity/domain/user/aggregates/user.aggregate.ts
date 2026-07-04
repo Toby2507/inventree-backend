@@ -1,5 +1,4 @@
-import { AggregateRoot } from '@app/common/bases';
-import { Email, PhoneNumber } from '@app/common/value-objects';
+import { AggregateRoot, Email, PhoneNumber } from '@app/shared-kernel';
 import { MfaType, UserSecurity, UserSecuritySnapshot } from '../entities/user-security.entity';
 import { AuthenticationBlockedEvent } from '../events/authentication-blocked.event';
 import { UserDisabledEvent } from '../events/user-disabled.event';

@@ -1,4 +1,4 @@
-import { ClassConstructor } from '@app/common/types';
+import { ClassConstructor } from '@app/shared-kernel';
 import { ConfigObject, registerAs } from '@nestjs/config';
 import { validate } from './validation.config';
 

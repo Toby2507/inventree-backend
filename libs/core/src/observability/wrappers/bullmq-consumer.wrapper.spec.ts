@@ -1,4 +1,4 @@
-import { Fn } from '@app/common/types';
+import { Fn } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { createOtelTestHarness, makeLoggerMock } from '@app/testing/core/observability';
 import { fsJob } from '@app/testing/system';

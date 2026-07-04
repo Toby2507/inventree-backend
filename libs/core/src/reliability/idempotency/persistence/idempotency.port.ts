@@ -1,5 +1,5 @@
-import { JsonValue } from '@app/common/types';
 import { OperationalDB } from '@app/database';
+import { JsonValue } from '@app/shared-kernel';
 import { CreateIdempotency, IdempotencyRecord } from './idempotency.persistence.types';
 
 export interface IdempotencyRepository {

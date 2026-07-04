@@ -1,4 +1,4 @@
-import { Mapper } from '@app/common/bases';
+import { Mapper } from '@app/shared-kernel';
 import { User } from '../../../../domain/user/aggregates/user.aggregate';
 import { UserSecurityMapper } from './user-security.mapper';
 import { UserPersistence } from './user.persistence.types';

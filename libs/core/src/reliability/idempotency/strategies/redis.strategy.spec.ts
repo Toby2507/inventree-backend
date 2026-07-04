@@ -1,6 +1,6 @@
-import { IDEMPOTENCY_HEADER } from '@app/common/constants';
 import { REDIS } from '@app/core/infrastructure/redis';
 import { OBFUSCATION } from '@app/core/security';
+import { IDEMPOTENCY_HEADER } from '@app/nest-adapters/constants';
 import { makeRedisMock } from '@app/testing/core/infrastructure';
 import { fsRedisIdempotencyRecord } from '@app/testing/core/reliability/idempotency';
 import { makeObfuscationMock } from '@app/testing/core/security';

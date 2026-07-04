@@ -1,4 +1,4 @@
-import { Mapper } from '@app/common/bases';
+import { Mapper } from '@app/shared-kernel';
 import { UserSecuritySnapshot } from '../../../../domain/user/entities/user-security.entity';
 import { UserSecuritySnapRow } from './user.persistence.types';
 

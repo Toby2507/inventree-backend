@@ -1,5 +1,5 @@
-import { DomainEvent } from '@app/common/bases';
 import { OUTBOX_SERVICE, OutboxServicePort } from '@app/core/reliability/outbox';
+import { DomainEvent } from '@app/shared-kernel';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { sql } from 'kysely';
 import { storeContextStorage } from '../context/store-context';

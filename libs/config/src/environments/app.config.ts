@@ -1,4 +1,4 @@
-import { Environment } from '@app/common/types';
+import { Environment } from '@app/shared-kernel';
 import { ConfigType } from '@nestjs/config';
 import { Transform } from 'class-transformer';
 import { IsDefined, IsEnum, IsNumber, IsString } from 'class-validator';

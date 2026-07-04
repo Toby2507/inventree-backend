@@ -109,6 +109,24 @@
         "tsConfigPath": "libs/database/tsconfig.lib.json"
       }
     },
+    "nest-adapters": {
+      "type": "library",
+      "root": "libs/nest-adapters",
+      "entryFile": "index",
+      "sourceRoot": "libs/nest-adapters/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/nest-adapters/tsconfig.lib.json"
+      }
+    },
+    "shared-kernel": {
+      "type": "library",
+      "root": "libs/shared-kernel",
+      "entryFile": "index",
+      "sourceRoot": "libs/shared-kernel/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/shared-kernel/tsconfig.lib.json"
+      }
+    },
     "testing": {
       "type": "library",
       "root": "libs/testing",

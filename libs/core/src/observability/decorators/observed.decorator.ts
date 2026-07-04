@@ -1,4 +1,4 @@
-import { copyMethodMetadata } from '@app/common/utils';
+import { copyMethodMetadata } from '@app/nest-adapters/utils';
 import { LoggerPort } from '../ports/logger.port';
 import { Trace, TraceOptions } from './trace.decorator';
 

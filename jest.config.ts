@@ -5,11 +5,12 @@ const baseProjectConfig = {
   globalSetup: '<rootDir>/jest/global-setup.ts',
   globalTeardown: '<rootDir>/jest/global-teardown.ts',
   moduleNameMapper: {
-    '^@app/common(|/.*)$': '<rootDir>/libs/common/src$1',
     '^@app/config(|/.*)$': '<rootDir>/libs/config/src$1',
     '^@app/contexts(|/.*)$': '<rootDir>/libs/contexts/src$1',
     '^@app/core(|/.*)$': '<rootDir>/libs/core/src$1',
     '^@app/database(|/.*)$': '<rootDir>/libs/database/src$1',
+    '^@app/nest-adapters(|/.*)$': '<rootDir>/libs/nest-adapters/src$1',
+    '^@app/shared-kernel(|/.*)$': '<rootDir>/libs/shared-kernel/src$1',
     '^@app/testing(|/.*)$': '<rootDir>/libs/testing/src$1',
   },
 };
@@ -39,11 +40,12 @@ module.exports = {
   testEnvironment: '<rootDir>/jest/custom-jest-environment.ts',
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   moduleNameMapper: {
-    '^@app/common(|/.*)$': '<rootDir>/libs/common/src$1',
     '^@app/config(|/.*)$': '<rootDir>/libs/config/src$1',
     '^@app/contexts(|/.*)$': '<rootDir>/libs/contexts/src$1',
     '^@app/core(|/.*)$': '<rootDir>/libs/core/src$1',
     '^@app/database(|/.*)$': '<rootDir>/libs/database/src$1',
+    '^@app/nest-adapters(|/.*)$': '<rootDir>/libs/nest-adapters/src$1',
+    '^@app/shared-kernel(|/.*)$': '<rootDir>/libs/shared-kernel/src$1',
     '^@app/testing(|/.*)$': '<rootDir>/libs/testing/src$1',
   },
   globals: {

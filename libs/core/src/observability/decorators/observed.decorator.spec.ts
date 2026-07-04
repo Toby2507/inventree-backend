@@ -1,4 +1,4 @@
-import { Fn } from '@app/common/types';
+import { Fn } from '@app/shared-kernel';
 import {
   createOtelTestHarness,
   fsObservationContext,

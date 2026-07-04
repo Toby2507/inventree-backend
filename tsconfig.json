@@ -19,12 +19,13 @@
     "noFallthroughCasesInSwitch": true,
     "strict": true,
     "paths": {
-      "@app/common/*": ["./libs/common/src/*"],
       "@app/config": ["./libs/config/src/index"],
       "@app/contexts/*": ["./libs/contexts/src/*"],
       "@app/core/*": ["./libs/core/src/*"],
       "@app/database": ["./libs/database/src/index"],
       "@app/database/*": ["./libs/database/src/*"],
+      "@app/nest-adapters/*": ["./libs/nest-adapters/src/*"],
+      "@app/shared-kernel": ["./libs/shared-kernel/src/index"],
       "@app/testing": ["./libs/testing/src/index"],
       "@app/testing/*": ["./libs/testing/src/*"]
     },

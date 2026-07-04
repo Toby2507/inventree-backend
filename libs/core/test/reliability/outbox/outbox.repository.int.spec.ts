@@ -1,7 +1,6 @@
-import { DomainEvent } from '@app/common/bases';
-import { Mutable } from '@app/common/types';
 import { OutboxKyselyRepository } from '@app/core/reliability/outbox/persistence/outbox.kysely.repository';
 import { OperationalDB, OperationalSchema } from '@app/database';
+import { DomainEvent, Mutable } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { fsSerializedOutboxContext } from '@app/testing/core/observability';
 import { feOutboxEvent } from '@app/testing/core/reliability/outbox';

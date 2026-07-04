@@ -3,7 +3,7 @@
   "compilerOptions": {
     "declaration": true,
     "root": "src",
-    "outDir": "../../dist/libs/common"
+    "outDir": "../../dist/libs/shared-kernel"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test"]

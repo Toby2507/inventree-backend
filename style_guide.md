@@ -219,7 +219,7 @@ All domain exceptions extend `DomainException` from `libs/common/src/exceptions`
 `HttpException` — the domain layer has zero HTTP awareness.
 
 ```typescript
-import { DomainException } from '@app/common';
+import { DomainException } from '@app/shared-kernel';
 
 export class TransactionAlreadyCompletedException extends DomainException {
   readonly code = 'TRANSACTION_ALREADY_COMPLETED';

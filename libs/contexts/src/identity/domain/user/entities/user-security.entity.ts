@@ -1,4 +1,6 @@
-import { BaseEntity, DomainEvent } from '@app/common/bases';
+import { BaseEntity, DomainEvent } from '@app/shared-kernel';
+import { UserLockedOutEvent } from '../events/user-locked-out.event';
+import { UserLoggedInEvent } from '../events/user-logged-in.event';
 import {
   MfaAlreadyEnabledException,
   MfaNotEnabledException,
@@ -6,8 +8,6 @@ import {
   MfaSetupInProgressException,
   MfaSetupNotInProgressException,
 } from '../exceptions/security.exceptions';
-import { UserLockedOutEvent } from '../events/user-locked-out.event';
-import { UserLoggedInEvent } from '../events/user-logged-in.event';
 
 export type MfaType = 'email' | 'totp';
 export type MfaStatus = 'pending' | 'enabled' | 'disabled';

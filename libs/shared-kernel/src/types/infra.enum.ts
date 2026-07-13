@@ -11,3 +11,9 @@ export enum LogLevel {
   INFO = 'info',
   DEBUG = 'debug',
 }
+
+export enum MailProvider {
+  SMTP = 'smtp',
+  RESEND = 'resend',
+  FAKE = 'fake',
+}

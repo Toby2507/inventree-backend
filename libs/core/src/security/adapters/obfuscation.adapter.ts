@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { ObfuscationPort } from '../ports/obfuscation.port';
-import stringify from 'fast-json-stable-stringify';
+import { SECURITY_CONFIG, SecurityConfig } from '@app/config';
+import { Inject, Injectable } from '@nestjs/common';
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypto';
-import { ConfigService } from '@nestjs/config';
+import stringify from 'fast-json-stable-stringify';
+import { ObfuscationPort } from '../ports/obfuscation.port';
 
 @Injectable()
 export class ObfuscationAdapter implements ObfuscationPort {
@@ -10,11 +10,11 @@ export class ObfuscationAdapter implements ObfuscationPort {
   private readonly IV_BYTES = 12; // 96-bit IV — GCM standard
   private readonly TAG_BYTES = 16;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(@Inject(SECURITY_CONFIG) private readonly config: SecurityConfig) {}
 
   hash(data: unknown): string {
     const normalized = typeof data === 'string' ? data : stringify(data);
-    return createHash('sha256').update(stringify(normalized)).digest('hex');
+    return createHash('sha256').update(normalized).digest('hex');
   }
 
   encrypt(plaintext: string): string {
@@ -40,7 +40,7 @@ export class ObfuscationAdapter implements ObfuscationPort {
   }
 
   private getKey(): Buffer {
-    const secret = this.configService.get<string>('OBFUSCATION_KEY');
+    const secret = this.config.obfuscationKey;
     if (!secret) throw new Error('OBFUSCATION_KEY is not configured');
     const key = Buffer.from(secret, 'hex');
     if (key.length !== 32) throw new Error('OBFUSCATION_KEY must be 32 bytes (64 hex characters)');

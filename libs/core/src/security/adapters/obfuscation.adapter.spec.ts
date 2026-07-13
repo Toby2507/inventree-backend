@@ -1,5 +1,4 @@
 import { faker } from '@app/testing';
-import { makeConfigMock } from '@app/testing/system';
 import { ObfuscationAdapter } from './obfuscation.adapter';
 
 // 32 bytes expressed as 64 lowercase hex characters
@@ -7,13 +6,11 @@ const VALID_KEY = faker.string.hexadecimal({ length: 64, casing: 'lower', prefix
 
 describe('ObfuscationAdapter', () => {
   let adapter: ObfuscationAdapter;
-
-  const configService = makeConfigMock();
+  const config = { obfuscationKey: VALID_KEY };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    adapter = new ObfuscationAdapter(configService);
-    configService.get.mockReturnValue(VALID_KEY);
+    adapter = new ObfuscationAdapter(config);
   });
 
   describe('hash()', () => {
@@ -120,33 +117,27 @@ describe('ObfuscationAdapter', () => {
 
   describe('getKey() validation', () => {
     it('should throw when OBFUSCATION_KEY is absent from config', () => {
-      (configService.get as jest.Mock).mockReturnValue(undefined);
+      config.obfuscationKey = '';
       expect(() => adapter.encrypt('x')).toThrow('OBFUSCATION_KEY is not configured');
     });
 
     it('should throw when OBFUSCATION_KEY is shorter than 64 hex chars', () => {
-      (configService.get as jest.Mock).mockReturnValue('a'.repeat(62));
+      config.obfuscationKey = 'a'.repeat(62);
       expect(() => adapter.encrypt('x')).toThrow(
         'OBFUSCATION_KEY must be 32 bytes (64 hex characters)',
       );
     });
 
     it('should throw when OBFUSCATION_KEY is longer than 64 hex chars', () => {
-      (configService.get as jest.Mock).mockReturnValue('a'.repeat(66));
+      config.obfuscationKey = 'a'.repeat(66);
       expect(() => adapter.encrypt('x')).toThrow(
         'OBFUSCATION_KEY must be 32 bytes (64 hex characters)',
       );
     });
 
     it('should accept a valid 64-char hex key without throwing', () => {
-      (configService.get as jest.Mock).mockReturnValue(VALID_KEY);
+      config.obfuscationKey = VALID_KEY;
       expect(() => adapter.encrypt('x')).not.toThrow();
-    });
-
-    it('should re-read the key on every operation (no stale cache)', () => {
-      adapter.encrypt('one');
-      adapter.encrypt('two');
-      expect(configService.get).toHaveBeenCalledTimes(2);
     });
   });
 });

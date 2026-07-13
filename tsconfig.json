@@ -18,6 +18,7 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "strict": true,
+    "jsx": "react-jsx",
     "paths": {
       "@app/config": ["./libs/config/src/index"],
       "@app/contexts/*": ["./libs/contexts/src/*"],

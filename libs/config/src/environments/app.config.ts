@@ -21,6 +21,10 @@ class AppEnvConfig {
   @IsDefined()
   @IsString()
   API_URL!: string;
+
+  @IsDefined()
+  @IsString()
+  APP_URL!: string;
 }
 
 export const appConfig = createConfig('app', AppEnvConfig, (cfg) => ({
@@ -28,6 +32,7 @@ export const appConfig = createConfig('app', AppEnvConfig, (cfg) => ({
   port: cfg.PORT,
   name: cfg.SYSTEM_NAME,
   apiUrl: cfg.API_URL,
+  appUrl: cfg.APP_URL,
 }));
 
 export const APP_CONFIG = appConfig.KEY;

@@ -1,9 +1,8 @@
-import { CACHE_CONFIG, CacheConfig } from './environments';
-
-export const BULL_MQ = Symbol('BULL_MQ');
+import { ConfigModule } from '@nestjs/config';
+import { CACHE_CONFIG, cacheConfig, CacheConfig } from './environments';
 
 export const bullmqConfig = {
-  provide: BULL_MQ,
+  imports: [ConfigModule.forFeature(cacheConfig)],
   inject: [CACHE_CONFIG],
   useFactory: (config: CacheConfig) => ({
     connection: {

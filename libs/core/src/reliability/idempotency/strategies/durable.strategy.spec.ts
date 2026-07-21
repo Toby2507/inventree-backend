@@ -1,5 +1,5 @@
 import { REDIS } from '@app/core/infrastructure/redis';
-import { OBFUSCATION } from '@app/core/security';
+import { CRYPTOGRAPHY } from '@app/core/security/cryptography';
 import { DATABASE_CONTEXT } from '@app/database';
 import { IDEMPOTENCY_HEADER } from '@app/nest-adapters/constants';
 import { makeRedisMock } from '@app/testing/core/infrastructure';
@@ -7,7 +7,7 @@ import {
   fsIdempotencyRecord,
   makeIdempotencyRepositoryMock,
 } from '@app/testing/core/reliability/idempotency';
-import { makeObfuscationMock } from '@app/testing/core/security';
+import { makeCryptographyMock } from '@app/testing/core/security';
 import { makeDatabaseContextMock } from '@app/testing/database';
 import { makeCallHandlerMock, makeRequestMock } from '@app/testing/system';
 import {
@@ -32,7 +32,7 @@ describe('DurableIdempotencyStrategy', () => {
   let mockHandle: jest.Mock;
 
   const redis = makeRedisMock();
-  const obfuscation = makeObfuscationMock();
+  const cryptography = makeCryptographyMock();
   const dbContext = makeDatabaseContextMock();
   const idempotencyRepository = makeIdempotencyRepositoryMock();
   const request = makeRequestMock({ headers: { [IDEMPOTENCY_HEADER]: 'idem-key-1' } });
@@ -46,7 +46,7 @@ describe('DurableIdempotencyStrategy', () => {
       providers: [
         DurableIdempotencyStrategy,
         { provide: REDIS, useValue: redis },
-        { provide: OBFUSCATION, useValue: obfuscation },
+        { provide: CRYPTOGRAPHY, useValue: cryptography },
         { provide: DATABASE_CONTEXT, useValue: dbContext },
         { provide: IDEMPOTENCY_REPOSITORY, useValue: idempotencyRepository },
       ],
@@ -59,7 +59,7 @@ describe('DurableIdempotencyStrategy', () => {
     jest.clearAllMocks();
     ({ callHandler, mockHandle } = makeCallHandlerMock());
     mockHandle.mockReturnValue(of('ok'));
-    obfuscation.hash.mockReturnValue('hash-abc');
+    cryptography.sha256.mockReturnValue('hash-abc');
   });
 
   afterAll(async () => {
@@ -76,7 +76,7 @@ describe('DurableIdempotencyStrategy', () => {
   describe('when fetching existing records', () => {
     it('should attempt to fetch existing record from redis', async () => {
       const record = fsIdempotencyRecord.generate({ status: 'completed' });
-      obfuscation.hash.mockReturnValue(record.requestHash);
+      cryptography.sha256.mockReturnValue(record.requestHash);
       redis.get.mockResolvedValue(record);
       await runStrategy();
       expect(redis.get).toHaveBeenCalledWith(getKey());
@@ -85,7 +85,7 @@ describe('DurableIdempotencyStrategy', () => {
 
     it('should fallback to database if redis is unavailable', async () => {
       const record = fsIdempotencyRecord.generate({ status: 'completed' });
-      obfuscation.hash.mockReturnValue(record.requestHash);
+      cryptography.sha256.mockReturnValue(record.requestHash);
       redis.get.mockResolvedValue(null);
       idempotencyRepository.findActiveRecord.mockResolvedValue(record);
       await runStrategy();
@@ -100,7 +100,7 @@ describe('DurableIdempotencyStrategy', () => {
 
   describe('when existing record exists', () => {
     it('should throw if request hash does not match stored hash', async () => {
-      obfuscation.hash.mockReturnValue('different-hash');
+      cryptography.sha256.mockReturnValue('different-hash');
       redis.get.mockResolvedValue(fsIdempotencyRecord.generate());
       await expect(runStrategy()).rejects.toThrow(new BadRequestException('Payload mismatch'));
       expect(callHandler.handle).not.toHaveBeenCalled();
@@ -108,7 +108,7 @@ describe('DurableIdempotencyStrategy', () => {
 
     it('should throw if record is in_progress', async () => {
       const record = fsIdempotencyRecord.generate({ status: 'in_progress' });
-      obfuscation.hash.mockReturnValue(record.requestHash);
+      cryptography.sha256.mockReturnValue(record.requestHash);
       redis.get.mockResolvedValue(record);
       await expect(runStrategy()).rejects.toThrow(ConflictException);
       expect(callHandler.handle).not.toHaveBeenCalled();
@@ -116,7 +116,7 @@ describe('DurableIdempotencyStrategy', () => {
 
     it('should replay the cached response', async () => {
       const record = fsIdempotencyRecord.generate({ status: 'completed' });
-      obfuscation.hash.mockReturnValue(record.requestHash);
+      cryptography.sha256.mockReturnValue(record.requestHash);
       redis.get.mockResolvedValue(record);
       await expect(runStrategy()).resolves.toEqual(record.response);
       expect(callHandler.handle).not.toHaveBeenCalled();
@@ -127,7 +127,7 @@ describe('DurableIdempotencyStrategy', () => {
         status: 'failed',
         error: { message: 'Validation failed', code: 'INVALID_ERROR' },
       });
-      obfuscation.hash.mockReturnValue(record.requestHash);
+      cryptography.sha256.mockReturnValue(record.requestHash);
       redis.get.mockResolvedValue(record);
       const error = await runStrategy().catch((err) => err);
       expect(error).toBeInstanceOf(IdempotencyException);
@@ -382,7 +382,7 @@ describe('DurableIdempotencyStrategy', () => {
 
       it('should fetch and replay the existing record', async () => {
         const existingRecord = fsIdempotencyRecord.generate({ status: 'completed' });
-        obfuscation.hash.mockReturnValue(existingRecord.requestHash);
+        cryptography.sha256.mockReturnValue(existingRecord.requestHash);
         redis.get.mockResolvedValueOnce(null).mockResolvedValueOnce(existingRecord); // first check: no record, second check: found record after conflict
         idempotencyRepository.findActiveRecord.mockResolvedValue(null);
         const result = await runStrategy();

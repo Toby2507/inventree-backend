@@ -1,9 +1,9 @@
 import { REDIS } from '@app/core/infrastructure/redis';
-import { OBFUSCATION } from '@app/core/security';
+import { CRYPTOGRAPHY } from '@app/core/security/cryptography';
 import { IDEMPOTENCY_HEADER } from '@app/nest-adapters/constants';
 import { makeRedisMock } from '@app/testing/core/infrastructure';
 import { fsRedisIdempotencyRecord } from '@app/testing/core/reliability/idempotency';
-import { makeObfuscationMock } from '@app/testing/core/security';
+import { makeCryptographyMock } from '@app/testing/core/security';
 import { makeCallHandlerMock, makeRequestMock } from '@app/testing/system';
 import {
   BadRequestException,
@@ -26,7 +26,7 @@ describe('RedisIdempotencyStrategy', () => {
   let mockHandle: jest.Mock;
 
   const redis = makeRedisMock();
-  const obfuscation = makeObfuscationMock();
+  const cryptography = makeCryptographyMock();
   const request = makeRequestMock({ headers: { [IDEMPOTENCY_HEADER]: 'idem-key-1' } });
 
   const runStrategy = (options: IdempotencyOptions = OPTIONS, req: any = request) =>
@@ -38,7 +38,7 @@ describe('RedisIdempotencyStrategy', () => {
       providers: [
         RedisIdempotencyStrategy,
         { provide: REDIS, useValue: redis },
-        { provide: OBFUSCATION, useValue: obfuscation },
+        { provide: CRYPTOGRAPHY, useValue: cryptography },
       ],
     }).compile();
     await module.init();
@@ -49,7 +49,7 @@ describe('RedisIdempotencyStrategy', () => {
     jest.clearAllMocks();
     ({ callHandler, mockHandle } = makeCallHandlerMock());
     mockHandle.mockReturnValue(of('ok'));
-    obfuscation.hash.mockReturnValue('hash-abc');
+    cryptography.sha256.mockReturnValue('hash-abc');
     redis.set.mockResolvedValue('OK');
     redis.del.mockResolvedValue(1);
   });
@@ -74,7 +74,7 @@ describe('RedisIdempotencyStrategy', () => {
 
   describe('when existing record exists', () => {
     it('should throw if request hash does not match stored hash', async () => {
-      obfuscation.hash.mockReturnValue('different-hash');
+      cryptography.sha256.mockReturnValue('different-hash');
       redis.get.mockResolvedValue(fsRedisIdempotencyRecord.generate());
       await expect(runStrategy()).rejects.toThrow(new BadRequestException('Payload mismatch'));
       expect(callHandler.handle).not.toHaveBeenCalled();
@@ -82,7 +82,7 @@ describe('RedisIdempotencyStrategy', () => {
 
     it('should throw if record is in_progress', async () => {
       const record = fsRedisIdempotencyRecord.generate({ status: 'in_progress' });
-      obfuscation.hash.mockReturnValue(record.requestHash);
+      cryptography.sha256.mockReturnValue(record.requestHash);
       redis.get.mockResolvedValue(record);
       await expect(runStrategy()).rejects.toThrow(ConflictException);
       expect(callHandler.handle).not.toHaveBeenCalled();
@@ -90,7 +90,7 @@ describe('RedisIdempotencyStrategy', () => {
 
     it('should replay the cached response', async () => {
       const record = fsRedisIdempotencyRecord.generate({ status: 'completed' });
-      obfuscation.hash.mockReturnValue(record.requestHash);
+      cryptography.sha256.mockReturnValue(record.requestHash);
       redis.get.mockResolvedValue(record);
       await expect(runStrategy()).resolves.toEqual(record.response);
       expect(callHandler.handle).not.toHaveBeenCalled();
@@ -101,7 +101,7 @@ describe('RedisIdempotencyStrategy', () => {
         status: 'failed',
         error: { message: 'Validation failed', code: 'INVALID_ERROR' },
       });
-      obfuscation.hash.mockReturnValue(record.requestHash);
+      cryptography.sha256.mockReturnValue(record.requestHash);
       redis.get.mockResolvedValue(record);
       const error = await runStrategy().catch((err) => err);
       expect(error).toBeInstanceOf(IdempotencyException);

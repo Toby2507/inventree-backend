@@ -1,5 +1,5 @@
 import { REDIS, RedisPort } from '@app/core/infrastructure/redis';
-import { OBFUSCATION, ObfuscationPort } from '@app/core/security';
+import { CRYPTOGRAPHY, CryptographyPort } from '@app/core/security/cryptography';
 import { IDEMPOTENCY_HEADER } from '@app/nest-adapters/constants';
 import { mapCodeToStatus } from '@app/nest-adapters/utils';
 import { JsonValue } from '@app/shared-kernel';
@@ -27,14 +27,14 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
 
   constructor(
     @Inject(REDIS) private readonly redis: RedisPort,
-    @Inject(OBFUSCATION) private readonly obfuscation: ObfuscationPort,
+    @Inject(CRYPTOGRAPHY) private readonly crypto: CryptographyPort,
   ) {}
 
   handle<T>(request: Request, next: CallHandler, options: IdempotencyOptions): Observable<T> {
     return defer(async () => {
       const key = request.header(IDEMPOTENCY_HEADER);
       if (!key) throw new BadRequestException('Missing Idempotency-Key');
-      const hash = this.obfuscation.hash(request.body);
+      const hash = this.crypto.sha256(request.body);
       const existingRecord = await this.getRecord(key, options.scope);
       if (existingRecord) {
         const record = this.resolveExistingRecord(existingRecord, hash);

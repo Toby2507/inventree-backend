@@ -1,1 +1,1 @@
-export * from './mocks/obfuscation.mocks';
+export * from './mocks/cryptography.mocks';

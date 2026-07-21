@@ -22,7 +22,7 @@
     "migrate:ci": "nest start migrator",
     "migrate:create": "tsx scripts/create-migrations.ts",
     "migrate:run": "docker compose -f compose.dev.yaml run --rm migrator",
-    "migrate:restart": "pnpm docker:dev:reset && pnpm migrate:run",
+    "migrate:restart": "docker compose -f compose.dev.yaml down db -v && pnpm migrate:run",
     "lint": "eslint \"{apps,libs}/**/*.ts\" --fix",
     "prepare": "husky",
     "test": "jest",

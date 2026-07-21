@@ -2,17 +2,17 @@ import { SECURITY_CONFIG, SecurityConfig } from '@app/config';
 import { Inject, Injectable } from '@nestjs/common';
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypto';
 import stringify from 'fast-json-stable-stringify';
-import { ObfuscationPort } from '../ports/obfuscation.port';
+import { CryptographyPort } from './cryptography.port';
 
 @Injectable()
-export class ObfuscationAdapter implements ObfuscationPort {
+export class CryptographyAdapter implements CryptographyPort {
   private readonly ALGORITHM = 'aes-256-gcm';
   private readonly IV_BYTES = 12; // 96-bit IV — GCM standard
   private readonly TAG_BYTES = 16;
 
   constructor(@Inject(SECURITY_CONFIG) private readonly config: SecurityConfig) {}
 
-  hash(data: unknown): string {
+  sha256(data: unknown): string {
     const normalized = typeof data === 'string' ? data : stringify(data);
     return createHash('sha256').update(normalized).digest('hex');
   }
@@ -39,11 +39,19 @@ export class ObfuscationAdapter implements ObfuscationPort {
     return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString('utf8');
   }
 
+  randomBytes(size: number): Buffer {
+    return randomBytes(size);
+  }
+
+  randomToken(size = 32): string {
+    return randomBytes(size).toString('base64url');
+  }
+
   private getKey(): Buffer {
-    const secret = this.config.obfuscationKey;
-    if (!secret) throw new Error('OBFUSCATION_KEY is not configured');
+    const secret = this.config.cryptographyKey;
+    if (!secret) throw new Error('CRYPTOGRAPHY_KEY is not configured');
     const key = Buffer.from(secret, 'hex');
-    if (key.length !== 32) throw new Error('OBFUSCATION_KEY must be 32 bytes (64 hex characters)');
+    if (key.length !== 32) throw new Error('CRYPTOGRAPHY_KEY must be 32 bytes (64 hex characters)');
     return key;
   }
 }

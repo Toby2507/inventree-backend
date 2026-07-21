@@ -3,7 +3,7 @@ import { GeneratorModule } from '@app/core/generators';
 import { RedisModule } from '@app/core/infrastructure/redis';
 import { ObservabilityModule, ObservationContextMiddleware } from '@app/core/observability';
 import { IdempotencyModule } from '@app/core/reliability/idempotency';
-import { SecurityModule } from '@app/core/security';
+import { CryptographyModule } from '@app/core/security/cryptography';
 import { DatabaseModule } from '@app/database';
 import { DomainExceptionFilter } from '@app/nest-adapters/filters';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
@@ -24,7 +24,7 @@ import { IdentityModule } from './identity';
     GeneratorModule,
     IdempotencyModule,
     RedisModule,
-    SecurityModule,
+    CryptographyModule,
     // Modules
     IdentityModule,
   ],

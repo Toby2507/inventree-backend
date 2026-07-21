@@ -1,50 +1,50 @@
 import { faker } from '@app/testing';
-import { ObfuscationAdapter } from './obfuscation.adapter';
+import { CryptographyAdapter } from './cryptography.adapter';
 
 // 32 bytes expressed as 64 lowercase hex characters
 const VALID_KEY = faker.string.hexadecimal({ length: 64, casing: 'lower', prefix: '' });
 
-describe('ObfuscationAdapter', () => {
-  let adapter: ObfuscationAdapter;
-  const config = { obfuscationKey: VALID_KEY };
+describe('CryptographyAdapter', () => {
+  let adapter: CryptographyAdapter;
+  const config = { cryptographyKey: VALID_KEY };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    adapter = new ObfuscationAdapter(config);
+    adapter = new CryptographyAdapter(config);
   });
 
-  describe('hash()', () => {
+  describe('sha256 hashing', () => {
     it('should return a 64-character lowercase hex string (SHA-256)', () => {
-      expect(adapter.hash('hello')).toMatch(/^[0-9a-f]{64}$/);
+      expect(adapter.sha256('hello')).toMatch(/^[0-9a-f]{64}$/);
     });
 
     it('should be deterministic for the same string input', () => {
-      expect(adapter.hash('test')).toBe(adapter.hash('test'));
+      expect(adapter.sha256('test')).toBe(adapter.sha256('test'));
     });
 
     it('should be deterministic for the same object input', () => {
       const obj = { id: 1, role: 'admin' };
-      expect(adapter.hash(obj)).toBe(adapter.hash(obj));
+      expect(adapter.sha256(obj)).toBe(adapter.sha256(obj));
     });
 
     it('should produce the same hash regardless of object key insertion order', () => {
-      expect(adapter.hash({ a: 1, b: 2 })).toBe(adapter.hash({ b: 2, a: 1 }));
+      expect(adapter.sha256({ a: 1, b: 2 })).toBe(adapter.sha256({ b: 2, a: 1 }));
     });
 
     it('should produce different hashes for different string inputs', () => {
-      expect(adapter.hash('foo')).not.toBe(adapter.hash('bar'));
+      expect(adapter.sha256('foo')).not.toBe(adapter.sha256('bar'));
     });
 
     it('should produce different hashes for different objects', () => {
-      expect(adapter.hash({ a: 1 })).not.toBe(adapter.hash({ a: 2 }));
+      expect(adapter.sha256({ a: 1 })).not.toBe(adapter.sha256({ a: 2 }));
     });
 
     it('should handle null without throwing', () => {
-      expect(() => adapter.hash(null)).not.toThrow();
+      expect(() => adapter.sha256(null)).not.toThrow();
     });
 
     it('should handle numeric input without throwing', () => {
-      expect(() => adapter.hash(42)).not.toThrow();
+      expect(() => adapter.sha256(42)).not.toThrow();
     });
   });
 
@@ -115,28 +115,51 @@ describe('ObfuscationAdapter', () => {
     });
   });
 
-  describe('getKey() validation', () => {
-    it('should throw when OBFUSCATION_KEY is absent from config', () => {
-      config.obfuscationKey = '';
-      expect(() => adapter.encrypt('x')).toThrow('OBFUSCATION_KEY is not configured');
+  describe('randomBytes() and randomToken()', () => {
+    it('should return a Buffer of the requested size', () => {
+      const size = 16;
+      const buf = adapter.randomBytes(size);
+      expect(buf).toBeInstanceOf(Buffer);
+      expect(buf.length).toBe(size);
     });
 
-    it('should throw when OBFUSCATION_KEY is shorter than 64 hex chars', () => {
-      config.obfuscationKey = 'a'.repeat(62);
+    it('should return a base64url string of the requested size', () => {
+      const size = 32;
+      const token = adapter.randomToken(size);
+      expect(typeof token).toBe('string');
+      // Base64url encoding expands the byte length to ~4/3, so we check the length accordingly
+      expect(token.length).toBeGreaterThanOrEqual(Math.ceil((size * 4) / 3));
+    });
+
+    it('should default to 32 bytes for randomToken()', () => {
+      const token = adapter.randomToken();
+      expect(typeof token).toBe('string');
+      expect(token.length).toBeGreaterThanOrEqual(Math.ceil((32 * 4) / 3));
+    });
+  });
+
+  describe('getKey() validation', () => {
+    it('should throw when CRYPTOGRAPHY_KEY is absent from config', () => {
+      config.cryptographyKey = '';
+      expect(() => adapter.encrypt('x')).toThrow('CRYPTOGRAPHY_KEY is not configured');
+    });
+
+    it('should throw when CRYPTOGRAPHY_KEY is shorter than 64 hex chars', () => {
+      config.cryptographyKey = 'a'.repeat(62);
       expect(() => adapter.encrypt('x')).toThrow(
-        'OBFUSCATION_KEY must be 32 bytes (64 hex characters)',
+        'CRYPTOGRAPHY_KEY must be 32 bytes (64 hex characters)',
       );
     });
 
-    it('should throw when OBFUSCATION_KEY is longer than 64 hex chars', () => {
-      config.obfuscationKey = 'a'.repeat(66);
+    it('should throw when CRYPTOGRAPHY_KEY is longer than 64 hex chars', () => {
+      config.cryptographyKey = 'a'.repeat(66);
       expect(() => adapter.encrypt('x')).toThrow(
-        'OBFUSCATION_KEY must be 32 bytes (64 hex characters)',
+        'CRYPTOGRAPHY_KEY must be 32 bytes (64 hex characters)',
       );
     });
 
     it('should accept a valid 64-char hex key without throwing', () => {
-      config.obfuscationKey = VALID_KEY;
+      config.cryptographyKey = VALID_KEY;
       expect(() => adapter.encrypt('x')).not.toThrow();
     });
   });

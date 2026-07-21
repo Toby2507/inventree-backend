@@ -17,7 +17,7 @@ export interface OutboxRepository {
     nextAttemptAt: Date,
     deadLetter: boolean,
   ): Promise<void>;
-  releaseExpiredLocks(db: OperationalDB): Promise<void>;
+  releaseExpiredLocks(db: OperationalDB): Promise<number>;
 }
 
 export const OUTBOX_REPOSITORY = Symbol('OUTBOX_REPOSITORY');

@@ -78,8 +78,8 @@ export class OutboxKyselyRepository implements OutboxRepository {
       .execute();
   }
 
-  async releaseExpiredLocks(db: OperationalDB): Promise<void> {
-    await db
+  async releaseExpiredLocks(db: OperationalDB): Promise<number> {
+    const [{ numUpdatedRows }] = await db
       .updateTable('outbox_events')
       .set({
         status: 'pending',
@@ -90,5 +90,6 @@ export class OutboxKyselyRepository implements OutboxRepository {
       .where('status', '=', 'locked')
       .where('lock_expires_at', '<', new Date())
       .execute();
+    return Number(numUpdatedRows ?? 0);
   }
 }

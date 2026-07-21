@@ -3,8 +3,9 @@ import { OperationalDB, OperationalSchema } from '@app/database';
 import { DomainEvent, Mutable } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { fsSerializedOutboxContext } from '@app/testing/core/observability';
-import { feOutboxEvent } from '@app/testing/core/reliability/outbox';
+import { FDEventPayload, feOutboxEvent } from '@app/testing/core/reliability/outbox';
 import { createTestContext, TestContext } from '@app/testing/database';
+import { sql } from 'kysely';
 
 describe('OutboxKyselyRepository (integration)', () => {
   let ctx: TestContext<OperationalSchema>;
@@ -264,6 +265,46 @@ describe('OutboxKyselyRepository (integration)', () => {
       await repo.releaseExpiredLocks(db);
       const row = await db.selectFrom('outbox_events').selectAll().executeTakeFirst();
       expect(row?.status).toBe('pending');
+    });
+  });
+
+  describe('claimBatch — query plan under backlog', () => {
+    const seedOutboxEvents = async (
+      db: OperationalDB,
+      count: number,
+      override?: Partial<FDEventPayload>,
+    ) => {
+      const CHUNK_SIZE = 500;
+      const events = feOutboxEvent.generateMany(count, override);
+      for (let i = 0; i < events.length; i += CHUNK_SIZE) {
+        const chunk = events.slice(i, i + CHUNK_SIZE);
+        await repo.insert(db, { events: chunk, ctx: obsCtx });
+      }
+    };
+
+    it('should use the partial index and avoids a sequential scan with a large due backlog', async () => {
+      await seedOutboxEvents(db, 5_000); // future events
+      const plan = await sql<{ 'QUERY PLAN': string }>`
+        EXPLAIN (ANALYZE, FORMAT JSON)
+        UPDATE operational.outbox_events
+        SET status = 'locked',
+          locked_at = now(),
+          locked_by = 'load_test',
+          lock_expires_at = now() + INTERVAL '30 seconds'
+        WHERE id IN (
+          SELECT id
+          FROM operational.outbox_events
+          WHERE status = 'pending' AND next_attempt_at <= now()
+          ORDER BY occurred_at ASC
+          LIMIT 25
+          FOR UPDATE SKIP LOCKED
+        )
+        RETURNING id
+      `.execute(db);
+      const planJson = (plan.rows[0]['QUERY PLAN'][0] as any).Plan;
+      const planText = JSON.stringify(planJson);
+      expect(planText).not.toContain('Seq Scan');
+      expect(planText).toContain('idx_outbox_claim');
     });
   });
 });

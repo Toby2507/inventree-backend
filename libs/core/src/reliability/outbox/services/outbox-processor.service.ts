@@ -9,9 +9,10 @@ import {
 } from '@app/core/observability';
 import {
   DATABASE_CONTEXT,
-  DATABASE_PROVIDER,
+  DATABASE_LISTENER,
   DatabaseContextPort,
-  DatabaseProviderPort,
+  DatabaseListenerPort,
+  ListenChannel,
 } from '@app/database';
 import { JsonValue } from '@app/shared-kernel';
 import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
@@ -34,7 +35,8 @@ export class OutboxProcessorService implements OnApplicationBootstrap {
 
   private readonly instanceId: string;
   private readonly logger;
-  private isPolling = false;
+  private isProcessing = false;
+  private needsAnotherPass = false;
 
   constructor(
     @Inject(LOGGER) logger: LoggerPort,
@@ -43,66 +45,93 @@ export class OutboxProcessorService implements OnApplicationBootstrap {
     @Inject(EVENT_ROUTER) private readonly eventRouter: EventRouterPort,
     @Inject(QUEUE_MAPPER) private readonly queueMapper: QueueMapperPort,
     @Inject(OUTBOX_REPOSITORY) private readonly repository: OutboxRepository,
-    @Inject(DATABASE_PROVIDER) private readonly dbProvider: DatabaseProviderPort,
+    @Inject(DATABASE_LISTENER) private readonly listener: DatabaseListenerPort,
   ) {
     this.instanceId = this.idGenerator.generateUUIDV4();
-    this.logger = logger.forContext('OutboxProcessor');
+    this.logger = logger.forContext(OutboxProcessorService.name);
   }
 
   async onApplicationBootstrap(): Promise<void> {
     this.logger.log('Outbox processor started', { instanceId: this.instanceId });
-    await this.listenForNotifications();
+    this.listener.subscribe(
+      ListenChannel.OUTBOX_PENDING,
+      OutboxProcessorService.name,
+      () => void this.triggerProcessing(),
+    );
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
-  async poll(): Promise<void> {
-    if (this.isPolling) return;
-    this.isPolling = true;
-    try {
-      await this.processBatch();
-    } catch (error) {
-      this.logger.error('Outbox poll failed', {
-        message: error instanceof Error ? error.message : String(error),
-      });
-    } finally {
-      this.isPolling = false;
-    }
+  @Cron(CronExpression.EVERY_10_SECONDS)
+  async retryDueEvents(): Promise<void> {
+    await this.triggerProcessing();
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
   async releaseExpiredLocks(): Promise<void> {
-    await this.db.platformCommand((ctx) => this.repository.releaseExpiredLocks(ctx.operational));
-  }
-
-  private async listenForNotifications(): Promise<void> {
-    const client = this.dbProvider.notificationClient;
-    client.on('notification', (msg) => {
-      this.logger.debug('NOTIFY recieved', { channel: msg.channel, eventId: msg.payload });
-      void this.poll();
-    });
-    await client.query('LISTEN outbox_pending');
-    this.logger.log('Listening for outbox notifications');
-  }
-
-  private async processBatch(): Promise<void> {
-    const rows = await this.db.platformCommand((ctx) =>
-      this.repository.claimBatch(
-        ctx.operational,
-        this.BATCH_SIZE,
-        this.instanceId,
-        this.LOCK_DURATION_MS,
-      ),
+    const count = await this.db.platformCommand((ctx) =>
+      this.repository.releaseExpiredLocks(ctx.operational),
     );
-    if (!rows.length) return;
-    this.logger.debug('Claimed outbox batch', { count: rows.length, instanceId: this.instanceId });
-    const limit = pLimit(this.CONCURRENCY_LIMIT);
-    const results = await Promise.allSettled(rows.map((row) => limit(() => this.processRow(row))));
-    const unexpected = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
-    if (unexpected.length) {
-      this.logger.error('Unexpected processRow rejections in batch', {
-        count: unexpected.length,
-        reasons: unexpected.map((r) => r.reason?.message ?? String(r.reason)),
+    if (count > 0)
+      this.logger.warn('Released expired outbox locks', {
+        count,
+        instanceId: this.instanceId,
       });
+  }
+
+  private async triggerProcessing(): Promise<void> {
+    if (this.isProcessing) {
+      this.needsAnotherPass = true;
+      return;
+    }
+    this.isProcessing = true;
+    try {
+      do {
+        this.needsAnotherPass = false;
+        await this.drain();
+      } while (this.needsAnotherPass);
+    } finally {
+      this.isProcessing = false;
+    }
+  }
+
+  private async drain(): Promise<void> {
+    while (true) {
+      const rowCount = await this.processBatch();
+      if (rowCount === 0) break;
+    }
+  }
+
+  private async processBatch(): Promise<number> {
+    try {
+      const rows = await this.db.platformCommand((ctx) =>
+        this.repository.claimBatch(
+          ctx.operational,
+          this.BATCH_SIZE,
+          this.instanceId,
+          this.LOCK_DURATION_MS,
+        ),
+      );
+      if (!rows.length) return 0;
+      this.logger.debug('Claimed outbox batch', {
+        count: rows.length,
+        instanceId: this.instanceId,
+      });
+      const limit = pLimit(this.CONCURRENCY_LIMIT);
+      const results = await Promise.allSettled(
+        rows.map((row) => limit(() => this.processRow(row))),
+      );
+      const unexpected = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
+      if (unexpected.length) {
+        this.logger.error('Unexpected processRow rejections in batch', {
+          count: unexpected.length,
+          reasons: unexpected.map((r) => r.reason?.message ?? String(r.reason)),
+        });
+      }
+      return rows.length;
+    } catch (error) {
+      this.logger.error('Failed to process outbox batch', {
+        error: error instanceof Error ? error.stack : String(error),
+      });
+      return 0;
     }
   }
 

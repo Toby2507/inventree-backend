@@ -2,4 +2,4 @@
 set -a
 . ./.env
 set +a
-kysely-codegen --url "$DATABASE_URL" --out-file libs/database/src/db.types.ts
+kysely-codegen --url "$DATABASE_URL" --out-file libs/database/src/types/db.types.ts

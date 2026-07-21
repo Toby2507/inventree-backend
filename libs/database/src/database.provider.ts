@@ -3,7 +3,7 @@ import { LOGGER, LoggerPort } from '@app/core/observability';
 import { Inject, Injectable, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { Kysely, PostgresDialect } from 'kysely';
 import { Client, Pool, PoolConfig } from 'pg';
-import { DatabaseProviderPort, NotificationConnection } from './ports/provider.port';
+import { DatabaseClient, DatabaseProviderPort } from './ports/provider.port';
 import { AnalyticsDB, OperationalDB } from './types/db.schema.types';
 
 @Injectable()
@@ -105,7 +105,7 @@ export class DatabaseProvider
   }
 
   // ==== NOTIFICATION CONNECTION FACTORY =====================
-  public async createNotificationClient(): Promise<NotificationConnection> {
+  public async createNotificationClient(): Promise<DatabaseClient> {
     const client = new Client({
       user: this.config.user,
       host: this.config.host,
@@ -121,7 +121,7 @@ export class DatabaseProvider
     return client;
   }
 
-  public async destroyNotificationClient(client: NotificationConnection): Promise<void> {
+  public async destroyNotificationClient(client: DatabaseClient): Promise<void> {
     try {
       await client.end();
       this.logger.log('Notification client disconnected');

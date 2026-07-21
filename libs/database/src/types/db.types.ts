@@ -45,6 +45,13 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Numeric = ColumnType<string, number | string, number | string>;
 
+export type OperationalActionTokenPurpose =
+  | 'email_change'
+  | 'email_verification'
+  | 'magic_login'
+  | 'password_reset'
+  | 'two_factor_auth';
+
 export type OperationalAuditAction = 'delete' | 'insert' | 'restore' | 'soft_delete' | 'update';
 
 export type OperationalAuditSource = 'api' | 'import' | 'migration' | 'pos' | 'system';
@@ -394,6 +401,16 @@ export interface KyselyMigrationBootstrap {
 export interface KyselyMigrationOperational {
   name: string;
   timestamp: string;
+}
+
+export interface OperationalActionTokens {
+  created_at: Generated<Timestamp>;
+  expires_at: Timestamp;
+  id: Generated<string>;
+  purpose: OperationalActionTokenPurpose;
+  token_hash: string;
+  used_at: Timestamp | null;
+  user_id: string;
 }
 
 export interface OperationalAuditLogs {
@@ -750,7 +767,6 @@ export interface OperationalInventoryLotItems {
 
 export interface OperationalInventoryLotMovements {
   created_at: Generated<Timestamp>;
-  id: Generated<string>;
   lot_id: string;
   movement_id: string;
   quantity: Numeric;
@@ -793,7 +809,6 @@ export interface OperationalInventoryMovements {
 
 export interface OperationalInventorySerialMovements {
   created_at: Generated<Timestamp>;
-  id: Generated<string>;
   movement_id: string;
   serial_id: string;
   status_after: OperationalInventorySerialStatus;
@@ -970,7 +985,7 @@ export interface OperationalOutboxEvents {
   lock_expires_at: Timestamp | null;
   locked_at: Timestamp | null;
   locked_by: string | null;
-  next_attempt_at: Timestamp | null;
+  next_attempt_at: Generated<Timestamp | null>;
   occurred_at: Generated<Timestamp>;
   partition_key: string | null;
   payload: Json;
@@ -1478,7 +1493,6 @@ export interface OperationalStoreMembers {
 export interface OperationalStoreNumberSequences {
   created_at: Generated<Timestamp>;
   current_value: Generated<Int8>;
-  id: Generated<string>;
   include_day: Generated<boolean>;
   include_month: Generated<boolean>;
   include_year: Generated<boolean>;
@@ -2381,6 +2395,7 @@ export interface DB {
   kysely_migration_analytics: KyselyMigrationAnalytics;
   kysely_migration_bootstrap: KyselyMigrationBootstrap;
   kysely_migration_operational: KyselyMigrationOperational;
+  'operational.action_tokens': OperationalActionTokens;
   'operational.audit_logs': OperationalAuditLogs;
   'operational.barcode_registry': OperationalBarcodeRegistry;
   'operational.billing_customers': OperationalBillingCustomers;

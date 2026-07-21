@@ -13,7 +13,7 @@ export {
 } from './context/store-context';
 // Ports
 export { DATABASE_CONTEXT, DatabaseContextPort } from './ports/context.port';
-export { DATABASE_PROVIDER, DatabaseProviderPort } from './ports/provider.port';
+export { DATABASE_LISTENER, DatabaseListenerPort, ListenChannel } from './ports/listener.port';
 // Services
 export { MigrationService } from './services/migration.service';
 // Modules

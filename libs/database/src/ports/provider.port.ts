@@ -1,11 +1,11 @@
-import type { Client } from 'pg';
+import { Client } from 'pg';
 import type { AnalyticsDB, OperationalDB } from '../types/db.schema.types';
 
-export type NotificationConnection = Client;
+export type DatabaseClient = Client;
 
 export interface DatabaseProviderPort {
-  createNotificationClient(): Promise<NotificationConnection>;
-  destroyNotificationClient(client: NotificationConnection): Promise<void>;
+  createNotificationClient(): Promise<DatabaseClient>;
+  destroyNotificationClient(client: DatabaseClient): Promise<void>;
   forBootstrapMigration: OperationalDB;
   forOperationalMigration: OperationalDB;
   forAnalyticsMigration: AnalyticsDB;

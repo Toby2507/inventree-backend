@@ -79,8 +79,7 @@ CREATE TABLE operational.outbox_events (
 
 -- Indexes
 CREATE INDEX idx_outbox_claim
-  ON operational.outbox_events (status, next_attempt_at, occurred_at, id)
-  INCLUDE (id)
+  ON operational.outbox_events (next_attempt_at, occurred_at, id)
   WHERE status = 'pending';
 
 CREATE INDEX idx_outbox_expired_locks

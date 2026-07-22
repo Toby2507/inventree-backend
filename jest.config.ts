@@ -1,6 +1,6 @@
 const baseProjectConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest/setup-after-env.ts', '<rootDir>/jest/setup-db.ts'],
-  transform: { '^.+\\.(t|j)s$': 'ts-jest' },
+  transform: { '^.+\\.(t|j)sx?$': 'ts-jest' },
   testEnvironment: '<rootDir>/jest/custom-jest-environment.ts',
   globalSetup: '<rootDir>/jest/global-setup.ts',
   globalTeardown: '<rootDir>/jest/global-teardown.ts',

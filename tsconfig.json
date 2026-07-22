@@ -8,6 +8,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "target": "es2024",
+    "lib": ["ES2024", "ESNext.Temporal"],
     "sourceMap": true,
     "outDir": "./dist",
     "incremental": true,

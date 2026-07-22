@@ -1,8 +1,8 @@
 import { REDIS, RedisPort } from '@app/core/infrastructure/redis';
 import { CRYPTOGRAPHY, CryptographyPort } from '@app/core/security/cryptography';
 import { DATABASE_CONTEXT, DatabaseContextPort } from '@app/database';
-import { IDEMPOTENCY_HEADER } from '@app/nest-adapters/constants';
-import { mapCodeToStatus } from '@app/nest-adapters/utils';
+import { IDEMPOTENCY_HEADER } from '@app/framework/nest/constants';
+import { mapCodeToStatus } from '@app/framework/nest/utils';
 import { JsonValue } from '@app/shared-kernel';
 import {
   BadRequestException,

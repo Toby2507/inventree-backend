@@ -109,13 +109,13 @@
         "tsConfigPath": "libs/database/tsconfig.lib.json"
       }
     },
-    "nest-adapters": {
+    "framework": {
       "type": "library",
-      "root": "libs/nest-adapters",
+      "root": "libs/framework",
       "entryFile": "index",
-      "sourceRoot": "libs/nest-adapters/src",
+      "sourceRoot": "libs/framework/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/nest-adapters/tsconfig.lib.json"
+        "tsConfigPath": "libs/framework/tsconfig.lib.json"
       }
     },
     "shared-kernel": {

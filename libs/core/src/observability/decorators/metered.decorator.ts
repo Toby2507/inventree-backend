@@ -1,4 +1,4 @@
-import { copyMethodMetadata } from '@app/nest-adapters/utils';
+import { copyMethodMetadata } from '@app/framework/nest/utils';
 import { MetricName, MetricNames } from '../metrics/metric-names';
 import { MetricsPort } from '../ports/metrics.port';
 

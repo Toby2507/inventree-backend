@@ -2,7 +2,7 @@ import {
   CAUSATION_HEADER,
   CORRELATION_HEADER,
   IDEMPOTENCY_HEADER,
-} from '@app/nest-adapters/constants';
+} from '@app/framework/nest/constants';
 import { Fn } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { createOtelTestHarness } from '@app/testing/core/observability';

@@ -26,7 +26,7 @@
       "@app/core/*": ["./libs/core/src/*"],
       "@app/database": ["./libs/database/src/index"],
       "@app/database/*": ["./libs/database/src/*"],
-      "@app/nest-adapters/*": ["./libs/nest-adapters/src/*"],
+      "@app/framework/*": ["./libs/framework/src/*"],
       "@app/shared-kernel": ["./libs/shared-kernel/src/index"],
       "@app/testing": ["./libs/testing/src/index"],
       "@app/testing/*": ["./libs/testing/src/*"]

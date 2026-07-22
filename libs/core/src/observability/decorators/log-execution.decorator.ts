@@ -1,4 +1,4 @@
-import { copyMethodMetadata } from '@app/nest-adapters/utils';
+import { copyMethodMetadata } from '@app/framework/nest/utils';
 import { LoggerPort } from '../ports/logger.port';
 
 type LoggableInstance = { logger?: LoggerPort };

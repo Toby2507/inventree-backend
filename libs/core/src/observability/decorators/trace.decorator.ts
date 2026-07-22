@@ -1,4 +1,4 @@
-import { copyMethodMetadata } from '@app/nest-adapters/utils';
+import { copyMethodMetadata } from '@app/framework/nest/utils';
 import { SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
 import { getOptionalObservationContext } from '../context/observation-context.storage';
 import { SpanAttributes } from '../tracing/span-attributes';

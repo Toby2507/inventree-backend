@@ -1,7 +1,7 @@
 import { REDIS } from '@app/core/infrastructure/redis';
 import { CRYPTOGRAPHY } from '@app/core/security/cryptography';
 import { DATABASE_CONTEXT } from '@app/database';
-import { IDEMPOTENCY_HEADER } from '@app/nest-adapters/constants';
+import { IDEMPOTENCY_HEADER } from '@app/framework/nest/constants';
 import { makeRedisMock } from '@app/testing/core/infrastructure';
 import {
   fsIdempotencyRecord,

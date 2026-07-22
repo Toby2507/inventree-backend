@@ -2,7 +2,7 @@ import {
   CAUSATION_HEADER,
   CORRELATION_HEADER,
   IDEMPOTENCY_HEADER,
-} from '@app/nest-adapters/constants';
+} from '@app/framework/nest/constants';
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { context as otelCtx, propagation, ROOT_CONTEXT, trace } from '@opentelemetry/api';
 import { NextFunction, Request, Response } from 'express';

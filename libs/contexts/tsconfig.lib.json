@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "declaration": true,
-    "root": "src",
+    "rootDir": "../../",
     "outDir": "../../dist/libs/contexts"
   },
   "include": ["src/**/*"],

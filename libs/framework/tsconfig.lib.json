@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "declaration": true,
-    "root": "src",
+    "rootDir": "../../",
     "outDir": "../../dist/libs/framework"
   },
   "include": ["src/**/*"],

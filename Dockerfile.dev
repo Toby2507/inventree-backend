@@ -1,13 +1,12 @@
-FROM node:24-alpine
+FROM node:26-alpine
 WORKDIR /app
 # Enable pnpm via Corepack
-RUN corepack enable
+RUN npm install --global pnpm@10.30.3
 # Copy only manifests first for better caching
 COPY package.json pnpm-lock.yaml ./
 # Install all dependencies (including dev)
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-  pnpm config set store-dir /pnpm/store && \
-  pnpm install --frozen-lockfile
+  pnpm install --frozen-lockfile --store-dir /pnpm/store
 # Copy entrypoint script
 COPY /scripts/docker-entrypoint.dev.sh /entrypoint.sh
 # Make entrypoint executable

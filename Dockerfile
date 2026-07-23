@@ -5,10 +5,10 @@
 # - Installs ONLY prod deps into node_modules, using pnpm.
 # - This is what we’ll copy into the final runtime image.
 ###############################################################################
-FROM node:24-bookworm-slim AS deps
+FROM node:26-trixie-slim AS deps
 WORKDIR /app
 # Enable pnpm via Corepack (bundled with recent Node)
-RUN corepack enable
+RUN npm install --global pnpm@10.30.3
 # Copy only manifests first for better caching
 COPY package.json pnpm-lock.yaml ./
 # Install production deps only
@@ -22,9 +22,9 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
 # - Installs all deps (including dev deps), then builds NestJS (ts->dist).
 # - Keeps build tools isolated from runtime.
 ###############################################################################
-FROM node:24-bookworm-slim AS build
+FROM node:26-trixie-slim AS build
 WORKDIR /app
-RUN corepack enable
+RUN npm install --global pnpm@10.30.3
 COPY package.json pnpm-lock.yaml ./
 # Install all deps (dev + prod) needed to build
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
@@ -42,7 +42,7 @@ RUN pnpm nest build ${APP_NAME}
 # - Copies compiled output + prod node_modules only.
 # - Uses distroless: smaller, fewer moving parts, no shell.
 ###############################################################################
-FROM gcr.io/distroless/nodejs24-debian13 AS runtime
+FROM gcr.io/distroless/nodejs26-debian13 AS runtime
 WORKDIR /app
 # get app name from argument (e.g. "worker-core")
 ARG APP_NAME

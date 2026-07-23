@@ -5,13 +5,14 @@ import { ObservabilityModule, ObservationContextMiddleware } from '@app/core/obs
 import { IdempotencyModule } from '@app/core/reliability/idempotency';
 import { CryptographyModule } from '@app/core/security/cryptography';
 import { DatabaseModule } from '@app/database';
-import { DomainExceptionFilter } from '@app/nest-adapters/filters';
+import { DomainExceptionFilter } from '@app/framework/nest/filters';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ScheduleModule } from '@nestjs/schedule';
 import { IdentityModule } from './identity';
+import { ClockModule } from '@app/shared-kernel';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { IdentityModule } from './identity';
     IdempotencyModule,
     RedisModule,
     CryptographyModule,
+    ClockModule,
     // Modules
     IdentityModule,
   ],

@@ -11,7 +11,7 @@ describe('EventRouter', () => {
   it('should resolve known event types to their corresponding routes', () => {
     const routes = router.resolve('identity.user.registered');
     expect(routes).toEqual(
-      expect.arrayContaining([expect.objectContaining({ queue: QUEUE_NAMES.NOTIFICATIONS })]),
+      expect.arrayContaining([expect.objectContaining({ queue: QUEUE_NAMES.EMAIL })]),
     );
   });
 

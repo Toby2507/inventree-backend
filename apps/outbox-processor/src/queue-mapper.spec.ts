@@ -13,6 +13,7 @@ describe('QueueMapper', () => {
   const analyticsQueue = makeQueueMock(QUEUE_NAMES.ANALYTICS);
   const billingQueue = makeQueueMock(QUEUE_NAMES.BILLING);
   const reportQueue = makeQueueMock(QUEUE_NAMES.REPORTS);
+  const emailQueue = makeQueueMock(QUEUE_NAMES.EMAIL);
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
@@ -23,6 +24,7 @@ describe('QueueMapper', () => {
         { provide: getQueueToken(QUEUE_NAMES.ANALYTICS), useValue: analyticsQueue },
         { provide: getQueueToken(QUEUE_NAMES.BILLING), useValue: billingQueue },
         { provide: getQueueToken(QUEUE_NAMES.REPORTS), useValue: reportQueue },
+        { provide: getQueueToken(QUEUE_NAMES.EMAIL), useValue: emailQueue },
       ],
     }).compile();
     mapper = module.get(QueueMapper);
@@ -40,6 +42,7 @@ describe('QueueMapper', () => {
     [QUEUE_NAMES.ANALYTICS, analyticsQueue],
     [QUEUE_NAMES.BILLING, billingQueue],
     [QUEUE_NAMES.REPORTS, reportQueue],
+    [QUEUE_NAMES.EMAIL, emailQueue],
   ])('should resolve %s queue correctly', (name, expected) => {
     expect(mapper.get(name)).toBe(expected);
   });

@@ -1,3 +1,4 @@
+import { EmailJob } from '@app/core/infrastructure/email';
 import { QUEUE_NAMES } from '@app/core/infrastructure/queue';
 import { EventRoute, EventRouterPort } from '@app/core/reliability/outbox';
 import { Injectable } from '@nestjs/common';
@@ -5,7 +6,9 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class EventRouter implements EventRouterPort {
   private readonly routes: Record<string, EventRoute[]> = {
-    'identity.user.registered': [{ queue: QUEUE_NAMES.NOTIFICATIONS }],
+    'identity.user.registered': [
+      { queue: QUEUE_NAMES.EMAIL, jobName: EmailJob.SEND_VERIFICATION_EMAIL },
+    ],
     'identity.user.email_verified': [{ queue: QUEUE_NAMES.NOTIFICATIONS }],
     'identity.user.locked_out': [{ queue: QUEUE_NAMES.NOTIFICATIONS }],
     'identity.user.disabled': [{ queue: QUEUE_NAMES.NOTIFICATIONS }],

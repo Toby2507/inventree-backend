@@ -14,6 +14,7 @@ export class QueueMapper implements QueueMapperPort {
     @InjectQueue(QUEUE_NAMES.ANALYTICS) analytics: Queue,
     @InjectQueue(QUEUE_NAMES.BILLING) billing: Queue,
     @InjectQueue(QUEUE_NAMES.REPORTS) reports: Queue,
+    @InjectQueue(QUEUE_NAMES.EMAIL) email: Queue,
   ) {
     this.queues = new Map<QueueName, Queue>([
       [QUEUE_NAMES.NOTIFICATIONS, notifications],
@@ -21,6 +22,7 @@ export class QueueMapper implements QueueMapperPort {
       [QUEUE_NAMES.ANALYTICS, analytics],
       [QUEUE_NAMES.BILLING, billing],
       [QUEUE_NAMES.REPORTS, reports],
+      [QUEUE_NAMES.EMAIL, email],
     ]);
   }
 

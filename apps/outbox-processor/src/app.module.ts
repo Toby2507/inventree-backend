@@ -8,6 +8,7 @@ import {
   QUEUE_MAPPER,
 } from '@app/core/reliability/outbox';
 import { DatabaseModule } from '@app/database';
+import { ClockModule } from '@app/shared-kernel';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -22,6 +23,7 @@ import { QueueMapper } from './queue-mapper';
     DatabaseModule,
     OutboxModule,
     GeneratorModule,
+    ClockModule,
     QueueModule.forRoot(),
     QueueModule.registerAll(),
   ],

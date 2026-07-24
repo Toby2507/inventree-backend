@@ -100,6 +100,26 @@ describe('Instant Value Object', () => {
       });
     });
 
+    describe('isAfterOrEqual', () => {
+      it('should return true when this instant is later', () => {
+        const earlier = Instant.fromEpochMs(EPOCH_MS);
+        const later = earlier.add(Duration.hours(1));
+        expect(later.isAfterOrEqual(earlier)).toBe(true);
+      });
+
+      it('should return true when equal', () => {
+        const a = Instant.fromEpochMs(EPOCH_MS);
+        const b = Instant.fromEpochMs(EPOCH_MS);
+        expect(a.isAfterOrEqual(b)).toBe(true);
+      });
+
+      it('should return false when this instant is earlier', () => {
+        const earlier = Instant.fromEpochMs(EPOCH_MS);
+        const later = earlier.add(Duration.hours(1));
+        expect(earlier.isAfterOrEqual(later)).toBe(false);
+      });
+    });
+
     describe('equals', () => {
       it('should return true for two instants built from the same epoch ms', () => {
         const a = Instant.fromEpochMs(EPOCH_MS);

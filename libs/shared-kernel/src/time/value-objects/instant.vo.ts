@@ -12,6 +12,10 @@ export class Instant {
     return new Instant(instant);
   }
 
+  static fromDate(date: Date): Instant {
+    return new Instant(Temporal.Instant.fromEpochMilliseconds(date.getTime()));
+  }
+
   // ==== OPERATIONS ==============
   add(duration: Duration): Instant {
     return new Instant(
@@ -31,6 +35,10 @@ export class Instant {
 
   isAfter(other: Instant): boolean {
     return Temporal.Instant.compare(this._instant, other._instant) > 0;
+  }
+
+  isAfterOrEqual(other: Instant): boolean {
+    return Temporal.Instant.compare(this._instant, other._instant) >= 0;
   }
 
   equals(other: Instant): boolean {

@@ -6,6 +6,7 @@ import { IdempotencyModule } from '@app/core/reliability/idempotency';
 import { CryptographyModule } from '@app/core/security/cryptography';
 import { DatabaseModule } from '@app/database';
 import { LayerExceptionFilter } from '@app/framework/nest/filters';
+import { InfrastructureExceptionFilter } from '@app/framework/nest/filters/infrastructure-exception.filter';
 import { ClockModule } from '@app/shared-kernel';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
@@ -30,7 +31,10 @@ import { IdentityModule } from './identity';
     // Modules
     IdentityModule,
   ],
-  providers: [{ provide: APP_FILTER, useClass: LayerExceptionFilter }],
+  providers: [
+    { provide: APP_FILTER, useClass: LayerExceptionFilter },
+    { provide: APP_FILTER, useClass: InfrastructureExceptionFilter },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

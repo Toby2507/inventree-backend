@@ -1,15 +1,10 @@
-import {
-  ApplicationException,
-  DomainException,
-  ExceptionCategory,
-  InfrastructureException,
-} from '@app/shared-kernel';
+import { LOGGER, LoggerPort } from '@app/core/observability';
+import { ApplicationException, DomainException, ExceptionCategory } from '@app/shared-kernel';
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus, Inject } from '@nestjs/common';
 import { Response } from 'express';
 import { mapExceptionCategoryToStatus } from '../utils';
-import { LOGGER, LoggerPort } from '@app/core/observability';
 
-@Catch(ApplicationException, DomainException, InfrastructureException)
+@Catch(ApplicationException, DomainException)
 export class LayerExceptionFilter implements ExceptionFilter {
   private readonly logger;
 

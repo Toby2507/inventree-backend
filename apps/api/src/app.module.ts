@@ -5,14 +5,14 @@ import { ObservabilityModule, ObservationContextMiddleware } from '@app/core/obs
 import { IdempotencyModule } from '@app/core/reliability/idempotency';
 import { CryptographyModule } from '@app/core/security/cryptography';
 import { DatabaseModule } from '@app/database';
-import { DomainExceptionFilter } from '@app/framework/nest/filters';
+import { LayerExceptionFilter } from '@app/framework/nest/filters';
+import { ClockModule } from '@app/shared-kernel';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ScheduleModule } from '@nestjs/schedule';
 import { IdentityModule } from './identity';
-import { ClockModule } from '@app/shared-kernel';
 
 @Module({
   imports: [
@@ -30,7 +30,7 @@ import { ClockModule } from '@app/shared-kernel';
     // Modules
     IdentityModule,
   ],
-  providers: [{ provide: APP_FILTER, useClass: DomainExceptionFilter }],
+  providers: [{ provide: APP_FILTER, useClass: LayerExceptionFilter }],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

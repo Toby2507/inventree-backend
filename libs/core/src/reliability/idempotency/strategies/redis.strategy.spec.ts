@@ -16,6 +16,7 @@ import { firstValueFrom, of, throwError } from 'rxjs';
 import { IdempotencyOptions } from '../decorators/idempotency.decorator';
 import { IdempotencyException } from '../exceptions/idempotency.exception';
 import { RedisIdempotencyStrategy } from './redis.strategy';
+import { ExceptionCategory } from '@app/shared-kernel';
 
 const OPTIONS: IdempotencyOptions = { strategy: 'redis', scope: 'payments' };
 
@@ -229,9 +230,9 @@ describe('RedisIdempotencyStrategy', () => {
           expect(redis.set).not.toHaveBeenCalled();
         });
 
-        it('should resolve status from err.code via mapCodeToStatus when status is not available', async () => {
+        it('should resolve status from err.category via mapExceptionCategoryToStatus when status is not available', async () => {
           const err = new Error('Domain error') as any;
-          err.code = 'INVALID_ERROR';
+          err.category = ExceptionCategory.VALIDATION;
           mockHandle.mockReturnValue(throwError(() => err));
           await expect(runStrategy()).rejects.toThrow('Domain error');
           expect(redis.set).toHaveBeenCalledWith(

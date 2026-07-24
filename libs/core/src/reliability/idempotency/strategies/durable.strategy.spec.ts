@@ -22,6 +22,7 @@ import { IdempotencyException } from '../exceptions/idempotency.exception';
 import { IdempotencyRecord } from '../persistence/idempotency.persistence.types';
 import { IDEMPOTENCY_REPOSITORY } from '../persistence/idempotency.port';
 import { DurableIdempotencyStrategy } from './durable.strategy';
+import { ExceptionCategory } from '@app/shared-kernel';
 
 const OPTIONS: IdempotencyOptions = { strategy: 'durable', scope: 'payments' };
 
@@ -339,14 +340,14 @@ describe('DurableIdempotencyStrategy', () => {
           expect(redis.del).toHaveBeenCalledWith(getKey());
         });
 
-        it('should resolve status from err.code via mapCodeToStatus when status is not available', async () => {
+        it('should resolve status from err.category via mapExceptionCategoryToStatus when status is not available', async () => {
           const err = new Error('Domain error') as any;
-          err.code = 'INVALID_ERROR';
+          err.category = ExceptionCategory.VALIDATION;
           mockHandle.mockReturnValue(throwError(() => err));
           const updateRecord: IdempotencyRecord = {
             ...record,
             status: 'failed',
-            error: { message: err.message, code: err.code },
+            error: { message: err.message, category: err.category },
           };
           idempotencyRepository.markFailed.mockResolvedValue(updateRecord);
           await expect(runStrategy()).rejects.toThrow('Domain error');
@@ -360,7 +361,10 @@ describe('DurableIdempotencyStrategy', () => {
             getKey(),
             expect.objectContaining({
               status: 'failed',
-              error: expect.objectContaining({ message: 'Domain error', code: 'INVALID_ERROR' }),
+              error: expect.objectContaining({
+                message: 'Domain error',
+                category: ExceptionCategory.VALIDATION,
+              }),
             }),
             expect.any(Number),
           );

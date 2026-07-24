@@ -1,5 +1,6 @@
-import { DomainException } from '@app/shared-kernel';
+import { DomainException, ExceptionCategory } from '@app/shared-kernel';
 
+// Business Rule Exceptions
 export class TokenAlreadyConsumedException extends DomainException {
   readonly code = 'ACTION_TOKEN_INVALID';
   constructor() {
@@ -21,9 +22,14 @@ export class TokenExpiredException extends DomainException {
   }
 }
 
+// Validation exceptions
 export class TokenExpiryBeforeCreationTimeException extends DomainException {
-  readonly code = 'ACTION_TOKEN_INVALID';
+  readonly code = 'EXPIRY_BEFORE_CREATION_TIME';
   constructor() {
     super('The provided token expiry time is before the creation time');
+  }
+
+  override get category(): ExceptionCategory {
+    return ExceptionCategory.VALIDATION;
   }
 }

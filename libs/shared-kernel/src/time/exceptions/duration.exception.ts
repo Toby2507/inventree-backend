@@ -1,4 +1,4 @@
-import { DomainException } from '../../exceptions/domain.exception';
+import { DomainException } from '../../exceptions/exception.bases';
 
 export class InvalidDurationException extends DomainException {
   readonly code = 'DURATION_INVALID';

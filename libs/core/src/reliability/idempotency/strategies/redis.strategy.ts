@@ -1,7 +1,7 @@
 import { REDIS, RedisPort } from '@app/core/infrastructure/redis';
 import { CRYPTOGRAPHY, CryptographyPort } from '@app/core/security/cryptography';
 import { IDEMPOTENCY_HEADER } from '@app/framework/nest/constants';
-import { mapCodeToStatus } from '@app/framework/nest/utils';
+import { mapExceptionCategoryToStatus } from '@app/framework/nest/utils';
 import { JsonValue } from '@app/shared-kernel';
 import {
   BadRequestException,
@@ -51,6 +51,7 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
               const errorPayload = {
                 message: err.message,
                 code: err.code,
+                category: err.category,
                 status: err.status ?? err.getStatus?.(),
                 name: err.name,
               };
@@ -116,8 +117,8 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
     let status = 0;
     if (err && typeof err.getStatus === 'function') status = err.getStatus();
     else if (err?.status) status = err.status;
-    if (status === 0 && err.code) {
-      status = mapCodeToStatus(err.code);
+    if (status === 0 && err.category) {
+      status = mapExceptionCategoryToStatus(err.category);
       err.status = status; // Attach mapped status back to error for later use
     }
     if (status >= 400 && status < 500) return status !== 429 && status !== 408;
@@ -143,8 +144,8 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
   }
 
   private reconstructError(error: JsonValue): Error {
-    const { message, code } = error as any;
-    const err = new IdempotencyException(message, code);
+    const { message, code, category } = error as any;
+    const err = new IdempotencyException(message, code, category);
     return err;
   }
 }

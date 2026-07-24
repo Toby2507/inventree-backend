@@ -45,13 +45,6 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Numeric = ColumnType<string, number | string, number | string>;
 
-export type OperationalActionTokenPurpose =
-  | 'email_change'
-  | 'email_verification'
-  | 'magic_login'
-  | 'password_reset'
-  | 'two_factor_auth';
-
 export type OperationalAuditAction = 'delete' | 'insert' | 'restore' | 'soft_delete' | 'update';
 
 export type OperationalAuditSource = 'api' | 'import' | 'migration' | 'pos' | 'system';
@@ -404,13 +397,16 @@ export interface KyselyMigrationOperational {
 }
 
 export interface OperationalActionTokens {
+  consumed_at: Timestamp | null;
   created_at: Generated<Timestamp>;
   expires_at: Timestamp;
   id: Generated<string>;
-  purpose: OperationalActionTokenPurpose;
+  purpose: string;
+  revoked_at: Timestamp | null;
+  revoked_reason: string | null;
   token_hash: string;
-  used_at: Timestamp | null;
   user_id: string;
+  version: Generated<number>;
 }
 
 export interface OperationalAuditLogs {

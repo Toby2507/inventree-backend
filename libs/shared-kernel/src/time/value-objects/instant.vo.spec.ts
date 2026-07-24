@@ -14,6 +14,16 @@ describe('Instant Value Object', () => {
       expect(Instant.fromTemporal(temporalInstant).toEpochMs()).toBe(EPOCH_MS);
     });
 
+    it('should create from a native Date', () => {
+      const date = new Date(EPOCH_MS);
+      expect(Instant.fromDate(date).toEpochMs()).toBe(EPOCH_MS);
+    });
+
+    it('should create from an ISO 8601 string', () => {
+      const isoString = '2024-07-22T00:00:00Z';
+      expect(Instant.parse(isoString).toEpochMs()).toBe(EPOCH_MS);
+    });
+
     it('should ensure two instants built from the same epoch ms are equal', () => {
       const a = Instant.fromEpochMs(EPOCH_MS);
       const b = Instant.fromTemporal(Temporal.Instant.fromEpochMilliseconds(EPOCH_MS));

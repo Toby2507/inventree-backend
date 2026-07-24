@@ -16,6 +16,10 @@ export class Instant {
     return new Instant(Temporal.Instant.fromEpochMilliseconds(date.getTime()));
   }
 
+  static parse(isoString: string): Instant {
+    return new Instant(Temporal.Instant.from(isoString));
+  }
+
   // ==== OPERATIONS ==============
   add(duration: Duration): Instant {
     return new Instant(

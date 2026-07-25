@@ -1,9 +1,9 @@
 import {
   ACTION_TOKEN_PURPOSE,
   ACTION_TOKEN_REVOKE_REASON,
-} from '@app/core/security/action-token/domain/action-token.types';
-import { DuplicateTokenHashException } from '@app/core/security/action-token/infrastructure/action-token.exception';
-import { ActionTokenKyselyRepository } from '@app/core/security/action-token/infrastructure/action-token.kysely.repository';
+} from '@app/core/security/action-token/domain/aggregates/action-token.types';
+import { DuplicateTokenHashException } from '@app/core/security/action-token/infrastructure/exceptions/persistence.exception';
+import { ActionTokenKyselyRepository } from '@app/core/security/action-token/infrastructure/persistence/action-token.kysely.repository';
 import { OperationalSchema, OptimisticConcurrencyControlException } from '@app/database';
 import { Duration, Instant } from '@app/shared-kernel';
 import { faker } from '@app/testing';
@@ -142,7 +142,7 @@ describe('ActionTokenKyselyRepository (integration)', () => {
     it('should return active action token by user and purpose', async () => {
       const token = feActionToken.generate({ userId });
       await repo.create(db, token);
-      const foundToken = await repo.findActiveByUserAndPurpose(
+      const foundToken = await repo.findUsableByUserAndPurpose(
         db,
         userId,
         token.purpose,
@@ -163,7 +163,7 @@ describe('ActionTokenKyselyRepository (integration)', () => {
         createdAt: Instant.parse(dateString).add(Duration.hours(1)),
       });
       await Promise.all([repo.create(db, token1), repo.create(db, token2)]);
-      const foundToken = await repo.findActiveByUserAndPurpose(
+      const foundToken = await repo.findUsableByUserAndPurpose(
         db,
         userId,
         ACTION_TOKEN_PURPOSE.PASSWORD_RESET,
@@ -173,7 +173,7 @@ describe('ActionTokenKyselyRepository (integration)', () => {
     });
 
     it('should return null if no active token exists for user and purpose', async () => {
-      const foundToken = await repo.findActiveByUserAndPurpose(
+      const foundToken = await repo.findUsableByUserAndPurpose(
         db,
         userId,
         ACTION_TOKEN_PURPOSE.EMAIL_CHANGE,
@@ -187,7 +187,7 @@ describe('ActionTokenKyselyRepository (integration)', () => {
       await repo.create(db, token);
       token.consume(Instant.parse(dateString));
       await repo.update(db, token);
-      const foundToken = await repo.findActiveByUserAndPurpose(
+      const foundToken = await repo.findUsableByUserAndPurpose(
         db,
         userId,
         token.purpose,
@@ -201,7 +201,7 @@ describe('ActionTokenKyselyRepository (integration)', () => {
       await repo.create(db, token);
       token.revoke(ACTION_TOKEN_REVOKE_REASON.ATTEMPTS_EXCEEDED, Instant.parse(dateString));
       await repo.update(db, token);
-      const foundToken = await repo.findActiveByUserAndPurpose(
+      const foundToken = await repo.findUsableByUserAndPurpose(
         db,
         userId,
         token.purpose,
@@ -217,7 +217,7 @@ describe('ActionTokenKyselyRepository (integration)', () => {
         expiresAt: Instant.parse(dateString),
       });
       await repo.create(db, token);
-      const foundToken = await repo.findActiveByUserAndPurpose(
+      const foundToken = await repo.findUsableByUserAndPurpose(
         db,
         userId,
         token.purpose,

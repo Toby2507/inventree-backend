@@ -3,7 +3,6 @@ export const ACTION_TOKEN_PURPOSE = {
   PASSWORD_RESET: 'password_reset',
   EMAIL_CHANGE: 'email_change',
   MAGIC_LOGIN: 'magic_login',
-  TWO_FACTOR_AUTH: 'two_factor_auth',
 } as const;
 export type ActionTokenPurpose = (typeof ACTION_TOKEN_PURPOSE)[keyof typeof ACTION_TOKEN_PURPOSE];
 

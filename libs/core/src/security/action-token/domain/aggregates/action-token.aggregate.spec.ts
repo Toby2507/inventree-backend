@@ -1,14 +1,14 @@
 import { Instant } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { feActionToken, fsActionToken } from '@app/testing/core/security';
-import { ActionTokenID } from './action-token-id.vo';
-import { ActionToken } from './action-token.aggregate';
 import {
   TokenAlreadyConsumedException,
   TokenExpiredException,
   TokenExpiryBeforeCreationTimeException,
   TokenRevokedException,
-} from './action-token.exceptions';
+} from '../exceptions/action-token.exceptions';
+import { ActionTokenID } from '../value-objects/action-token-id.vo';
+import { ActionToken } from './action-token.aggregate';
 import { ACTION_TOKEN_REVOKE_REASON } from './action-token.types';
 
 const at = (ms: number) => Instant.fromEpochMs(ms);

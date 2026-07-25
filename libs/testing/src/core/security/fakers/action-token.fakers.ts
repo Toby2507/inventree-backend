@@ -2,9 +2,9 @@ import {
   ActionToken,
   ActionTokenSnapshot,
   CreateActionTokenProps,
-} from '@app/core/security/action-token/domain/action-token.aggregate';
-import { ACTION_TOKEN_PURPOSE } from '@app/core/security/action-token/domain/action-token.types';
-import { ActionTokenRow } from '@app/core/security/action-token/infrastructure/action-token.persistence.types';
+} from '@app/core/security/action-token/domain/aggregates/action-token.aggregate';
+import { ACTION_TOKEN_PURPOSE } from '@app/core/security/action-token/domain/aggregates/action-token.types';
+import { ActionTokenRow } from '@app/core/security/action-token/infrastructure/persistence/action-token.persistence.types';
 import { Instant } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { createEntityFaker, createFaker } from '@app/testing/faker-factory';

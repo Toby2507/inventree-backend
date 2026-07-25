@@ -1,7 +1,10 @@
 import { Instant, Mapper } from '@app/shared-kernel';
+import { ActionToken } from '../../domain/aggregates/action-token.aggregate';
+import {
+  ActionTokenPurpose,
+  ActionTokenRevokeReason,
+} from '../../domain/aggregates/action-token.types';
 import { ActionTokenRow } from './action-token.persistence.types';
-import { ActionToken } from '../domain/action-token.aggregate';
-import { ActionTokenPurpose, ActionTokenRevokeReason } from '../domain/action-token.types';
 
 export class ActionTokenMapper extends Mapper<ActionToken, ActionTokenRow> {
   toDomain(raw: ActionTokenRow): ActionToken {

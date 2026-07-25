@@ -5,11 +5,11 @@ import {
 } from '@app/database';
 import { Instant } from '@app/shared-kernel';
 import { Injectable } from '@nestjs/common';
-import { ActionToken } from '../domain/action-token.aggregate';
-import { ActionTokenRepository } from '../domain/action-token.repository';
-import { DuplicateTokenHashException } from './action-token.exception';
-import { ActionTokenMapper } from './action-token.mapper';
-import { ActionTokenPurpose } from '../domain/action-token.types';
+import { ActionTokenRepository } from '../../domain/action-token.repository';
+import { ActionToken } from '../../domain/aggregates/action-token.aggregate';
+import { ActionTokenPurpose } from '../../domain/aggregates/action-token.types';
+import { DuplicateTokenHashException } from '../exceptions/persistence.exception';
+import { ActionTokenMapper } from '../persistence/action-token.mapper';
 
 @Injectable()
 export class ActionTokenKyselyRepository implements ActionTokenRepository {
@@ -47,7 +47,7 @@ export class ActionTokenKyselyRepository implements ActionTokenRepository {
     return row ? this.mapper.toDomain(row) : null;
   }
 
-  async findActiveByUserAndPurpose(
+  async findUsableByUserAndPurpose(
     db: OperationalDB,
     userId: string,
     purpose: ActionTokenPurpose,

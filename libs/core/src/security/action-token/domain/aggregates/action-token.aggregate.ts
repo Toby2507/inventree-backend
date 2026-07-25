@@ -1,11 +1,11 @@
 import { AggregateRoot, Instant } from '@app/shared-kernel';
-import { ActionTokenID } from './action-token-id.vo';
 import {
   TokenAlreadyConsumedException,
   TokenExpiredException,
   TokenExpiryBeforeCreationTimeException,
   TokenRevokedException,
-} from './action-token.exceptions';
+} from '../exceptions/action-token.exceptions';
+import { ActionTokenID } from '../value-objects/action-token-id.vo';
 import { ActionTokenPurpose, ActionTokenRevokeReason } from './action-token.types';
 
 export interface ActionTokenSnapshot {

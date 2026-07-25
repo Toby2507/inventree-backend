@@ -1,12 +1,12 @@
 import { OperationalDB } from '@app/database';
 import { Instant } from '@app/shared-kernel';
-import { ActionToken } from './action-token.aggregate';
+import { ActionToken } from './aggregates/action-token.aggregate';
 
 export interface ActionTokenRepository {
   create(db: OperationalDB, token: ActionToken): Promise<void>;
   update(db: OperationalDB, token: ActionToken): Promise<void>;
   findByHash(db: OperationalDB, hash: string): Promise<ActionToken | null>;
-  findActiveByUserAndPurpose(
+  findUsableByUserAndPurpose(
     db: OperationalDB,
     userId: string,
     purpose: string,
@@ -14,4 +14,4 @@ export interface ActionTokenRepository {
   ): Promise<ActionToken | null>;
 }
 
-export const ACTION_TOKEN_REPOSITORY = Symbol('ACTION_TOKEN_REPOSITORY');
+export const TOKEN_REPOSITORY = Symbol('ACTION_TOKEN_REPOSITORY');

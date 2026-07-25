@@ -8,7 +8,7 @@ import {
   fsIdempotencyRecord,
   makeIdempotencyRepositoryMock,
 } from '@app/testing/core/reliability/idempotency';
-import { makeCryptographyMock } from '@app/testing/core/security';
+import { makeCryptographyMock } from '@app/testing/core/security/cryptography';
 import { makeDatabaseContextMock } from '@app/testing/database';
 import { makeCallHandlerMock, makeRequestMock } from '@app/testing/system';
 import {

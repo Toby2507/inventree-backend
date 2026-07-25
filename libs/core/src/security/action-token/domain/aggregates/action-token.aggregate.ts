@@ -1,9 +1,7 @@
 import { AggregateRoot, Instant } from '@app/shared-kernel';
 import {
-  TokenAlreadyConsumedException,
-  TokenExpiredException,
   TokenExpiryBeforeCreationTimeException,
-  TokenRevokedException,
+  TokenInvalidException,
 } from '../exceptions/action-token.exceptions';
 import { ActionTokenID } from '../value-objects/action-token-id.vo';
 import type { ActionTokenPurpose, ActionTokenRevokeReason } from './action-token.types';
@@ -82,23 +80,24 @@ export class ActionToken extends AggregateRoot<ActionTokenSnapshot> {
   }
 
   // ==== COMMANDS ==============
-  consume(now: Instant): void {
-    if (this.isConsumed()) throw new TokenAlreadyConsumedException();
-    if (this.isRevoked()) throw new TokenRevokedException();
-    if (this.isExpired(now)) throw new TokenExpiredException();
+  consume(purpose: ActionTokenPurpose, now: Instant): void {
+    this.ensureCanConsume(purpose, now);
     this._consumedAt = now;
     this._version++;
   }
 
   revoke(reason: ActionTokenRevokeReason, now: Instant): void {
-    if (this.isRevoked()) return;
-    if (this.isConsumed()) throw new TokenAlreadyConsumedException();
+    if (this.isRevoked() || this.isConsumed()) return;
     this._revokedAt = now;
     this._revokedReason = reason;
     this._version++;
   }
 
   // ==== INVARIANTS ==============
+  private ensureCanConsume(purpose: ActionTokenPurpose, now: Instant): void {
+    if (!this.isUsable(now) || this._purpose !== purpose) throw new TokenInvalidException();
+  }
+
   private ensureCreationDateIsBeforeExpiry(): void {
     if (this._expiresAt.isBefore(this._createdAt))
       throw new TokenExpiryBeforeCreationTimeException();

@@ -1,4 +1,4 @@
-import { fdActionToken, feActionToken } from '@app/testing/core/security';
+import { fdActionToken, feActionToken } from '@app/testing/core/security/action-token';
 import { ActionTokenMapper } from './action-token.mapper';
 
 describe('ActionToken Mapper', () => {

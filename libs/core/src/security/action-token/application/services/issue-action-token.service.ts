@@ -19,11 +19,11 @@ import type {
 @Injectable()
 export class IssueActionTokenService implements IssueActionToken {
   constructor(
-    @Inject(TOKEN_REPOSITORY) private readonly repository: ActionTokenRepository,
-    @Inject(POLICY_REGISTRY) private readonly policyRegistry: ActionTokenPolicyRegistry,
+    @Inject(CLOCK) private readonly clock: Clock,
     @Inject(CRYPTOGRAPHY) private readonly crypto: Cryptography,
     @Inject(ID_GENERATOR) private readonly idGenerator: IDGenerator,
-    @Inject(CLOCK) private readonly clock: Clock,
+    @Inject(POLICY_REGISTRY) private readonly policyRegistry: ActionTokenPolicyRegistry,
+    @Inject(TOKEN_REPOSITORY) private readonly repository: ActionTokenRepository,
   ) {}
 
   async execute(db: OperationalDB, command: IssueActionTokenCommand): Promise<IssuedActionToken> {
@@ -55,9 +55,9 @@ export class IssueActionTokenService implements IssueActionToken {
       command.purpose,
       this.clock.now(),
     );
-    for (const token of existingUsableTokens) {
-      token.revoke(ACTION_TOKEN_REVOKE_REASONS.SUPERSEDED, this.clock.now());
-      await this.repository.update(db, token);
-    }
+    const reason = ACTION_TOKEN_REVOKE_REASONS.SUPERSEDED;
+    const tokenIds = existingUsableTokens.map((t) => t.id.value);
+    for (const token of existingUsableTokens) token.revoke(reason, this.clock.now());
+    await this.repository.revokeUsableByIds(db, tokenIds, reason, this.clock.now());
   }
 }

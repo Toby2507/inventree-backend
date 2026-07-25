@@ -17,4 +17,4 @@ export interface IssueActionToken {
   execute(db: OperationalDB, command: IssueActionTokenCommand): Promise<IssuedActionToken>;
 }
 
-export const ISSUE_ACTION_TOKEN = Symbol('ISSUE_ACTION_TOKEN');
+export const ISSUE_TOKEN = Symbol('ISSUE_ACTION_TOKEN');

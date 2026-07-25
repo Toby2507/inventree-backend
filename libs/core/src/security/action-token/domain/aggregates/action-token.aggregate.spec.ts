@@ -1,15 +1,14 @@
 import { Instant } from '@app/shared-kernel';
 import { faker } from '@app/testing';
-import { feActionToken, fsActionToken } from '@app/testing/core/security';
+import { feActionToken, fsActionToken } from '@app/testing/core/security/action-token';
 import {
-  TokenAlreadyConsumedException,
   TokenExpiredException,
   TokenExpiryBeforeCreationTimeException,
-  TokenRevokedException,
+  TokenInvalidException,
 } from '../exceptions/action-token.exceptions';
 import { ActionTokenID } from '../value-objects/action-token-id.vo';
 import { ActionToken } from './action-token.aggregate';
-import { ACTION_TOKEN_REVOKE_REASONS } from './action-token.types';
+import { ACTION_TOKEN_PURPOSES, ACTION_TOKEN_REVOKE_REASONS } from './action-token.types';
 
 const at = (ms: number) => Instant.fromEpochMs(ms);
 const BASE_TIME = 1_700_000_000_000;
@@ -77,7 +76,7 @@ describe('ActionToken Aggregate Root', () => {
 
     it('should mark the token as consumed and bump the version', () => {
       const token = feActionToken.generate();
-      token.consume(NOW);
+      token.consume(token.purpose, NOW);
       expect(token.isConsumed()).toBe(true);
       expect(token.version).toBe(1);
       expect(token.toSnapshot().consumedAt).toEqual(NOW);
@@ -86,15 +85,15 @@ describe('ActionToken Aggregate Root', () => {
     describe('guards', () => {
       it('should throw if token is already consumed', () => {
         const token = feActionToken.generate();
-        token.consume(NOW);
-        expect(() => token.consume(NOW)).toThrow(TokenAlreadyConsumedException);
+        token.consume(token.purpose, NOW);
+        expect(() => token.consume(token.purpose, NOW)).toThrow(TokenInvalidException);
         expect(token.version).toBe(1);
       });
 
       it('should throw if token is already revoked', () => {
         const token = feActionToken.generate();
         token.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, NOW);
-        expect(() => token.consume(NOW)).toThrow(TokenRevokedException);
+        expect(() => token.consume(token.purpose, NOW)).toThrow(TokenInvalidException);
         expect(token.version).toBe(1);
       });
 
@@ -104,16 +103,24 @@ describe('ActionToken Aggregate Root', () => {
           expiresAt: at(BASE_TIME),
         });
         const expiredTime = at(BASE_TIME + 1_000);
-        expect(() => token.consume(expiredTime)).toThrow(TokenExpiredException);
+        expect(() => token.consume(token.purpose, expiredTime)).toThrow(TokenExpiredException);
+        expect(token.version).toBe(0);
+      });
+
+      it('should throw if token purpose does not match', () => {
+        const token = feActionToken.generate({ purpose: ACTION_TOKEN_PURPOSES.PASSWORD_RESET });
+        expect(() => token.consume(ACTION_TOKEN_PURPOSES.EMAIL_VERIFICATION, NOW)).toThrow(
+          TokenInvalidException,
+        );
         expect(token.version).toBe(0);
       });
     });
 
     it('should not mutate state when an exception is thrown', () => {
       const token = feActionToken.generate();
-      token.consume(NOW);
+      token.consume(token.purpose, NOW);
       const before = token.toSnapshot();
-      expect(() => token.consume(NOW)).toThrow();
+      expect(() => token.consume(token.purpose, NOW)).toThrow();
       expect(token.toSnapshot()).toEqual(before);
     });
   });
@@ -130,13 +137,12 @@ describe('ActionToken Aggregate Root', () => {
       expect(token.toSnapshot().revokedReason).toEqual(ACTION_TOKEN_REVOKE_REASONS.MANUAL);
     });
 
-    it('should throw if token is already consumed', () => {
+    it('should be no-op if token is already consumed', () => {
       const token = feActionToken.generate();
-      token.consume(NOW);
-      expect(() => token.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, NOW)).toThrow(
-        TokenAlreadyConsumedException,
-      );
-      expect(token.version).toBe(1);
+      token.consume(token.purpose, NOW);
+      const before = token.toSnapshot();
+      expect(() => token.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, NOW)).not.toThrow();
+      expect(token.toSnapshot()).toEqual(before);
     });
 
     it('should be no-op if token is already revoked', () => {
@@ -151,7 +157,7 @@ describe('ActionToken Aggregate Root', () => {
   describe('predicates', () => {
     it('should return true for isConsumed() if token is consumed', () => {
       const token = feActionToken.generate();
-      token.consume(at(BASE_TIME));
+      token.consume(token.purpose, at(BASE_TIME));
       expect(token.isConsumed()).toBe(true);
     });
 
@@ -180,7 +186,7 @@ describe('ActionToken Aggregate Root', () => {
       expect(token.isUsable(at(BASE_TIME + 2_000))).toBe(false);
       // Consumed token should also be unusable
       const token2 = feActionToken.generate();
-      token2.consume(at(BASE_TIME));
+      token2.consume(token2.purpose, at(BASE_TIME));
       expect(token2.isUsable(at(BASE_TIME))).toBe(false);
       // Revoked token should also be unusable
       const token3 = feActionToken.generate();
@@ -239,7 +245,7 @@ describe('ActionToken Aggregate Root', () => {
 
     it('should reflect mutations made after reconstitution in the snapshot', () => {
       const original = feActionToken.generateFromSnapshot(originalSnapshot);
-      original.consume(at(BASE_TIME + 1_000));
+      original.consume(original.purpose, at(BASE_TIME + 1_000));
       const snapshot = original.toSnapshot();
       expect(snapshot.consumedAt?.toEpochMs()).toBe(BASE_TIME + 1_000);
     });

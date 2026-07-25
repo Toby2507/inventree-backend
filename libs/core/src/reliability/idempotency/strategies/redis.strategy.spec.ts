@@ -4,7 +4,7 @@ import { IDEMPOTENCY_HEADER } from '@app/framework/nest/constants';
 import { EXCEPTION_CATEGORIES } from '@app/shared-kernel';
 import { makeRedisMock } from '@app/testing/core/infrastructure';
 import { fsRedisIdempotencyRecord } from '@app/testing/core/reliability/idempotency';
-import { makeCryptographyMock } from '@app/testing/core/security';
+import { makeCryptographyMock } from '@app/testing/core/security/cryptography';
 import { makeCallHandlerMock, makeRequestMock } from '@app/testing/system';
 import {
   BadRequestException,

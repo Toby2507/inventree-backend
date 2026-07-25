@@ -1,3 +1,4 @@
+import { OperationalDB } from '@app/database';
 import type { DatabaseClient, DatabaseProvider } from '@app/database/ports/provider.port';
 import { EventEmitter } from 'events';
 
@@ -6,7 +7,7 @@ type PgQueryable = DatabaseClient & {
   connect: () => Promise<DatabaseClient>;
 };
 
-export const makeDatabaseConnectionMock = () => ({});
+export const makeDatabaseConnectionMock = () => ({}) as OperationalDB;
 
 export const makeDatabaseClientMock = () => {
   const emitter = new EventEmitter();

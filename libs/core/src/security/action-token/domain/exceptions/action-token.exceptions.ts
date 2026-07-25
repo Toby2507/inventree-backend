@@ -22,6 +22,17 @@ export class TokenExpiredException extends DomainException {
   }
 }
 
+export class TokenInvalidException extends DomainException {
+  readonly code = 'ACTION_TOKEN_INVALID';
+  constructor() {
+    super('Invalid or expired token');
+  }
+
+  override get category(): ExceptionCategory {
+    return EXCEPTION_CATEGORIES.VALIDATION;
+  }
+}
+
 // Validation exceptions
 export class TokenExpiryBeforeCreationTimeException extends DomainException {
   readonly code = 'EXPIRY_BEFORE_CREATION_TIME';

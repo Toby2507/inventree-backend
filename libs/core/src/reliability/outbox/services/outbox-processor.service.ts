@@ -1,28 +1,28 @@
-import { ID_GENERATOR, IDGeneratorPort } from '@app/core/generators';
+import { ID_GENERATOR, type IDGenerator } from '@app/core/generators';
 import {
   getOptionalObservationContext,
   LOGGER,
-  LoggerPort,
-  SerializedBusinessContext,
-  SpanAttributes,
+  type Logger,
+  type SerializedBusinessContext,
+  SPAN_ATTRIBUTES,
   withRestoredObservationContext,
 } from '@app/core/observability';
 import {
   DATABASE_CONTEXT,
   DATABASE_LISTENER,
-  DatabaseContextPort,
-  DatabaseListenerPort,
-  ListenChannel,
+  type DatabaseContext,
+  type DatabaseListener,
+  LISTEN_CHANNELS,
 } from '@app/database';
-import { JsonValue } from '@app/shared-kernel';
-import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import type { JsonValue } from '@app/shared-kernel';
+import { Inject, Injectable, type OnApplicationBootstrap } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { SpanKind } from '@opentelemetry/api';
 import pLimit from 'p-limit';
-import { EVENT_ROUTER, EventRouterPort } from '../ports/event-router.port';
-import { QUEUE_MAPPER, QueueMapperPort } from '../ports/queue-mapper.port';
-import { OUTBOX_REPOSITORY, OutboxRepository } from '../ports/repository.port';
-import { OutboxEvent } from '../types/outbox.interface';
+import { EVENT_ROUTER, type EventRouter } from '../ports/event-router.port';
+import { QUEUE_MAPPER, type QueueMapper } from '../ports/queue-mapper.port';
+import { OUTBOX_REPOSITORY, type OutboxRepository } from '../ports/repository.port';
+import type { OutboxEvent } from '../types/outbox.interface';
 
 @Injectable()
 export class OutboxProcessorService implements OnApplicationBootstrap {
@@ -39,13 +39,13 @@ export class OutboxProcessorService implements OnApplicationBootstrap {
   private needsAnotherPass = false;
 
   constructor(
-    @Inject(LOGGER) logger: LoggerPort,
-    @Inject(DATABASE_CONTEXT) private readonly db: DatabaseContextPort,
-    @Inject(ID_GENERATOR) private readonly idGenerator: IDGeneratorPort,
-    @Inject(EVENT_ROUTER) private readonly eventRouter: EventRouterPort,
-    @Inject(QUEUE_MAPPER) private readonly queueMapper: QueueMapperPort,
+    @Inject(LOGGER) logger: Logger,
+    @Inject(DATABASE_CONTEXT) private readonly db: DatabaseContext,
+    @Inject(ID_GENERATOR) private readonly idGenerator: IDGenerator,
+    @Inject(EVENT_ROUTER) private readonly eventRouter: EventRouter,
+    @Inject(QUEUE_MAPPER) private readonly queueMapper: QueueMapper,
     @Inject(OUTBOX_REPOSITORY) private readonly repository: OutboxRepository,
-    @Inject(DATABASE_LISTENER) private readonly listener: DatabaseListenerPort,
+    @Inject(DATABASE_LISTENER) private readonly listener: DatabaseListener,
   ) {
     this.instanceId = this.idGenerator.generateUUIDV4();
     this.logger = logger.forContext(OutboxProcessorService.name);
@@ -54,7 +54,7 @@ export class OutboxProcessorService implements OnApplicationBootstrap {
   async onApplicationBootstrap(): Promise<void> {
     this.logger.log('Outbox processor started', { instanceId: this.instanceId });
     this.listener.subscribe(
-      ListenChannel.OUTBOX_PENDING,
+      LISTEN_CHANNELS.OUTBOX_PENDING,
       OutboxProcessorService.name,
       () => void this.triggerProcessing(),
     );
@@ -144,9 +144,9 @@ export class OutboxProcessorService implements OnApplicationBootstrap {
         spanName: `outbox.process.${row.eventType}`,
         spanKind: SpanKind.PRODUCER,
         spanAttributes: {
-          [SpanAttributes.OUTBOX_EVENT_TYPE]: row.eventType,
-          [SpanAttributes.OUTBOX_AGGREGATE_TYPE]: row.aggregateType ?? '',
-          [SpanAttributes.AGGREGATE_ID]: row.aggregateId ?? '',
+          [SPAN_ATTRIBUTES.OUTBOX_EVENT_TYPE]: row.eventType,
+          [SPAN_ATTRIBUTES.OUTBOX_AGGREGATE_TYPE]: row.aggregateType ?? '',
+          [SPAN_ATTRIBUTES.AGGREGATE_ID]: row.aggregateId ?? '',
         },
       },
       async () => {

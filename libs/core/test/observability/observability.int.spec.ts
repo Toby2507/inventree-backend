@@ -1,10 +1,10 @@
 import {
   getOptionalObservationContext,
   LOGGER,
-  LoggerPort,
+  type Logger,
   Metered,
   METRICS,
-  MetricsPort,
+  type Metrics,
   ObservationContextMiddleware,
   Observed,
 } from '@app/core/observability';
@@ -15,14 +15,14 @@ import { createOtelTestHarness, makeLoggerMock } from '@app/testing/core/observa
 import {
   Controller,
   Get,
-  INestApplication,
+  type INestApplication,
   Inject,
   Injectable,
   Module,
-  NestModule,
+  type NestModule,
 } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { SpanStatusCode } from '@opentelemetry/api';
 import request from 'supertest';
 
@@ -31,8 +31,8 @@ class TestService {
   public capturedContext: any;
 
   constructor(
-    @Inject(LOGGER) readonly logger: LoggerPort,
-    @Inject(METRICS) readonly metrics: MetricsPort,
+    @Inject(LOGGER) readonly logger: Logger,
+    @Inject(METRICS) readonly metrics: Metrics,
   ) {}
 
   @Observed()
@@ -104,6 +104,7 @@ describe('Observability (Integration)', () => {
     }).compile();
     app = module.createNestApplication();
     await app.init();
+    await app.listen(0);
     service = module.get(TestService);
   });
 

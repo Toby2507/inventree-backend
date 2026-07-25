@@ -1,4 +1,4 @@
-export {
+export type {
   AnalyticsDB,
   AnalyticsSchema,
   OperationalDB,
@@ -6,16 +6,21 @@ export {
 } from './types/db.schema.types';
 // Context
 export {
-  StoreContext,
   getOptionalStoreContext,
   getStoreContext,
   storeContextStorage,
+  type StoreContext,
 } from './context/store-context';
 // Exceptions
 export { OptimisticConcurrencyControlException } from './exceptions/database.exceptions';
 // Ports
-export { DATABASE_CONTEXT, DatabaseContextPort } from './ports/context.port';
-export { DATABASE_LISTENER, DatabaseListenerPort, ListenChannel } from './ports/listener.port';
+export { DATABASE_CONTEXT, type DatabaseContext } from './ports/context.port';
+export {
+  DATABASE_LISTENER,
+  LISTEN_CHANNELS,
+  type DatabaseListener,
+  type ListenChannel,
+} from './ports/listener.port';
 // Services
 export { MigrationService } from './services/migration.service';
 // Modules

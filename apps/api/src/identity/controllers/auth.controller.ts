@@ -9,7 +9,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { RegisterUserDTO } from '../dtos/input/user.dtos';
+import type { RegisterUserDTO } from '../dtos/input/user.dtos';
 
 @ApiTags('Authentication')
 @Controller('auth')

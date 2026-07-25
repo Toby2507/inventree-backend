@@ -1,4 +1,4 @@
-import { Duration } from './duration.vo';
+import type { Duration } from './duration.vo';
 
 export class Instant {
   private constructor(private readonly _instant: Temporal.Instant) {}

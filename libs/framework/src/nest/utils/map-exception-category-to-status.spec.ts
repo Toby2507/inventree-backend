@@ -1,16 +1,16 @@
-import { ExceptionCategory } from '@app/shared-kernel';
+import { EXCEPTION_CATEGORIES, type ExceptionCategory } from '@app/shared-kernel';
 import { HttpStatus } from '@nestjs/common';
 import { mapExceptionCategoryToStatus } from './map-exception-category-to-status';
 
 describe('mapExceptionCategoryToStatus', () => {
   it.each([
-    [ExceptionCategory.VALIDATION, HttpStatus.BAD_REQUEST],
-    [ExceptionCategory.NOT_FOUND, HttpStatus.NOT_FOUND],
-    [ExceptionCategory.UNAUTHORIZED, HttpStatus.UNAUTHORIZED],
-    [ExceptionCategory.FORBIDDEN, HttpStatus.FORBIDDEN],
-    [ExceptionCategory.CONFLICT, HttpStatus.CONFLICT],
-    [ExceptionCategory.BUSINESS_RULE, HttpStatus.UNPROCESSABLE_ENTITY],
-    [ExceptionCategory.INTERNAL, HttpStatus.INTERNAL_SERVER_ERROR],
+    [EXCEPTION_CATEGORIES.VALIDATION, HttpStatus.BAD_REQUEST],
+    [EXCEPTION_CATEGORIES.NOT_FOUND, HttpStatus.NOT_FOUND],
+    [EXCEPTION_CATEGORIES.UNAUTHORIZED, HttpStatus.UNAUTHORIZED],
+    [EXCEPTION_CATEGORIES.FORBIDDEN, HttpStatus.FORBIDDEN],
+    [EXCEPTION_CATEGORIES.CONFLICT, HttpStatus.CONFLICT],
+    [EXCEPTION_CATEGORIES.BUSINESS_RULE, HttpStatus.UNPROCESSABLE_ENTITY],
+    [EXCEPTION_CATEGORIES.INTERNAL, HttpStatus.INTERNAL_SERVER_ERROR],
   ])('should map %s to %s', (category, expectedStatus) => {
     expect(mapExceptionCategoryToStatus(category)).toBe(expectedStatus);
   });
@@ -21,17 +21,17 @@ describe('mapExceptionCategoryToStatus', () => {
   });
 
   it('should have an explicit case for every current ExceptionCategory member (no silent default fallback)', () => {
-    const allCategories = Object.values(ExceptionCategory) as ExceptionCategory[];
+    const allCategories = Object.values(EXCEPTION_CATEGORIES) as ExceptionCategory[];
     const statusesFromDefaultFallback = HttpStatus.INTERNAL_SERVER_ERROR;
     const unexpectedlyDefaulted = allCategories.filter((category) => {
-      if (category === ExceptionCategory.INTERNAL) return false;
+      if (category === EXCEPTION_CATEGORIES.INTERNAL) return false;
       return mapExceptionCategoryToStatus(category) === statusesFromDefaultFallback;
     });
     expect(unexpectedlyDefaulted).toEqual([]);
   });
 
   it('always returns a value from the HttpStatus enum', () => {
-    const allCategories = Object.values(ExceptionCategory) as ExceptionCategory[];
+    const allCategories = Object.values(EXCEPTION_CATEGORIES) as ExceptionCategory[];
     const validStatuses = Object.values(HttpStatus);
     for (const category of allCategories) {
       expect(validStatuses).toContain(mapExceptionCategoryToStatus(category));

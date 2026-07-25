@@ -1,4 +1,4 @@
-import { CryptographyPort } from '@app/core/security/cryptography';
+import type { Cryptography } from '@app/core/security/cryptography';
 
 export const makeCryptographyMock = () => {
   return {
@@ -7,5 +7,5 @@ export const makeCryptographyMock = () => {
     decrypt: jest.fn(),
     randomBytes: jest.fn(),
     randomToken: jest.fn(),
-  } as unknown as jest.Mocked<CryptographyPort>;
+  } as unknown as jest.Mocked<Cryptography>;
 };

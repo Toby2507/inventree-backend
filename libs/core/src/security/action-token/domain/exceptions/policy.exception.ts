@@ -1,4 +1,4 @@
-import { DomainException, ExceptionCategory } from '@app/shared-kernel';
+import { DomainException, EXCEPTION_CATEGORIES, type ExceptionCategory } from '@app/shared-kernel';
 import { ActionTokenPurpose } from '../aggregates/action-token.types';
 
 export class TokenPurposePolicyNotFoundException extends DomainException {
@@ -8,6 +8,6 @@ export class TokenPurposePolicyNotFoundException extends DomainException {
   }
 
   override get category(): ExceptionCategory {
-    return ExceptionCategory.INTERNAL;
+    return EXCEPTION_CATEGORIES.INTERNAL;
   }
 }

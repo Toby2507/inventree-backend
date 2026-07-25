@@ -1,8 +1,8 @@
-import { ObservabilityConfig } from '@app/config';
+import type { ObservabilityConfig } from '@app/config';
 import { LogLevel } from '@app/shared-kernel';
 import { fsObservationContext, makeMockPino } from '@app/testing/core/observability';
 import { observationStorage } from '../context/observation-context.storage';
-import { AppLoggerService, ContextLogger } from './app-logger.service';
+import { AppLoggerService, ContextLoggerService } from './app-logger.service';
 
 let capturedPinoConfig: Record<string, unknown> = {};
 const mockPinoInstance = makeMockPino();
@@ -166,7 +166,7 @@ describe('AppLoggerService', () => {
 
     it('should return a ContextLogger instance', () => {
       const result = service.forContext('SomeHandler');
-      expect(result).toBeInstanceOf(ContextLogger);
+      expect(result).toBeInstanceOf(ContextLoggerService);
     });
 
     it('should return a different ContextLogger instance for each call', () => {
@@ -177,12 +177,12 @@ describe('AppLoggerService', () => {
   });
 });
 
-describe('ContextLogger', () => {
-  let contextLogger: ContextLogger;
+describe('ContextLoggerService', () => {
+  let contextLogger: ContextLoggerService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    contextLogger = new ContextLogger(mockPinoInstance as any);
+    contextLogger = new ContextLoggerService(mockPinoInstance as any);
   });
 
   describe('method routing', () => {

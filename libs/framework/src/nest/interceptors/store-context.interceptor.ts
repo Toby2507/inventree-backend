@@ -1,7 +1,12 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
-import { Request } from 'express';
+import { storeContextStorage, type StoreContext } from '@app/database';
+import {
+  Injectable,
+  type CallHandler,
+  type ExecutionContext,
+  type NestInterceptor,
+} from '@nestjs/common';
+import type { Request } from 'express';
 import { Observable } from 'rxjs';
-import { storeContextStorage, StoreContext } from '@app/database';
 
 interface StoreAwareUser {
   sub: string;

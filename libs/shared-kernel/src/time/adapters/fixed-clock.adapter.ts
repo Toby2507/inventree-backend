@@ -1,8 +1,8 @@
-import { ClockPort } from '../ports/clock.port';
-import { Duration } from '../value-objects/duration.vo';
-import { Instant } from '../value-objects/instant.vo';
+import type { Clock } from '../ports/clock.port';
+import type { Duration } from '../value-objects/duration.vo';
+import type { Instant } from '../value-objects/instant.vo';
 
-export class FixedClock implements ClockPort {
+export class FixedClock implements Clock {
   constructor(private instant: Instant) {}
 
   now(): Instant {

@@ -1,11 +1,11 @@
-import { QUEUE_NAMES, QueueName } from '@app/core/infrastructure/queue';
-import { QueueMapperPort } from '@app/core/reliability/outbox';
+import { QUEUE_NAMES, type QueueName } from '@app/core/infrastructure/queue';
+import type { QueueMapper } from '@app/core/reliability/outbox';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
-import { Queue } from 'bullmq';
+import type { Queue } from 'bullmq';
 
 @Injectable()
-export class QueueMapper implements QueueMapperPort {
+export class QueueMappingService implements QueueMapper {
   private readonly queues: Map<QueueName, Queue>;
 
   constructor(

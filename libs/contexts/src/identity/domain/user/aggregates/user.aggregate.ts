@@ -1,5 +1,9 @@
 import { AggregateRoot, Email, PhoneNumber } from '@app/shared-kernel';
-import { MfaType, UserSecurity, UserSecuritySnapshot } from '../entities/user-security.entity';
+import {
+  type MfaType,
+  UserSecurity,
+  type UserSecuritySnapshot,
+} from '../entities/user-security.entity';
 import { AuthenticationBlockedEvent } from '../events/authentication-blocked.event';
 import { UserDisabledEvent } from '../events/user-disabled.event';
 import { UserEmailVerifiedEvent } from '../events/user-email-verified.event';

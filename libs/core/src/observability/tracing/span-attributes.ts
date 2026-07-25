@@ -1,4 +1,4 @@
-export const SpanAttributes = {
+export const SPAN_ATTRIBUTES = {
   CORRELATION_ID: 'app.correlation_id',
   CAUSATION_ID: 'app.causation_id',
   COMMAND_NAME: 'app.command.name',
@@ -20,3 +20,5 @@ export const SpanAttributes = {
   ACTOR_USER_ID: 'app.actor.user_id',
   ACTOR_STORE_ID: 'app.actor.store_id',
 } as const;
+
+export type SpanAttribute = (typeof SPAN_ATTRIBUTES)[keyof typeof SPAN_ATTRIBUTES];

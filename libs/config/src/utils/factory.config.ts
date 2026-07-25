@@ -1,5 +1,5 @@
-import { ClassConstructor } from '@app/shared-kernel';
-import { ConfigObject, registerAs } from '@nestjs/config';
+import type { ClassConstructor } from '@app/shared-kernel';
+import { type ConfigObject, registerAs } from '@nestjs/config';
 import { validate } from './validation.config';
 
 export function createConfig<T, P extends ConfigObject>(

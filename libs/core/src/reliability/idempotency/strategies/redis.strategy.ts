@@ -1,24 +1,24 @@
-import { REDIS, RedisPort } from '@app/core/infrastructure/redis';
-import { CRYPTOGRAPHY, CryptographyPort } from '@app/core/security/cryptography';
+import { REDIS, type Redis } from '@app/core/infrastructure/redis';
+import { CRYPTOGRAPHY, type Cryptography } from '@app/core/security/cryptography';
 import { IDEMPOTENCY_HEADER } from '@app/framework/nest/constants';
 import { mapExceptionCategoryToStatus } from '@app/framework/nest/utils';
-import { JsonValue } from '@app/shared-kernel';
+import type { JsonValue } from '@app/shared-kernel';
 import {
   BadRequestException,
-  CallHandler,
+  type CallHandler,
   ConflictException,
   Inject,
   Injectable,
   InternalServerErrorException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { Observable, catchError, defer, from, of, throwError } from 'rxjs';
+import type { Request } from 'express';
+import { type Observable, catchError, defer, from, of, throwError } from 'rxjs';
 import { map, mergeMap, switchMap } from 'rxjs/operators';
-import { IdempotencyOptions } from '../decorators/idempotency.decorator';
+import type { IdempotencyOptions } from '../decorators/idempotency.decorator';
 import { IdempotencyException } from '../exceptions/idempotency.exception';
-import { IdempotencyRedisRecord } from '../persistence/idempotency.persistence.types';
-import { IdempotencyStrategy } from './interface';
+import type { IdempotencyRedisRecord } from '../persistence/idempotency.persistence.types';
+import type { IdempotencyStrategy } from './interface';
 
 @Injectable()
 export class RedisIdempotencyStrategy implements IdempotencyStrategy {
@@ -26,8 +26,8 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
   private readonly TTL_SECONDS = 86_400; // 24 hours
 
   constructor(
-    @Inject(REDIS) private readonly redis: RedisPort,
-    @Inject(CRYPTOGRAPHY) private readonly crypto: CryptographyPort,
+    @Inject(REDIS) private readonly redis: Redis,
+    @Inject(CRYPTOGRAPHY) private readonly crypto: Cryptography,
   ) {}
 
   handle<T>(request: Request, next: CallHandler, options: IdempotencyOptions): Observable<T> {

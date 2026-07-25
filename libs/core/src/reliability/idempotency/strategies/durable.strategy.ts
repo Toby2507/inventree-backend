@@ -1,34 +1,37 @@
-import { REDIS, RedisPort } from '@app/core/infrastructure/redis';
-import { CRYPTOGRAPHY, CryptographyPort } from '@app/core/security/cryptography';
-import { DATABASE_CONTEXT, DatabaseContextPort } from '@app/database';
+import { REDIS, type Redis } from '@app/core/infrastructure/redis';
+import { CRYPTOGRAPHY, type Cryptography } from '@app/core/security/cryptography';
+import { DATABASE_CONTEXT, type DatabaseContext } from '@app/database';
 import { IDEMPOTENCY_HEADER } from '@app/framework/nest/constants';
 import { mapExceptionCategoryToStatus } from '@app/framework/nest/utils';
-import { JsonValue } from '@app/shared-kernel';
+import type { JsonValue } from '@app/shared-kernel';
 import {
   BadRequestException,
-  CallHandler,
+  type CallHandler,
   ConflictException,
   Inject,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { Observable, catchError, defer, from, of, throwError } from 'rxjs';
+import type { Request } from 'express';
+import { type Observable, catchError, defer, from, of, throwError } from 'rxjs';
 import { map, mergeMap, switchMap } from 'rxjs/operators';
-import { IdempotencyOptions } from '../decorators/idempotency.decorator';
+import type { IdempotencyOptions } from '../decorators/idempotency.decorator';
 import { IdempotencyException } from '../exceptions/idempotency.exception';
-import { IdempotencyRecord } from '../persistence/idempotency.persistence.types';
-import { IDEMPOTENCY_REPOSITORY, IdempotencyRepository } from '../persistence/idempotency.port';
-import { IdempotencyStrategy } from './interface';
+import type { IdempotencyRecord } from '../persistence/idempotency.persistence.types';
+import {
+  IDEMPOTENCY_REPOSITORY,
+  type IdempotencyRepository,
+} from '../persistence/idempotency.port';
+import type { IdempotencyStrategy } from './interface';
 
 @Injectable()
 export class DurableIdempotencyStrategy implements IdempotencyStrategy {
   private readonly TTL_SECONDS = 86_400; // 24 hours
 
   constructor(
-    @Inject(REDIS) private readonly redis: RedisPort,
-    @Inject(CRYPTOGRAPHY) private readonly crypto: CryptographyPort,
-    @Inject(DATABASE_CONTEXT) private readonly db: DatabaseContextPort,
+    @Inject(REDIS) private readonly redis: Redis,
+    @Inject(CRYPTOGRAPHY) private readonly crypto: Cryptography,
+    @Inject(DATABASE_CONTEXT) private readonly db: DatabaseContext,
     @Inject(IDEMPOTENCY_REPOSITORY) private readonly repository: IdempotencyRepository,
   ) {}
 

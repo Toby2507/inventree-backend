@@ -6,7 +6,7 @@ import {
   TokenRevokedException,
 } from '../exceptions/action-token.exceptions';
 import { ActionTokenID } from '../value-objects/action-token-id.vo';
-import { ActionTokenPurpose, ActionTokenRevokeReason } from './action-token.types';
+import type { ActionTokenPurpose, ActionTokenRevokeReason } from './action-token.types';
 
 export interface ActionTokenSnapshot {
   id: string;

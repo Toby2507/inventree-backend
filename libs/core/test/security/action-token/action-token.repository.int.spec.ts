@@ -1,15 +1,15 @@
 import {
-  ACTION_TOKEN_PURPOSE,
-  ACTION_TOKEN_REVOKE_REASON,
+  ACTION_TOKEN_PURPOSES,
+  ACTION_TOKEN_REVOKE_REASONS,
 } from '@app/core/security/action-token/domain/aggregates/action-token.types';
 import { DuplicateTokenHashException } from '@app/core/security/action-token/infrastructure/exceptions/persistence.exception';
 import { ActionTokenKyselyRepository } from '@app/core/security/action-token/infrastructure/persistence/action-token.kysely.repository';
-import { OperationalSchema, OptimisticConcurrencyControlException } from '@app/database';
+import { type OperationalSchema, OptimisticConcurrencyControlException } from '@app/database';
 import { Duration, Instant } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { feActionToken } from '@app/testing/core/security';
-import { createTestContext, TestContext } from '@app/testing/database';
-import { Kysely } from 'kysely';
+import { createTestContext, type TestContext } from '@app/testing/database';
+import type { Kysely } from 'kysely';
 
 const dateString = '2024-01-01T00:00:00Z';
 
@@ -17,19 +17,21 @@ describe('ActionTokenKyselyRepository (integration)', () => {
   let ctx: TestContext<OperationalSchema>;
   let db: Kysely<OperationalSchema>;
   let repo: ActionTokenKyselyRepository;
+  let userId: string;
 
-  const createUser = async () => {
+  const createUser = async (db: Kysely<OperationalSchema>) => {
     const user = await db
       .insertInto('users')
       .values({ email: faker.internet.email(), password_hash: 'password123' })
       .returning('id')
       .executeTakeFirstOrThrow();
-    return user.id;
+    userId = user.id;
   };
 
   beforeAll(async () => {
     ctx = await createTestContext();
     repo = new ActionTokenKyselyRepository();
+    await ctx.run(createUser);
   });
   beforeEach(async () => {
     db = await ctx.begin();
@@ -42,11 +44,6 @@ describe('ActionTokenKyselyRepository (integration)', () => {
   });
 
   describe('create()', () => {
-    let userId: string;
-    beforeEach(async () => {
-      userId = await createUser();
-    });
-
     it('should persist action token correctly', async () => {
       const token = feActionToken.generate({ userId });
       await repo.create(db, token);
@@ -76,12 +73,7 @@ describe('ActionTokenKyselyRepository (integration)', () => {
   });
 
   describe('update()', () => {
-    let userId: string;
     const now = Instant.parse(dateString);
-
-    beforeEach(async () => {
-      userId = await createUser();
-    });
 
     it('should update action token correctly', async () => {
       const token = feActionToken.generate({ userId });
@@ -115,11 +107,6 @@ describe('ActionTokenKyselyRepository (integration)', () => {
   });
 
   describe('findByHash()', () => {
-    let userId: string;
-    beforeEach(async () => {
-      userId = await createUser();
-    });
-
     it('should return action token by hash', async () => {
       const token = feActionToken.generate({ userId });
       await repo.create(db, token);
@@ -133,97 +120,88 @@ describe('ActionTokenKyselyRepository (integration)', () => {
     });
   });
 
-  describe('findActiveByUserAndPurpose()', () => {
-    let userId: string;
-    beforeEach(async () => {
-      userId = await createUser();
-    });
-
-    it('should return active action token by user and purpose', async () => {
+  describe('findUsableByUserAndPurpose()', () => {
+    it('should return usable action token by user and purpose', async () => {
       const token = feActionToken.generate({ userId });
       await repo.create(db, token);
-      const foundToken = await repo.findUsableByUserAndPurpose(
+      const foundTokens = await repo.findUsableByUserAndPurpose(
         db,
         userId,
         token.purpose,
         Instant.parse(dateString),
       );
-      expect(foundToken?.toSnapshot()).toEqual(token.toSnapshot());
+      expect(foundTokens).toHaveLength(1);
+      expect(foundTokens[0]?.toSnapshot()).toEqual(token.toSnapshot());
     });
 
-    it('should return the most recent active token if multiple exist for user and purpose', async () => {
+    it('should return all usable tokens if multiple exist for user and purpose', async () => {
       const token1 = feActionToken.generate({
         userId,
-        purpose: ACTION_TOKEN_PURPOSE.PASSWORD_RESET,
+        purpose: ACTION_TOKEN_PURPOSES.PASSWORD_RESET,
         createdAt: Instant.parse(dateString),
       });
       const token2 = feActionToken.generate({
         userId,
-        purpose: ACTION_TOKEN_PURPOSE.PASSWORD_RESET,
+        purpose: ACTION_TOKEN_PURPOSES.PASSWORD_RESET,
         createdAt: Instant.parse(dateString).add(Duration.hours(1)),
       });
       await Promise.all([repo.create(db, token1), repo.create(db, token2)]);
-      const foundToken = await repo.findUsableByUserAndPurpose(
+      const foundTokens = await repo.findUsableByUserAndPurpose(
         db,
         userId,
-        ACTION_TOKEN_PURPOSE.PASSWORD_RESET,
+        ACTION_TOKEN_PURPOSES.PASSWORD_RESET,
         Instant.parse(dateString),
       );
-      expect(foundToken?.toSnapshot()).toEqual(token2.toSnapshot());
+      expect(foundTokens).toHaveLength(2);
     });
 
-    it('should return null if no active token exists for user and purpose', async () => {
-      const foundToken = await repo.findUsableByUserAndPurpose(
+    it('should return an empty array if no usable token exists for user and purpose', async () => {
+      const foundTokens = await repo.findUsableByUserAndPurpose(
         db,
         userId,
-        ACTION_TOKEN_PURPOSE.EMAIL_CHANGE,
+        ACTION_TOKEN_PURPOSES.EMAIL_CHANGE,
         Instant.parse(dateString),
       );
-      expect(foundToken).toBeNull();
+      expect(foundTokens).toHaveLength(0);
     });
 
-    it('should return null if token is consumed', async () => {
-      const token = feActionToken.generate({ userId });
-      await repo.create(db, token);
-      token.consume(Instant.parse(dateString));
-      await repo.update(db, token);
-      const foundToken = await repo.findUsableByUserAndPurpose(
-        db,
+    it('should return an empty array if the available tokens are not usable (consumed, revoked, or expired)', async () => {
+      const purpose = ACTION_TOKEN_PURPOSES.PASSWORD_RESET;
+      const consumeToken = feActionToken.generate({ userId, purpose });
+      consumeToken.consume(Instant.parse(dateString));
+      const revokeToken = feActionToken.generate({ userId, purpose });
+      revokeToken.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, Instant.parse(dateString));
+      const expireToken = feActionToken.generate({
         userId,
-        token.purpose,
-        Instant.parse(dateString),
-      );
-      expect(foundToken).toBeNull();
-    });
-
-    it('should return null if token is revoked', async () => {
-      const token = feActionToken.generate({ userId });
-      await repo.create(db, token);
-      token.revoke(ACTION_TOKEN_REVOKE_REASON.ATTEMPTS_EXCEEDED, Instant.parse(dateString));
-      await repo.update(db, token);
-      const foundToken = await repo.findUsableByUserAndPurpose(
-        db,
-        userId,
-        token.purpose,
-        Instant.parse(dateString),
-      );
-      expect(foundToken).toBeNull();
-    });
-
-    it('should return null if token is expired', async () => {
-      const token = feActionToken.generate({
-        userId,
+        purpose,
         createdAt: Instant.parse(dateString).subtract(Duration.hours(1)),
         expiresAt: Instant.parse(dateString),
       });
-      await repo.create(db, token);
-      const foundToken = await repo.findUsableByUserAndPurpose(
+      await Promise.all([
+        repo.create(db, consumeToken),
+        repo.create(db, revokeToken),
+        repo.create(db, expireToken),
+      ]);
+      const foundTokens = await repo.findUsableByUserAndPurpose(
         db,
         userId,
-        token.purpose,
+        purpose,
         Instant.parse(dateString).add(Duration.hours(1)),
       );
-      expect(foundToken).toBeNull();
+      expect(foundTokens).toHaveLength(0);
+    });
+
+    it('should return an empty array if the available tokens are for a different purpose', async () => {
+      const purpose = ACTION_TOKEN_PURPOSES.PASSWORD_RESET;
+      const token = feActionToken.generate({ userId, purpose });
+      await repo.create(db, token);
+      const foundTokens = await repo.findUsableByUserAndPurpose(
+        db,
+        userId,
+        ACTION_TOKEN_PURPOSES.EMAIL_CHANGE,
+        Instant.parse(dateString),
+      );
+      expect(foundTokens).toHaveLength(0);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { DomainException, ExceptionCategory } from '@app/shared-kernel';
+import { DomainException, EXCEPTION_CATEGORIES, type ExceptionCategory } from '@app/shared-kernel';
 
 // Business Rule Exceptions
 export class TokenAlreadyConsumedException extends DomainException {
@@ -30,6 +30,6 @@ export class TokenExpiryBeforeCreationTimeException extends DomainException {
   }
 
   override get category(): ExceptionCategory {
-    return ExceptionCategory.VALIDATION;
+    return EXCEPTION_CATEGORIES.VALIDATION;
   }
 }

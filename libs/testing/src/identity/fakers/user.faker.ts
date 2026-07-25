@@ -1,9 +1,9 @@
 import {
-  CreateUserProps,
+  type CreateUserProps,
   User,
-  UserSnapshot,
+  type UserSnapshot,
 } from '@app/contexts/identity/domain/user/aggregates/user.aggregate';
-import { UserSnapRow } from '@app/contexts/identity/infrastructure/persistence/mappers/user/user.persistence.types';
+import type { UserSnapRow } from '@app/contexts/identity/infrastructure/persistence/mappers/user/user.persistence.types';
 import { createEntityFaker, createFaker } from '@app/testing/faker-factory';
 import { faker } from '@faker-js/faker';
 import { fsUserSecurity } from './user-security.faker';

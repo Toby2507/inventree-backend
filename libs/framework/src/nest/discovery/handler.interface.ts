@@ -1,4 +1,4 @@
-import { Job } from 'bullmq';
+import type { Job } from 'bullmq';
 
 export interface JobHandler<T = string, P = unknown> {
   readonly job: T;

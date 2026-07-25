@@ -1,4 +1,4 @@
-import { IDEMPOTENCY_KEY, IdempotencyOptions, Idempotent } from './idempotency.decorator';
+import { IDEMPOTENCY_KEY, type IdempotencyOptions, Idempotent } from './idempotency.decorator';
 
 describe('Idempotent', () => {
   it('should attach idempotency metadata', () => {

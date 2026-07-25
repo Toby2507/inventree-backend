@@ -1,10 +1,10 @@
 import { UserEmailAlreadyExistsException } from '@app/contexts/identity/domain/user/exceptions/registration.exceptions';
 import { UserKyselyRepository } from '@app/contexts/identity/infrastructure/persistence/repositories/user.kysely.repository';
-import { OperationalSchema } from '@app/database';
+import type { OperationalSchema } from '@app/database';
 import { faker } from '@app/testing';
-import { createTestContext, TestContext } from '@app/testing/database';
+import { createTestContext, type TestContext } from '@app/testing/database';
 import { feUser, fsUserSecurity } from '@app/testing/identity';
-import { Kysely } from 'kysely';
+import type { Kysely } from 'kysely';
 
 describe('UserKyselyRepository (integration)', () => {
   let ctx: TestContext<OperationalSchema>;

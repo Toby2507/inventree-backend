@@ -1,4 +1,4 @@
-import { ExceptionCategory } from './exception.enum';
+import { EXCEPTION_CATEGORIES, type ExceptionCategory } from './exception.enum';
 
 abstract class ExceptionBase extends Error {
   abstract readonly code: string;
@@ -18,7 +18,7 @@ abstract class ExceptionBase extends Error {
 
 export abstract class DomainException extends ExceptionBase {
   get category(): ExceptionCategory {
-    return ExceptionCategory.BUSINESS_RULE;
+    return EXCEPTION_CATEGORIES.BUSINESS_RULE;
   }
 }
 
@@ -26,6 +26,6 @@ export abstract class ApplicationException extends ExceptionBase {}
 
 export abstract class InfrastructureException extends ExceptionBase {
   get category(): ExceptionCategory {
-    return ExceptionCategory.INTERNAL;
+    return EXCEPTION_CATEGORIES.INTERNAL;
   }
 }

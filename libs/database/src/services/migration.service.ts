@@ -1,8 +1,8 @@
-import { LOGGER, LoggerPort } from '@app/core/observability';
+import { LOGGER, type Logger } from '@app/core/observability';
 import { Inject, Injectable } from '@nestjs/common';
-import { Migration, MigrationProvider, Migrator } from 'kysely';
+import { type Migration, type MigrationProvider, Migrator } from 'kysely';
 import { analyticsMigrations, bootstrapMigrations, operationalMigrations } from '../migrations';
-import { DATABASE_PROVIDER, DatabaseProviderPort } from '../ports/provider.port';
+import { DATABASE_PROVIDER, type DatabaseProvider } from '../ports/provider.port';
 
 type MigrationTarget = 'analytics' | 'bootstrap' | 'operational';
 
@@ -19,8 +19,8 @@ export class MigrationService {
   private readonly logger;
 
   constructor(
-    @Inject(LOGGER) logger: LoggerPort,
-    @Inject(DATABASE_PROVIDER) private readonly provider: DatabaseProviderPort,
+    @Inject(LOGGER) logger: Logger,
+    @Inject(DATABASE_PROVIDER) private readonly provider: DatabaseProvider,
   ) {
     this.logger = logger.forContext(MigrationService.name);
   }

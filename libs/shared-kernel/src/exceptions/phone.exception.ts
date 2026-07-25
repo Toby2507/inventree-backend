@@ -1,5 +1,5 @@
 import { DomainException } from './exception.bases';
-import { ExceptionCategory } from './exception.enum';
+import { EXCEPTION_CATEGORIES, type ExceptionCategory } from './exception.enum';
 
 export class InvalidPhoneNumberException extends DomainException {
   readonly code = 'PHONE_NUMBER_INVALID';
@@ -8,7 +8,7 @@ export class InvalidPhoneNumberException extends DomainException {
   }
 
   override get category(): ExceptionCategory {
-    return ExceptionCategory.VALIDATION;
+    return EXCEPTION_CATEGORIES.VALIDATION;
   }
 }
 
@@ -19,6 +19,6 @@ export class PhoneNumberCannotBeEmptyException extends DomainException {
   }
 
   override get category(): ExceptionCategory {
-    return ExceptionCategory.VALIDATION;
+    return EXCEPTION_CATEGORIES.VALIDATION;
   }
 }

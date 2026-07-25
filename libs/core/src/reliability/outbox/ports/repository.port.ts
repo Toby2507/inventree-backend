@@ -1,5 +1,5 @@
-import { OperationalDB } from '@app/database';
-import { CreateOutboxEvent, OutboxEvent } from '../types/outbox.interface';
+import type { OperationalDB } from '@app/database';
+import type { CreateOutboxEvent, OutboxEvent } from '../types/outbox.interface';
 
 export interface OutboxRepository {
   insert(db: OperationalDB, record: CreateOutboxEvent): Promise<void>;

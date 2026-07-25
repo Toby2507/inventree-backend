@@ -1,2 +1,2 @@
 export { CryptographyModule } from './cryptography.module';
-export { CRYPTOGRAPHY, CryptographyPort } from './cryptography.port';
+export { CRYPTOGRAPHY, type Cryptography } from './cryptography.port';

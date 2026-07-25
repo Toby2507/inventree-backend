@@ -1,4 +1,4 @@
-import { DomainEvent } from './domain-event.base';
+import type { DomainEvent } from './domain-event.base';
 import { BaseEntity } from './entity.base';
 
 export abstract class AggregateRoot<TSnapshot> extends BaseEntity<TSnapshot> {

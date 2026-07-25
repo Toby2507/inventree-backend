@@ -1,7 +1,7 @@
-import { ActionTokenPurpose } from '../../domain/aggregates/action-token.types';
+import type { ActionTokenPurpose } from '../../domain/aggregates/action-token.types';
 import { TokenPurposePolicyNotFoundException } from '../../domain/exceptions/policy.exception';
-import { ActionTokenPolicy } from '../../domain/policies/action-token-policy';
-import { ActionTokenPolicyRegistry } from '../../domain/policies/action-token-policy.registry';
+import type { ActionTokenPolicy } from '../../domain/policies/action-token-policy';
+import type { ActionTokenPolicyRegistry } from '../../domain/policies/action-token-policy.registry';
 import { DuplicateTokenPolicyException } from '../exceptions/policy.exceptions';
 
 export class InMemoryActionTokenPolicyRegistry implements ActionTokenPolicyRegistry {

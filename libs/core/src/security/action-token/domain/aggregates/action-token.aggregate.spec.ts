@@ -9,7 +9,7 @@ import {
 } from '../exceptions/action-token.exceptions';
 import { ActionTokenID } from '../value-objects/action-token-id.vo';
 import { ActionToken } from './action-token.aggregate';
-import { ACTION_TOKEN_REVOKE_REASON } from './action-token.types';
+import { ACTION_TOKEN_REVOKE_REASONS } from './action-token.types';
 
 const at = (ms: number) => Instant.fromEpochMs(ms);
 const BASE_TIME = 1_700_000_000_000;
@@ -63,7 +63,7 @@ describe('ActionToken Aggregate Root', () => {
       const snapshot = fsActionToken.generate({
         consumedAt: at(BASE_TIME + 1_000),
         revokedAt: at(BASE_TIME + 5_000),
-        revokedReason: ACTION_TOKEN_REVOKE_REASON.MANUAL,
+        revokedReason: ACTION_TOKEN_REVOKE_REASONS.MANUAL,
       });
       const token = ActionToken.reconstitute(snapshot);
       expect(token.isConsumed()).toBe(true);
@@ -93,7 +93,7 @@ describe('ActionToken Aggregate Root', () => {
 
       it('should throw if token is already revoked', () => {
         const token = feActionToken.generate();
-        token.revoke(ACTION_TOKEN_REVOKE_REASON.MANUAL, NOW);
+        token.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, NOW);
         expect(() => token.consume(NOW)).toThrow(TokenRevokedException);
         expect(token.version).toBe(1);
       });
@@ -123,17 +123,17 @@ describe('ActionToken Aggregate Root', () => {
 
     it('should mark the token as revoked and bump the version', () => {
       const token = feActionToken.generate();
-      token.revoke(ACTION_TOKEN_REVOKE_REASON.MANUAL, NOW);
+      token.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, NOW);
       expect(token.isRevoked()).toBe(true);
       expect(token.version).toBe(1);
       expect(token.toSnapshot().revokedAt).toEqual(NOW);
-      expect(token.toSnapshot().revokedReason).toEqual(ACTION_TOKEN_REVOKE_REASON.MANUAL);
+      expect(token.toSnapshot().revokedReason).toEqual(ACTION_TOKEN_REVOKE_REASONS.MANUAL);
     });
 
     it('should throw if token is already consumed', () => {
       const token = feActionToken.generate();
       token.consume(NOW);
-      expect(() => token.revoke(ACTION_TOKEN_REVOKE_REASON.MANUAL, NOW)).toThrow(
+      expect(() => token.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, NOW)).toThrow(
         TokenAlreadyConsumedException,
       );
       expect(token.version).toBe(1);
@@ -141,9 +141,9 @@ describe('ActionToken Aggregate Root', () => {
 
     it('should be no-op if token is already revoked', () => {
       const token = feActionToken.generate();
-      token.revoke(ACTION_TOKEN_REVOKE_REASON.MANUAL, NOW);
+      token.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, NOW);
       const before = token.toSnapshot();
-      expect(() => token.revoke(ACTION_TOKEN_REVOKE_REASON.MANUAL, NOW)).not.toThrow();
+      expect(() => token.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, NOW)).not.toThrow();
       expect(token.toSnapshot()).toEqual(before);
     });
   });
@@ -157,7 +157,7 @@ describe('ActionToken Aggregate Root', () => {
 
     it('should return true for isRevoked() if token is revoked', () => {
       const token = feActionToken.generate();
-      token.revoke(ACTION_TOKEN_REVOKE_REASON.MANUAL, at(BASE_TIME));
+      token.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, at(BASE_TIME));
       expect(token.isRevoked()).toBe(true);
     });
 
@@ -184,7 +184,7 @@ describe('ActionToken Aggregate Root', () => {
       expect(token2.isUsable(at(BASE_TIME))).toBe(false);
       // Revoked token should also be unusable
       const token3 = feActionToken.generate();
-      token3.revoke(ACTION_TOKEN_REVOKE_REASON.MANUAL, at(BASE_TIME));
+      token3.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, at(BASE_TIME));
       expect(token3.isUsable(at(BASE_TIME))).toBe(false);
     });
   });

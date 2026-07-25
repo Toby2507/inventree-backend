@@ -1,6 +1,6 @@
 import { makeLoggerMock } from '@app/testing/core/observability';
 import { makeDatabaseProviderMock } from '@app/testing/database';
-import { ListenChannel } from '../ports/listener.port';
+import type { ListenChannel } from '../ports/listener.port';
 import { PgListener } from './listener.service';
 
 const flushPromises = () => new Promise(setImmediate);

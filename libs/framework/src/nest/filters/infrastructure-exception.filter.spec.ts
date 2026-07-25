@@ -1,4 +1,8 @@
-import { ExceptionCategory, InfrastructureException } from '@app/shared-kernel';
+import {
+  EXCEPTION_CATEGORIES,
+  ExceptionCategory,
+  InfrastructureException,
+} from '@app/shared-kernel';
 import { makeLoggerMock } from '@app/testing/core/observability';
 import { makeHostMock } from '@app/testing/system';
 import { HttpStatus } from '@nestjs/common';
@@ -18,7 +22,7 @@ class OverridenCategoryException extends InfrastructureException {
   }
 
   get category(): ExceptionCategory {
-    return ExceptionCategory.BUSINESS_RULE;
+    return EXCEPTION_CATEGORIES.BUSINESS_RULE;
   }
 }
 

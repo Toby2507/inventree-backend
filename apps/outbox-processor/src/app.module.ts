@@ -12,8 +12,8 @@ import { ClockModule } from '@app/shared-kernel';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { EventRouter } from './event-router';
-import { QueueMapper } from './queue-mapper';
+import { EventRoutingService } from './event-router';
+import { QueueMappingService } from './queue-mapper';
 
 @Module({
   imports: [
@@ -29,8 +29,8 @@ import { QueueMapper } from './queue-mapper';
   ],
   providers: [
     OutboxProcessorService,
-    { provide: QUEUE_MAPPER, useClass: QueueMapper },
-    { provide: EVENT_ROUTER, useClass: EventRouter },
+    { provide: QUEUE_MAPPER, useClass: QueueMappingService },
+    { provide: EVENT_ROUTER, useClass: EventRoutingService },
   ],
 })
 export class AppModule {}

@@ -1,4 +1,4 @@
-import { StoreContext } from '@app/database';
+import type { StoreContext } from '@app/database';
 import { createFaker } from '@app/testing/faker-factory';
 import { faker } from '@faker-js/faker';
 

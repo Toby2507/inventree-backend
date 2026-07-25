@@ -1,7 +1,7 @@
 import { DATABASE_CONTEXT } from '@app/database';
 import { makeIdempotencyRepositoryMock } from '@app/testing/core/reliability/idempotency';
 import { makeDatabaseContextMock } from '@app/testing/database';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { IDEMPOTENCY_REPOSITORY } from '../persistence/idempotency.port';
 import { IdempotencyService } from './idempotency.service';
 

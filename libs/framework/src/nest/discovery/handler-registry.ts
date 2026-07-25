@@ -1,5 +1,5 @@
-import { OnModuleInit } from '@nestjs/common';
-import { DiscoveryService, Reflector } from '@nestjs/core';
+import type { OnModuleInit } from '@nestjs/common';
+import type { DiscoveryService, Reflector } from '@nestjs/core';
 
 export abstract class DiscoveryRegistry<TKey, THandler> implements OnModuleInit {
   protected readonly handlers = new Map<TKey, THandler>();

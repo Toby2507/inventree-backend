@@ -1,6 +1,6 @@
 import { Mapper } from '@app/shared-kernel';
-import { UserSecuritySnapshot } from '../../../../domain/user/entities/user-security.entity';
-import { UserSecuritySnapRow } from './user.persistence.types';
+import type { UserSecuritySnapshot } from '../../../../domain/user/entities/user-security.entity';
+import type { UserSecuritySnapRow } from './user.persistence.types';
 
 export class UserSecurityMapper extends Mapper<UserSecuritySnapshot, UserSecuritySnapRow> {
   toDomain(raw: UserSecuritySnapRow): UserSecuritySnapshot {

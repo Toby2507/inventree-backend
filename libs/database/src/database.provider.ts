@@ -1,14 +1,19 @@
-import { DATABASE_CONFIG, DatabaseConfig } from '@app/config';
-import { LOGGER, LoggerPort } from '@app/core/observability';
-import { Inject, Injectable, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
+import { DATABASE_CONFIG, type DatabaseConfig } from '@app/config';
+import { LOGGER, type Logger } from '@app/core/observability';
+import {
+  Inject,
+  Injectable,
+  type OnApplicationBootstrap,
+  type OnApplicationShutdown,
+} from '@nestjs/common';
 import { Kysely, PostgresDialect } from 'kysely';
-import { Client, Pool, PoolConfig } from 'pg';
-import { DatabaseClient, DatabaseProviderPort } from './ports/provider.port';
-import { AnalyticsDB, OperationalDB } from './types/db.schema.types';
+import { Client, Pool, type PoolConfig } from 'pg';
+import type { DatabaseClient, DatabaseProvider } from './ports/provider.port';
+import type { AnalyticsDB, OperationalDB } from './types/db.schema.types';
 
 @Injectable()
-export class DatabaseProvider
-  implements OnApplicationBootstrap, OnApplicationShutdown, DatabaseProviderPort
+export class DatabaseProviderService
+  implements OnApplicationBootstrap, OnApplicationShutdown, DatabaseProvider
 {
   private readonly logger;
   private _operationalPrimary!: OperationalDB;
@@ -22,9 +27,9 @@ export class DatabaseProvider
 
   constructor(
     @Inject(DATABASE_CONFIG) private readonly config: DatabaseConfig,
-    @Inject(LOGGER) logger: LoggerPort,
+    @Inject(LOGGER) logger: Logger,
   ) {
-    this.logger = logger.forContext(DatabaseProvider.name);
+    this.logger = logger.forContext(DatabaseProviderService.name);
   }
 
   // ==== LIFECYCLE HOOKS =====================

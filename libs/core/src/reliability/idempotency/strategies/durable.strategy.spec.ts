@@ -2,6 +2,7 @@ import { REDIS } from '@app/core/infrastructure/redis';
 import { CRYPTOGRAPHY } from '@app/core/security/cryptography';
 import { DATABASE_CONTEXT } from '@app/database';
 import { IDEMPOTENCY_HEADER } from '@app/framework/nest/constants';
+import { EXCEPTION_CATEGORIES } from '@app/shared-kernel';
 import { makeRedisMock } from '@app/testing/core/infrastructure';
 import {
   fsIdempotencyRecord,
@@ -15,14 +16,13 @@ import {
   ConflictException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { firstValueFrom, of, throwError } from 'rxjs';
-import { IdempotencyOptions } from '../decorators/idempotency.decorator';
+import type { IdempotencyOptions } from '../decorators/idempotency.decorator';
 import { IdempotencyException } from '../exceptions/idempotency.exception';
-import { IdempotencyRecord } from '../persistence/idempotency.persistence.types';
+import type { IdempotencyRecord } from '../persistence/idempotency.persistence.types';
 import { IDEMPOTENCY_REPOSITORY } from '../persistence/idempotency.port';
 import { DurableIdempotencyStrategy } from './durable.strategy';
-import { ExceptionCategory } from '@app/shared-kernel';
 
 const OPTIONS: IdempotencyOptions = { strategy: 'durable', scope: 'payments' };
 
@@ -342,7 +342,7 @@ describe('DurableIdempotencyStrategy', () => {
 
         it('should resolve status from err.category via mapExceptionCategoryToStatus when status is not available', async () => {
           const err = new Error('Domain error') as any;
-          err.category = ExceptionCategory.VALIDATION;
+          err.category = EXCEPTION_CATEGORIES.VALIDATION;
           mockHandle.mockReturnValue(throwError(() => err));
           const updateRecord: IdempotencyRecord = {
             ...record,
@@ -363,7 +363,7 @@ describe('DurableIdempotencyStrategy', () => {
               status: 'failed',
               error: expect.objectContaining({
                 message: 'Domain error',
-                category: ExceptionCategory.VALIDATION,
+                category: EXCEPTION_CATEGORIES.VALIDATION,
               }),
             }),
             expect.any(Number),

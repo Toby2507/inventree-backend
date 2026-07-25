@@ -1,8 +1,17 @@
-import { LOGGER, LoggerPort } from '@app/core/observability';
-import { Inject, Injectable, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
+import { LOGGER, type Logger } from '@app/core/observability';
+import {
+  Inject,
+  Injectable,
+  type OnApplicationBootstrap,
+  type OnApplicationShutdown,
+} from '@nestjs/common';
 import { Notification } from 'pg';
-import { ListenChannel, DatabaseListenerPort, ListenHandler } from '../ports/listener.port';
-import { DATABASE_PROVIDER, DatabaseClient, DatabaseProviderPort } from '../ports/provider.port';
+import type { DatabaseListener, ListenChannel, ListenHandler } from '../ports/listener.port';
+import {
+  DATABASE_PROVIDER,
+  type DatabaseClient,
+  type DatabaseProvider,
+} from '../ports/provider.port';
 
 interface Subscription {
   name: string;
@@ -10,9 +19,7 @@ interface Subscription {
 }
 
 @Injectable()
-export class PgListener
-  implements OnApplicationBootstrap, OnApplicationShutdown, DatabaseListenerPort
-{
+export class PgListener implements OnApplicationBootstrap, OnApplicationShutdown, DatabaseListener {
   private readonly logger;
   private client?: DatabaseClient;
 
@@ -25,8 +32,8 @@ export class PgListener
   private readonly subscriptions = new Map<ListenChannel, Set<Subscription>>();
 
   constructor(
-    @Inject(DATABASE_PROVIDER) private readonly provider: DatabaseProviderPort,
-    @Inject(LOGGER) logger: LoggerPort,
+    @Inject(DATABASE_PROVIDER) private readonly provider: DatabaseProvider,
+    @Inject(LOGGER) logger: Logger,
   ) {
     this.logger = logger.forContext(PgListener.name);
   }

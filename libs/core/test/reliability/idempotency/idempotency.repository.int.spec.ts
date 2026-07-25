@@ -1,12 +1,13 @@
 import { IdempotencyKyselyRepository } from '@app/core/reliability/idempotency/persistence/idempotency.kysely.repository';
-import { CreateIdempotency } from '@app/core/reliability/idempotency/persistence/idempotency.persistence.types';
-import { OperationalDB, OperationalSchema } from '@app/database';
+import type { CreateIdempotency } from '@app/core/reliability/idempotency/persistence/idempotency.persistence.types';
+import type { OperationalSchema } from '@app/database';
 import { fsCreateIdempotencyInput } from '@app/testing/core/reliability/idempotency';
-import { createTestContext, TestContext } from '@app/testing/database';
+import { createTestContext, type TestContext } from '@app/testing/database';
+import type { Kysely } from 'kysely';
 
 describe('IdempotencyKyselyRepository (integration)', () => {
   let ctx: TestContext<OperationalSchema>;
-  let db: OperationalDB;
+  let db: Kysely<OperationalSchema>;
   let repo: IdempotencyKyselyRepository;
 
   const expireRecord = async (input: CreateIdempotency) => {

@@ -1,4 +1,4 @@
-export interface CryptographyPort {
+export interface Cryptography {
   sha256(data: unknown): string;
   encrypt(data: string): string;
   decrypt(data: string): string;

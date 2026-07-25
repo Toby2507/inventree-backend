@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { IdempotencyStrategyType } from '../decorators/idempotency.decorator';
-import { DurableIdempotencyStrategy } from './durable.strategy';
-import { IdempotencyStrategy } from './interface';
-import { RedisIdempotencyStrategy } from './redis.strategy';
+import type { IdempotencyStrategyType } from '../decorators/idempotency.decorator';
+import type { DurableIdempotencyStrategy } from './durable.strategy';
+import type { IdempotencyStrategy } from './interface';
+import type { RedisIdempotencyStrategy } from './redis.strategy';
 
 @Injectable()
 export class IdempotencyStrategyFactory {

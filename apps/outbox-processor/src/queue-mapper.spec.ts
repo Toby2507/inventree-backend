@@ -1,12 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { QueueMapper } from './queue-mapper';
-import { getQueueToken } from '@nestjs/bullmq';
-import { QUEUE_NAMES, QueueName } from '@app/core/infrastructure/queue';
+import { QUEUE_NAMES, type QueueName } from '@app/core/infrastructure/queue';
 import { makeQueueMock } from '@app/testing/system';
+import { getQueueToken } from '@nestjs/bullmq';
+import { Test, type TestingModule } from '@nestjs/testing';
+import { QueueMappingService } from './queue-mapper';
 
-describe('QueueMapper', () => {
+describe('QueueMappingService', () => {
   let module: TestingModule;
-  let mapper: QueueMapper;
+  let mapper: QueueMappingService;
 
   const notificationQueue = makeQueueMock(QUEUE_NAMES.NOTIFICATIONS);
   const inventoryQueue = makeQueueMock(QUEUE_NAMES.INVENTORY);
@@ -18,7 +18,7 @@ describe('QueueMapper', () => {
   beforeAll(async () => {
     module = await Test.createTestingModule({
       providers: [
-        QueueMapper,
+        QueueMappingService,
         { provide: getQueueToken(QUEUE_NAMES.NOTIFICATIONS), useValue: notificationQueue },
         { provide: getQueueToken(QUEUE_NAMES.INVENTORY), useValue: inventoryQueue },
         { provide: getQueueToken(QUEUE_NAMES.ANALYTICS), useValue: analyticsQueue },
@@ -27,7 +27,7 @@ describe('QueueMapper', () => {
         { provide: getQueueToken(QUEUE_NAMES.EMAIL), useValue: emailQueue },
       ],
     }).compile();
-    mapper = module.get(QueueMapper);
+    mapper = module.get(QueueMappingService);
   });
   beforeEach(() => {
     jest.clearAllMocks();

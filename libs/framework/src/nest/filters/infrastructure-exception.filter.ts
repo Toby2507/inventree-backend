@@ -1,12 +1,18 @@
-import { LOGGER, LoggerPort } from '@app/core/observability';
+import { LOGGER, type Logger } from '@app/core/observability';
 import { InfrastructureException } from '@app/shared-kernel';
-import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus, Inject } from '@nestjs/common';
+import {
+  type ArgumentsHost,
+  Catch,
+  type ExceptionFilter,
+  HttpStatus,
+  Inject,
+} from '@nestjs/common';
 
 @Catch(InfrastructureException)
 export class InfrastructureExceptionFilter implements ExceptionFilter {
   private readonly logger;
 
-  constructor(@Inject(LOGGER) logger: LoggerPort) {
+  constructor(@Inject(LOGGER) logger: Logger) {
     this.logger = logger.forContext(InfrastructureExceptionFilter.name);
   }
 

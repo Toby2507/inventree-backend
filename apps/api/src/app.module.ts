@@ -8,7 +8,7 @@ import { DatabaseModule } from '@app/database';
 import { LayerExceptionFilter } from '@app/framework/nest/filters';
 import { InfrastructureExceptionFilter } from '@app/framework/nest/filters/infrastructure-exception.filter';
 import { ClockModule } from '@app/shared-kernel';
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { type MiddlewareConsumer, Module, type NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';

@@ -1,7 +1,10 @@
-import { OutboxEvent, OutboxEventRow } from '@app/core/reliability/outbox/types/outbox.interface';
+import type {
+  OutboxEvent,
+  OutboxEventRow,
+} from '@app/core/reliability/outbox/types/outbox.interface';
 import { faker } from '@app/testing';
 import { createClassFaker, createFaker } from '@app/testing/faker-factory';
-import { FDEvent, FDEventPayload } from './event.faker';
+import { FDEvent, type FDEventPayload } from './event.faker';
 
 export const fsOutboxEvent = createFaker<OutboxEvent>(() => ({
   id: faker.string.uuid(),

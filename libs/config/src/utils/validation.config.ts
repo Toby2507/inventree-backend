@@ -1,6 +1,6 @@
-import { ClassConstructor } from '@app/shared-kernel';
+import type { ClassConstructor } from '@app/shared-kernel';
 import { plainToInstance } from 'class-transformer';
-import { validateSync, ValidationError } from 'class-validator';
+import { validateSync, type ValidationError } from 'class-validator';
 
 const cache = new WeakMap<ClassConstructor<unknown>, unknown>();
 

@@ -1,15 +1,15 @@
 import { OutboxKyselyRepository } from '@app/core/reliability/outbox/persistence/outbox.kysely.repository';
-import { OperationalDB, OperationalSchema } from '@app/database';
-import { DomainEvent, Mutable } from '@app/shared-kernel';
+import type { OperationalDB, OperationalSchema } from '@app/database';
+import type { DomainEvent, Mutable } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { fsSerializedOutboxContext } from '@app/testing/core/observability';
-import { FDEventPayload, feOutboxEvent } from '@app/testing/core/reliability/outbox';
-import { createTestContext, TestContext } from '@app/testing/database';
-import { sql } from 'kysely';
+import { type FDEventPayload, feOutboxEvent } from '@app/testing/core/reliability/outbox';
+import { createTestContext, type TestContext } from '@app/testing/database';
+import { type Kysely, sql } from 'kysely';
 
 describe('OutboxKyselyRepository (integration)', () => {
   let ctx: TestContext<OperationalSchema>;
-  let db: OperationalDB;
+  let db: Kysely<OperationalSchema>;
   let repo: OutboxKyselyRepository;
 
   const obsCtx = {

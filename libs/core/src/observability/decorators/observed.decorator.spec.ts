@@ -1,15 +1,15 @@
-import { Fn } from '@app/shared-kernel';
+import type { Fn } from '@app/shared-kernel';
 import {
   createOtelTestHarness,
   fsObservationContext,
   makeLoggerMock,
 } from '@app/testing/core/observability';
 import { observationStorage } from '../context/observation-context.storage';
-import { LoggerPort } from '../ports/logger.port';
+import type { Logger } from '../ports/logger.port';
 import { Observed } from './observed.decorator';
 
 class SomeService {
-  constructor(private readonly logger?: LoggerPort) {}
+  constructor(private readonly logger?: Logger) {}
 
   @Observed()
   async doWork(fn?: Fn): Promise<string> {

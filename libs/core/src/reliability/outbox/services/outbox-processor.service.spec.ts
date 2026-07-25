@@ -1,7 +1,7 @@
 import { ID_GENERATOR } from '@app/core/generators';
 import { QUEUE_NAMES } from '@app/core/infrastructure/queue';
 import { LOGGER } from '@app/core/observability';
-import { DATABASE_CONTEXT, DATABASE_LISTENER, ListenChannel } from '@app/database';
+import { DATABASE_CONTEXT, DATABASE_LISTENER, LISTEN_CHANNELS } from '@app/database';
 import { faker } from '@app/testing';
 import { makeIdGeneratorMock } from '@app/testing/core/generators';
 import { createOtelTestHarness, makeLoggerMock } from '@app/testing/core/observability';
@@ -12,11 +12,11 @@ import {
   makeQueueMapperMock,
 } from '@app/testing/core/reliability/outbox';
 import { makeDatabaseContextMock, makeDatabaseListenerMock } from '@app/testing/database';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { EVENT_ROUTER } from '../ports/event-router.port';
 import { QUEUE_MAPPER } from '../ports/queue-mapper.port';
 import { OUTBOX_REPOSITORY } from '../ports/repository.port';
-import { OutboxEvent } from '../types/outbox.interface';
+import type { OutboxEvent } from '../types/outbox.interface';
 import { OutboxProcessorService } from './outbox-processor.service';
 
 const FIXED_UUID = faker.string.uuid();
@@ -104,7 +104,7 @@ describe('OutboxProcessorService', () => {
         instanceId: FIXED_UUID,
       });
       expect(dbListener.subscribe).toHaveBeenCalledWith(
-        ListenChannel.OUTBOX_PENDING,
+        LISTEN_CHANNELS.OUTBOX_PENDING,
         OutboxProcessorService.name,
         expect.any(Function),
       );

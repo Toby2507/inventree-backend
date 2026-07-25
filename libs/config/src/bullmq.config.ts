@@ -1,5 +1,5 @@
 import { ConfigModule } from '@nestjs/config';
-import { CACHE_CONFIG, cacheConfig, CacheConfig } from './environments';
+import { CACHE_CONFIG, cacheConfig, type CacheConfig } from './environments';
 
 export const bullmqConfig = {
   imports: [ConfigModule.forFeature(cacheConfig)],

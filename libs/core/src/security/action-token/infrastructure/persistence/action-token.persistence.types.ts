@@ -1,5 +1,5 @@
-import { OperationalSchema } from '@app/database';
-import { Insertable, Selectable } from 'kysely';
+import type { OperationalSchema } from '@app/database';
+import type { Insertable, Selectable } from 'kysely';
 
 export type ActionTokenRow = Selectable<OperationalSchema['action_tokens']>;
 export type NewActionTokenRow = Insertable<OperationalSchema['action_tokens']>;

@@ -1,6 +1,6 @@
-import { Instant } from '../value-objects/instant.vo';
+import type { Instant } from '../value-objects/instant.vo';
 
-export interface ClockPort {
+export interface Clock {
   now(): Instant;
 }
 

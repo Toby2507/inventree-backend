@@ -3,13 +3,13 @@ import { faker } from '@app/testing';
 import { createOtelTestHarness, fsObservationContext } from '@app/testing/core/observability';
 import { feOutboxEvent, makeOutboxRepositoryMock } from '@app/testing/core/reliability/outbox';
 import { makeDatabaseContextMock } from '@app/testing/database';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { OUTBOX_REPOSITORY } from '../ports/repository.port';
-import { OutboxService } from './outbox.service';
+import { OutboxPublishingService } from './outbox-publishing.service';
 
-describe('OutboxService', () => {
+describe('OutboxPublishingService', () => {
   let module: TestingModule;
-  let service: OutboxService;
+  let service: OutboxPublishingService;
 
   const dbContext = makeDatabaseContextMock();
   const repository = makeOutboxRepositoryMock();
@@ -18,10 +18,10 @@ describe('OutboxService', () => {
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      providers: [OutboxService, { provide: OUTBOX_REPOSITORY, useValue: repository }],
+      providers: [OutboxPublishingService, { provide: OUTBOX_REPOSITORY, useValue: repository }],
     }).compile();
     await module.init();
-    service = module.get(OutboxService);
+    service = module.get(OutboxPublishingService);
   });
 
   beforeEach(() => {

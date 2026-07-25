@@ -1,4 +1,8 @@
-import { ExceptionCategory, InfrastructureException } from '@app/shared-kernel';
+import {
+  EXCEPTION_CATEGORIES,
+  type ExceptionCategory,
+  InfrastructureException,
+} from '@app/shared-kernel';
 
 export class IdempotencyException extends InfrastructureException {
   constructor(
@@ -10,6 +14,6 @@ export class IdempotencyException extends InfrastructureException {
   }
 
   override get category(): ExceptionCategory {
-    return this._category ?? ExceptionCategory.INTERNAL;
+    return this._category ?? EXCEPTION_CATEGORIES.INTERNAL;
   }
 }

@@ -1,7 +1,7 @@
-import { JobPayload } from '@app/core/observability';
+import type { JobPayload } from '@app/core/observability';
 import { createFaker } from '@app/testing/faker-factory';
 import { faker } from '@faker-js/faker';
-import { Job } from 'bullmq';
+import type { Job } from 'bullmq';
 
 export const fsJob = createFaker<Job<JobPayload<Record<string, unknown>>>>(
   () =>

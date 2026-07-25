@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import argon2 from 'argon2';
-import { HashingPort } from '../../../application/ports/hashing.port';
+import type { Hashing } from '../../../application/ports/hashing.port';
 
 @Injectable()
-export class Argon2HashingAdapter implements HashingPort {
+export class Argon2HashingAdapter implements Hashing {
   async hash(value: string): Promise<string> {
     return argon2.hash(value);
   }

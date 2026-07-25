@@ -5,12 +5,13 @@ import {
   fsSerializedOutboxContext,
 } from '@app/testing/core/observability';
 import { ROOT_CONTEXT, SpanKind, SpanStatusCode } from '@opentelemetry/api';
-import { SpanAttributes } from '../tracing/span-attributes';
+import { SPAN_ATTRIBUTES, type SpanAttribute } from '../tracing/span-attributes';
 import { INVENTREE_TRACER } from '../tracing/tracer.provider';
-import { RestoredContextOptions, withRestoredObservationContext } from './restore-context';
+import { type RestoredContextOptions, withRestoredObservationContext } from './restore-context';
 
 const generatedUUID = faker.string.uuid();
 const mockObservationRun = jest.fn((_ctx, fn) => fn());
+type Attribute = Record<SpanAttribute, string>;
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => generatedUUID),
@@ -32,7 +33,7 @@ describe('withRestoredObservationContext()', () => {
     it('should generate and propagate a fallback correlationId across tracing and observation context', async () => {
       await withRestoredObservationContext(null, defaultOptions, async () => {});
       const [, spanOpts] = otel.tracer.startActiveSpan.mock.calls[0];
-      expect(spanOpts.attributes[SpanAttributes.CORRELATION_ID]).toBe(generatedUUID);
+      expect(spanOpts.attributes[SPAN_ATTRIBUTES.CORRELATION_ID]).toBe(generatedUUID);
       expect(mockObservationRun).toHaveBeenCalledWith(
         expect.objectContaining({ correlationId: generatedUUID }),
         expect.any(Function),
@@ -83,7 +84,7 @@ describe('withRestoredObservationContext()', () => {
 
   describe('Span creation', () => {
     it('should create a span with correct name, kind, and attributes', async () => {
-      const customAttributes = { 'custom.attr': 'value' };
+      const customAttributes = { 'custom.attr': 'value' } as unknown as Attribute;
       await withRestoredObservationContext(
         serializedContext,
         { ...defaultOptions, spanKind: 2, spanAttributes: customAttributes },
@@ -108,12 +109,12 @@ describe('withRestoredObservationContext()', () => {
         serializedContext,
         {
           ...defaultOptions,
-          spanAttributes: { [SpanAttributes.CORRELATION_ID]: customCorrelationId },
+          spanAttributes: { [SPAN_ATTRIBUTES.CORRELATION_ID]: customCorrelationId } as Attribute,
         },
         async () => {},
       );
       const [, spanOpts] = otel.tracer.startActiveSpan.mock.calls[0];
-      expect(spanOpts.attributes[SpanAttributes.CORRELATION_ID]).toBe(customCorrelationId);
+      expect(spanOpts.attributes[SPAN_ATTRIBUTES.CORRELATION_ID]).toBe(customCorrelationId);
     });
 
     it('should create a tracer using the INVENTREE_TRACER name', async () => {
@@ -177,7 +178,7 @@ describe('withRestoredObservationContext()', () => {
         {
           spanName: 'outbox.process.full.roundtrip',
           spanKind: SpanKind.CONSUMER,
-          spanAttributes: { 'test.extra.attributes': 'static-value' },
+          spanAttributes: { 'test.extra.attributes': 'static-value' } as unknown as Attribute,
         },
         fn,
       );
@@ -191,10 +192,10 @@ describe('withRestoredObservationContext()', () => {
         expect.objectContaining({
           kind: SpanKind.CONSUMER,
           attributes: expect.objectContaining({
-            [SpanAttributes.CORRELATION_ID]: serializedContext.correlationId,
-            [SpanAttributes.CAUSATION_ID]: serializedContext.causationId,
-            [SpanAttributes.ACTOR_USER_ID]: serializedContext.actorUserId,
-            [SpanAttributes.ACTOR_STORE_ID]: serializedContext.actorStoreId,
+            [SPAN_ATTRIBUTES.CORRELATION_ID]: serializedContext.correlationId,
+            [SPAN_ATTRIBUTES.CAUSATION_ID]: serializedContext.causationId,
+            [SPAN_ATTRIBUTES.ACTOR_USER_ID]: serializedContext.actorUserId,
+            [SPAN_ATTRIBUTES.ACTOR_STORE_ID]: serializedContext.actorStoreId,
             'test.extra.attributes': 'static-value',
           }),
         }),

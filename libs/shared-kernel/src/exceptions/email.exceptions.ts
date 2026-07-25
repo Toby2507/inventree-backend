@@ -1,5 +1,5 @@
 import { DomainException } from './exception.bases';
-import { ExceptionCategory } from './exception.enum';
+import { EXCEPTION_CATEGORIES, type ExceptionCategory } from './exception.enum';
 
 export class EmailCannotBeEmptyException extends DomainException {
   readonly code = 'EMPTY_EMAIL';
@@ -8,7 +8,7 @@ export class EmailCannotBeEmptyException extends DomainException {
   }
 
   override get category(): ExceptionCategory {
-    return ExceptionCategory.VALIDATION;
+    return EXCEPTION_CATEGORIES.VALIDATION;
   }
 }
 
@@ -19,7 +19,7 @@ export class EmailInvalidException extends DomainException {
   }
 
   override get category(): ExceptionCategory {
-    return ExceptionCategory.VALIDATION;
+    return EXCEPTION_CATEGORIES.VALIDATION;
   }
 }
 
@@ -30,6 +30,6 @@ export class EmailMaxLengthExceededException extends DomainException {
   }
 
   override get category(): ExceptionCategory {
-    return ExceptionCategory.VALIDATION;
+    return EXCEPTION_CATEGORIES.VALIDATION;
   }
 }

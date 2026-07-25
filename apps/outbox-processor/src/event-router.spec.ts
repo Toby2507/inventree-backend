@@ -1,11 +1,11 @@
 import { QUEUE_NAMES } from '@app/core/infrastructure/queue';
-import { EventRouter } from './event-router';
+import { EventRoutingService } from './event-router';
 
-describe('EventRouter', () => {
-  let router: EventRouter;
+describe('EventRoutingService', () => {
+  let router: EventRoutingService;
 
   beforeEach(() => {
-    router = new EventRouter();
+    router = new EventRoutingService();
   });
 
   it('should resolve known event types to their corresponding routes', () => {

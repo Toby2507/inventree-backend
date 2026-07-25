@@ -1,17 +1,17 @@
 import { context as otelCtx, trace } from '@opentelemetry/api';
-import { Job } from 'bullmq';
+import type { Job } from 'bullmq';
 import { v4 as uuidV4 } from 'uuid';
-import { ObservationContext, SerializedBusinessContext } from '../context/observation-context';
+import type { ObservationContext, SerializedBusinessContext } from '../context/observation-context';
 import { observationStorage } from '../context/observation-context.storage';
-import { LoggerPort } from '../ports/logger.port';
-import { SpanAttributes } from '../tracing/span-attributes';
-import { JobPayload } from './bullmq-producer.wrapper';
+import type { Logger } from '../ports/logger.port';
+import { SPAN_ATTRIBUTES } from '../tracing/span-attributes';
+import type { JobPayload } from './bullmq-producer.wrapper';
 
 type JobProcessor<T> = (job: Job<JobPayload<T>>, data: T) => Promise<void>;
 
 export function createObservedProcessor<T>(
   queueName: string,
-  logger: LoggerPort,
+  logger: Logger,
   processor: JobProcessor<T>,
 ): (job: Job<JobPayload<T>>) => Promise<void> {
   const log = logger.forContext(`Worker.${queueName}`);
@@ -23,14 +23,14 @@ export function createObservedProcessor<T>(
     };
     const activeSpan = trace.getSpan(otelCtx.active());
     activeSpan?.setAttributes({
-      [SpanAttributes.CORRELATION_ID]: obs.correlationId,
-      [SpanAttributes.JOB_QUEUE]: queueName,
-      [SpanAttributes.JOB_NAME]: job.name,
-      [SpanAttributes.JOB_ID]: String(job.id ?? ''),
-      [SpanAttributes.JOB_ATTEMPT]: job.attemptsMade,
-      ...(obs.causationId ? { [SpanAttributes.CAUSATION_ID]: obs.causationId } : {}),
-      ...(obs.actorUserId ? { [SpanAttributes.ACTOR_USER_ID]: obs.actorUserId } : {}),
-      ...(obs.actorStoreId ? { [SpanAttributes.ACTOR_STORE_ID]: obs.actorStoreId } : {}),
+      [SPAN_ATTRIBUTES.CORRELATION_ID]: obs.correlationId,
+      [SPAN_ATTRIBUTES.JOB_QUEUE]: queueName,
+      [SPAN_ATTRIBUTES.JOB_NAME]: job.name,
+      [SPAN_ATTRIBUTES.JOB_ID]: String(job.id ?? ''),
+      [SPAN_ATTRIBUTES.JOB_ATTEMPT]: job.attemptsMade,
+      ...(obs.causationId ? { [SPAN_ATTRIBUTES.CAUSATION_ID]: obs.causationId } : {}),
+      ...(obs.actorUserId ? { [SPAN_ATTRIBUTES.ACTOR_USER_ID]: obs.actorUserId } : {}),
+      ...(obs.actorStoreId ? { [SPAN_ATTRIBUTES.ACTOR_STORE_ID]: obs.actorStoreId } : {}),
     });
     const observationCtx: ObservationContext = {
       correlationId: obs.correlationId,

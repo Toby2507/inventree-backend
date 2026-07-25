@@ -1,4 +1,4 @@
-import { bootstrapTelemetry, LOGGER, LoggerPort } from '@app/core/observability';
+import { bootstrapTelemetry, LOGGER, type Logger } from '@app/core/observability';
 bootstrapTelemetry({ serviceName: 'inventree-migrator-service', serviceVersion: '1.0.0' });
 
 import { MigrationService } from '@app/database';
@@ -7,7 +7,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
-  const logger = app.get<LoggerPort>(LOGGER).forContext('Migrator');
+  const logger = app.get<Logger>(LOGGER).forContext('Migrator');
 
   try {
     logger.log('Starting database migration');

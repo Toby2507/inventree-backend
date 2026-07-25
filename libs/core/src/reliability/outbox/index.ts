@@ -1,5 +1,5 @@
 export { OutboxModule } from './outbox.module';
-export { EVENT_ROUTER, EventRoute, EventRouterPort } from './ports/event-router.port';
-export { OUTBOX_SERVICE, OutboxServicePort } from './ports/outbox.port';
-export { QUEUE_MAPPER, QueueMapperPort } from './ports/queue-mapper.port';
+export { EVENT_ROUTER, type EventRoute, type EventRouter } from './ports/event-router.port';
+export { OUTBOX_PUBLISHER, type OutboxPublisher } from './ports/outbox.port';
+export { QUEUE_MAPPER, type QueueMapper } from './ports/queue-mapper.port';
 export { OutboxProcessorService } from './services/outbox-processor.service';

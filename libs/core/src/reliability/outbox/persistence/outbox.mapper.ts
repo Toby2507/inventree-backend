@@ -1,5 +1,5 @@
-import { JsonValue, Mapper } from '@app/shared-kernel';
-import {
+import { type JsonValue, Mapper } from '@app/shared-kernel';
+import type {
   CreateOutboxEvent,
   NewOutboxEventRow,
   OutboxEvent,

@@ -1,7 +1,7 @@
-import { QueueName } from '@app/core/infrastructure/queue';
-import { Queue } from 'bullmq';
+import type { QueueName } from '@app/core/infrastructure/queue';
+import type { Queue } from 'bullmq';
 
-export interface QueueMapperPort {
+export interface QueueMapper {
   get(queueName: QueueName): Queue;
 }
 

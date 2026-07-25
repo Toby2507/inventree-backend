@@ -1,13 +1,13 @@
 import { getOptionalObservationContext, serializeOutboxContext } from '@app/core/observability';
-import { OperationalDB } from '@app/database';
-import { DomainEvent } from '@app/shared-kernel';
+import type { OperationalDB } from '@app/database';
+import type { DomainEvent } from '@app/shared-kernel';
 import { Inject, Injectable } from '@nestjs/common';
 import { trace } from '@opentelemetry/api';
-import { OutboxServicePort } from '../ports/outbox.port';
-import { OUTBOX_REPOSITORY, OutboxRepository } from '../ports/repository.port';
+import type { OutboxPublisher } from '../ports/outbox.port';
+import { OUTBOX_REPOSITORY, type OutboxRepository } from '../ports/repository.port';
 
 @Injectable()
-export class OutboxService implements OutboxServicePort {
+export class OutboxPublishingService implements OutboxPublisher {
   constructor(@Inject(OUTBOX_REPOSITORY) private readonly repository: OutboxRepository) {}
 
   async publishAll(db: OperationalDB, events: DomainEvent[]): Promise<void> {

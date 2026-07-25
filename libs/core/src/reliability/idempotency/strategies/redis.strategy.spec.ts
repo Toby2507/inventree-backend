@@ -1,6 +1,7 @@
 import { REDIS } from '@app/core/infrastructure/redis';
 import { CRYPTOGRAPHY } from '@app/core/security/cryptography';
 import { IDEMPOTENCY_HEADER } from '@app/framework/nest/constants';
+import { EXCEPTION_CATEGORIES } from '@app/shared-kernel';
 import { makeRedisMock } from '@app/testing/core/infrastructure';
 import { fsRedisIdempotencyRecord } from '@app/testing/core/reliability/idempotency';
 import { makeCryptographyMock } from '@app/testing/core/security';
@@ -11,12 +12,11 @@ import {
   InternalServerErrorException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { firstValueFrom, of, throwError } from 'rxjs';
-import { IdempotencyOptions } from '../decorators/idempotency.decorator';
+import type { IdempotencyOptions } from '../decorators/idempotency.decorator';
 import { IdempotencyException } from '../exceptions/idempotency.exception';
 import { RedisIdempotencyStrategy } from './redis.strategy';
-import { ExceptionCategory } from '@app/shared-kernel';
 
 const OPTIONS: IdempotencyOptions = { strategy: 'redis', scope: 'payments' };
 
@@ -232,7 +232,7 @@ describe('RedisIdempotencyStrategy', () => {
 
         it('should resolve status from err.category via mapExceptionCategoryToStatus when status is not available', async () => {
           const err = new Error('Domain error') as any;
-          err.category = ExceptionCategory.VALIDATION;
+          err.category = EXCEPTION_CATEGORIES.VALIDATION;
           mockHandle.mockReturnValue(throwError(() => err));
           await expect(runStrategy()).rejects.toThrow('Domain error');
           expect(redis.set).toHaveBeenCalledWith(

@@ -1,4 +1,4 @@
-export interface IDGeneratorPort {
+export interface IDGenerator {
   generateUUIDV4(): string;
   generateUUIDV7(): string;
 }

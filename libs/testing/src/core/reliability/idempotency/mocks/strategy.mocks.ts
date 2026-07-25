@@ -1,5 +1,5 @@
-import { IdempotencyStrategyFactory } from '@app/core/reliability/idempotency/strategies/factory';
-import { RedisIdempotencyStrategy } from '@app/core/reliability/idempotency/strategies/redis.strategy';
+import type { IdempotencyStrategyFactory } from '@app/core/reliability/idempotency/strategies/factory';
+import type { RedisIdempotencyStrategy } from '@app/core/reliability/idempotency/strategies/redis.strategy';
 
 export const makeIdempotencyStrategyMock = <T = RedisIdempotencyStrategy>() => {
   return {

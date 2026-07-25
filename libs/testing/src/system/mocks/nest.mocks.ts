@@ -1,7 +1,7 @@
-import { Fn } from '@app/shared-kernel';
-import { ArgumentsHost, CallHandler, ExecutionContext } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { Request, Response } from 'express';
+import type { Fn } from '@app/shared-kernel';
+import type { ArgumentsHost, CallHandler, ExecutionContext } from '@nestjs/common';
+import type { Reflector } from '@nestjs/core';
+import type { Request, Response } from 'express';
 
 interface HostMocks {
   host: ArgumentsHost;

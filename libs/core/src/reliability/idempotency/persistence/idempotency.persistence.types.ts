@@ -1,4 +1,4 @@
-import { JsonValue } from '@app/shared-kernel';
+import type { JsonValue } from '@app/shared-kernel';
 
 export type IdempotencyStatus = 'in_progress' | 'completed' | 'failed';
 

@@ -1,10 +1,10 @@
 import { makeMetricsMock } from '@app/testing/core/observability';
-import { MetricNames } from '../metrics/metric-names';
-import { MetricsPort } from '../ports/metrics.port';
+import { METRIC_NAMES } from '../metrics/metric-names';
+import type { Metrics } from '../ports/metrics.port';
 import { Metered } from './metered.decorator';
 
 class SomeService {
-  constructor(private readonly metrics?: MetricsPort) {}
+  constructor(private readonly metrics?: Metrics) {}
 
   @Metered()
   async doWork(): Promise<string> {
@@ -32,27 +32,27 @@ class SomeService {
   }
 }
 class RegisterUserCommandHandler {
-  constructor(public readonly metrics: MetricsPort) {}
+  constructor(public readonly metrics: Metrics) {}
   @Metered()
   async execute(): Promise<void> {}
 }
 class GetTransactionQueryHandler {
-  constructor(public readonly metrics: MetricsPort) {}
+  constructor(public readonly metrics: Metrics) {}
   @Metered()
   async execute(): Promise<void> {}
 }
 class UserKyselyRepository {
-  constructor(public readonly metrics: MetricsPort) {}
+  constructor(public readonly metrics: Metrics) {}
   @Metered()
   async create(): Promise<void> {}
 }
 class EmailJobHandler {
-  constructor(public readonly metrics: MetricsPort) {}
+  constructor(public readonly metrics: Metrics) {}
   @Metered()
   async handle(): Promise<void> {}
 }
 class QueueProcessor {
-  constructor(public readonly metrics: MetricsPort) {}
+  constructor(public readonly metrics: Metrics) {}
   @Metered()
   async process(): Promise<void> {}
 }
@@ -73,8 +73,8 @@ describe('@Metered() decorator', () => {
       const svc = new RegisterUserCommandHandler(metrics);
       await svc.execute();
       expect(metrics.timeAsync).toHaveBeenCalledWith(
-        MetricNames.COMMAND_DURATION,
-        MetricNames.COMMAND_TOTAL,
+        METRIC_NAMES.COMMAND_DURATION,
+        METRIC_NAMES.COMMAND_TOTAL,
         expect.objectContaining({ command: 'RegisterUserCommandHandler.execute' }),
         expect.any(Function),
       );
@@ -84,8 +84,8 @@ describe('@Metered() decorator', () => {
       const svc = new GetTransactionQueryHandler(metrics);
       await svc.execute();
       expect(metrics.timeAsync).toHaveBeenCalledWith(
-        MetricNames.QUERY_DURATION,
-        MetricNames.QUERY_TOTAL,
+        METRIC_NAMES.QUERY_DURATION,
+        METRIC_NAMES.QUERY_TOTAL,
         expect.objectContaining({ query: 'GetTransactionQueryHandler.execute' }),
         expect.any(Function),
       );
@@ -95,8 +95,8 @@ describe('@Metered() decorator', () => {
       const svc = new UserKyselyRepository(metrics);
       await svc.create();
       expect(metrics.timeAsync).toHaveBeenCalledWith(
-        MetricNames.REPO_DURATION,
-        MetricNames.REPO_TOTAL,
+        METRIC_NAMES.REPO_DURATION,
+        METRIC_NAMES.REPO_TOTAL,
         expect.objectContaining({ operation: 'UserKyselyRepository.create' }),
         expect.any(Function),
       );
@@ -106,8 +106,8 @@ describe('@Metered() decorator', () => {
       const svc = new EmailJobHandler(metrics);
       await svc.handle();
       expect(metrics.timeAsync).toHaveBeenCalledWith(
-        MetricNames.JOB_DURATION,
-        MetricNames.JOB_TOTAL,
+        METRIC_NAMES.JOB_DURATION,
+        METRIC_NAMES.JOB_TOTAL,
         expect.objectContaining({ job: 'EmailJobHandler.handle' }),
         expect.any(Function),
       );
@@ -117,8 +117,8 @@ describe('@Metered() decorator', () => {
       const svc = new QueueProcessor(metrics);
       await svc.process();
       expect(metrics.timeAsync).toHaveBeenCalledWith(
-        MetricNames.JOB_DURATION,
-        MetricNames.JOB_TOTAL,
+        METRIC_NAMES.JOB_DURATION,
+        METRIC_NAMES.JOB_TOTAL,
         expect.objectContaining({ job: 'QueueProcessor.process' }),
         expect.any(Function),
       );
@@ -128,8 +128,8 @@ describe('@Metered() decorator', () => {
       const svc = new SomeService(metrics);
       await svc.doWork();
       expect(metrics.timeAsync).toHaveBeenCalledWith(
-        MetricNames.CUSTOM_DURATION,
-        MetricNames.CUSTOM_TOTAL,
+        METRIC_NAMES.CUSTOM_DURATION,
+        METRIC_NAMES.CUSTOM_TOTAL,
         expect.objectContaining({ operation: 'SomeService.doWork' }),
         expect.any(Function),
       );
@@ -146,8 +146,8 @@ describe('@Metered() decorator', () => {
     it('should use the provided kind even for a non-QueryHandler class', async () => {
       await svc.doWorkWithCustomKind();
       expect(metrics.timeAsync).toHaveBeenCalledWith(
-        MetricNames.QUERY_DURATION,
-        MetricNames.QUERY_TOTAL,
+        METRIC_NAMES.QUERY_DURATION,
+        METRIC_NAMES.QUERY_TOTAL,
         expect.anything(),
         expect.any(Function),
       );

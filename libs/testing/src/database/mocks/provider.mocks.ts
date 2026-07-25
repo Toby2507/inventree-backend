@@ -1,4 +1,4 @@
-import { DatabaseClient, DatabaseProviderPort } from '@app/database/ports/provider.port';
+import type { DatabaseClient, DatabaseProvider } from '@app/database/ports/provider.port';
 import { EventEmitter } from 'events';
 
 type PgQueryable = DatabaseClient & {
@@ -36,7 +36,7 @@ export const makeDatabaseProviderMock = () => {
     client,
     recreateClient,
   } as unknown as jest.Mocked<
-    DatabaseProviderPort & {
+    DatabaseProvider & {
       client: jest.Mocked<PgQueryable>;
       recreateClient: () => void;
     }

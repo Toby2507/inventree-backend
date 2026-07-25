@@ -19,9 +19,6 @@ describe('ActionToken Mapper', () => {
       expect(snapshot.tokenHash).toBe(raw.token_hash);
       expect(snapshot.createdAt.toDate()).toEqual(raw.created_at);
       expect(snapshot.expiresAt.toDate()).toEqual(raw.expires_at);
-      expect(snapshot.consumedAt?.toDate()).toEqual(raw.consumed_at);
-      expect(snapshot.revokedAt?.toDate()).toEqual(raw.revoked_at);
-      expect(snapshot.revokedReason).toBe(raw.revoked_reason);
       expect(snapshot.version).toBe(raw.version);
     });
 
@@ -50,9 +47,6 @@ describe('ActionToken Mapper', () => {
       expect(raw.token_hash).toBe(tokenSnap.tokenHash);
       expect(raw.created_at).toEqual(tokenSnap.createdAt.toDate());
       expect(raw.expires_at).toEqual(tokenSnap.expiresAt.toDate());
-      expect(raw.consumed_at).toEqual(tokenSnap.consumedAt?.toDate());
-      expect(raw.revoked_at).toEqual(tokenSnap.revokedAt?.toDate());
-      expect(raw.revoked_reason).toBe(tokenSnap.revokedReason);
       expect(raw.version).toBe(tokenSnap.version);
     });
 

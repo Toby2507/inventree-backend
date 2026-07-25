@@ -1,8 +1,8 @@
 import { copyMethodMetadata } from '@app/framework/nest/utils';
-import { MetricName, MetricNames } from '../metrics/metric-names';
-import { MetricsPort } from '../ports/metrics.port';
+import { METRIC_NAMES, type MetricName } from '../metrics/metric-names';
+import type { Metrics } from '../ports/metrics.port';
 
-type MeteredInstance = { metrics?: MetricsPort };
+type MeteredInstance = { metrics?: Metrics };
 export type MeteredKind = 'command' | 'query' | 'repository' | 'job' | 'custom';
 
 export interface MeteredOptions {
@@ -13,18 +13,18 @@ export interface MeteredOptions {
 
 const isDev = process.env.NODE_ENV !== 'production';
 const DURATION_METRIC: Record<MeteredKind, MetricName> = {
-  command: MetricNames.COMMAND_DURATION,
-  query: MetricNames.QUERY_DURATION,
-  repository: MetricNames.REPO_DURATION,
-  job: MetricNames.JOB_DURATION,
-  custom: MetricNames.CUSTOM_DURATION,
+  command: METRIC_NAMES.COMMAND_DURATION,
+  query: METRIC_NAMES.QUERY_DURATION,
+  repository: METRIC_NAMES.REPO_DURATION,
+  job: METRIC_NAMES.JOB_DURATION,
+  custom: METRIC_NAMES.CUSTOM_DURATION,
 };
 const TOTAL_METRIC: Record<MeteredKind, MetricName> = {
-  command: MetricNames.COMMAND_TOTAL,
-  query: MetricNames.QUERY_TOTAL,
-  repository: MetricNames.REPO_TOTAL,
-  job: MetricNames.JOB_TOTAL,
-  custom: MetricNames.CUSTOM_TOTAL,
+  command: METRIC_NAMES.COMMAND_TOTAL,
+  query: METRIC_NAMES.QUERY_TOTAL,
+  repository: METRIC_NAMES.REPO_TOTAL,
+  job: METRIC_NAMES.JOB_TOTAL,
+  custom: METRIC_NAMES.CUSTOM_TOTAL,
 };
 const LABEL_KEY: Record<MeteredKind, string> = {
   command: 'command',

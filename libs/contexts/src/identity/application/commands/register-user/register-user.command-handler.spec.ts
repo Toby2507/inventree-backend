@@ -4,7 +4,7 @@ import { faker } from '@app/testing';
 import { makeIdGeneratorMock } from '@app/testing/core/generators';
 import { makeDatabaseContextMock } from '@app/testing/database';
 import { makeArgon2HasherMock, makeUserRepositoryMock } from '@app/testing/identity';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { User } from '../../../domain/user/aggregates/user.aggregate';
 import { UserRegisteredEvent } from '../../../domain/user/events/user-registered.event';
 import { UserEmailAlreadyExistsException } from '../../../domain/user/exceptions/registration.exceptions';

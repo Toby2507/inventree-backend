@@ -1,13 +1,13 @@
 import {
   isUniqueViolation,
-  OperationalDB,
+  type OperationalDB,
   OptimisticConcurrencyControlException,
 } from '@app/database';
-import { Instant } from '@app/shared-kernel';
+import type { Instant } from '@app/shared-kernel';
 import { Injectable } from '@nestjs/common';
-import { ActionTokenRepository } from '../../domain/action-token.repository';
+import type { ActionTokenRepository } from '../../domain/action-token.repository';
 import { ActionToken } from '../../domain/aggregates/action-token.aggregate';
-import { ActionTokenPurpose } from '../../domain/aggregates/action-token.types';
+import type { ActionTokenPurpose } from '../../domain/aggregates/action-token.types';
 import { DuplicateTokenHashException } from '../exceptions/persistence.exception';
 import { ActionTokenMapper } from '../persistence/action-token.mapper';
 
@@ -52,8 +52,8 @@ export class ActionTokenKyselyRepository implements ActionTokenRepository {
     userId: string,
     purpose: ActionTokenPurpose,
     now: Instant,
-  ): Promise<ActionToken | null> {
-    const row = await db
+  ): Promise<ActionToken[]> {
+    const rows = await db
       .selectFrom('action_tokens')
       .selectAll()
       .where('user_id', '=', userId)
@@ -62,8 +62,7 @@ export class ActionTokenKyselyRepository implements ActionTokenRepository {
       .where('consumed_at', 'is', null)
       .where('expires_at', '>', now.toDate())
       .orderBy('created_at', 'desc')
-      .limit(1)
-      .executeTakeFirst();
-    return row ? this.mapper.toDomain(row) : null;
+      .execute();
+    return this.mapper.toDomainBulk(rows);
   }
 }

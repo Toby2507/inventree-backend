@@ -1,6 +1,6 @@
-import { OperationalDB } from '@app/database';
-import { JsonValue } from '@app/shared-kernel';
-import { CreateIdempotency, IdempotencyRecord } from './idempotency.persistence.types';
+import type { OperationalDB } from '@app/database';
+import type { JsonValue } from '@app/shared-kernel';
+import type { CreateIdempotency, IdempotencyRecord } from './idempotency.persistence.types';
 
 export interface IdempotencyRepository {
   tryClaim(db: OperationalDB, record: CreateIdempotency): Promise<boolean>;

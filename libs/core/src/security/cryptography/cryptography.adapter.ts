@@ -1,11 +1,11 @@
-import { SECURITY_CONFIG, SecurityConfig } from '@app/config';
+import { SECURITY_CONFIG, type SecurityConfig } from '@app/config';
 import { Inject, Injectable } from '@nestjs/common';
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'crypto';
 import stringify from 'fast-json-stable-stringify';
-import { CryptographyPort } from './cryptography.port';
+import type { Cryptography } from './cryptography.port';
 
 @Injectable()
-export class CryptographyAdapter implements CryptographyPort {
+export class CryptographyAdapter implements Cryptography {
   private readonly ALGORITHM = 'aes-256-gcm';
   private readonly IV_BYTES = 12; // 96-bit IV — GCM standard
   private readonly TAG_BYTES = 16;

@@ -1,8 +1,8 @@
-import { OperationalDB } from '@app/database';
+import type { OperationalDB } from '@app/database';
 import { Injectable } from '@nestjs/common';
 import { sql } from 'kysely';
-import { OutboxRepository } from '../ports/repository.port';
-import { CreateOutboxEvent, OutboxEvent, OutboxEventRow } from '../types/outbox.interface';
+import type { OutboxRepository } from '../ports/repository.port';
+import type { CreateOutboxEvent, OutboxEvent, OutboxEventRow } from '../types/outbox.interface';
 import { OutboxEventMapper } from './outbox.mapper';
 
 @Injectable()

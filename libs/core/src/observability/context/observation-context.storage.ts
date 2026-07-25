@@ -1,5 +1,5 @@
 import { AsyncLocalStorage } from 'async_hooks';
-import { ObservationContext } from './observation-context';
+import type { ObservationContext } from './observation-context';
 
 export const observationStorage = new AsyncLocalStorage<ObservationContext>();
 

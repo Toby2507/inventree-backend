@@ -1,5 +1,5 @@
 import { ApplicationException, DomainException, InfrastructureException } from './exception.bases';
-import { ExceptionCategory } from './exception.enum';
+import { EXCEPTION_CATEGORIES, type ExceptionCategory } from './exception.enum';
 
 class TestDomainError extends DomainException {
   readonly code = 'TEST_DOMAIN_ERROR';
@@ -12,7 +12,7 @@ class TestDomainErrorWithContext extends DomainException {
 class TestApplicationError extends ApplicationException {
   readonly code = 'TEST_APPLICATION_ERROR';
   get category(): ExceptionCategory {
-    return ExceptionCategory.VALIDATION;
+    return EXCEPTION_CATEGORIES.VALIDATION;
   }
 }
 
@@ -78,7 +78,7 @@ describe('ExceptionBase (via concrete subclasses)', () => {
 describe('DomainException', () => {
   it('should always report category BUSINESS_RULE regardless of the concrete subclass', () => {
     const err = new TestDomainError('msg');
-    expect(err.category).toBe(ExceptionCategory.BUSINESS_RULE);
+    expect(err.category).toBe(EXCEPTION_CATEGORIES.BUSINESS_RULE);
   });
 
   it('should require each concrete subclass to define its own code', () => {
@@ -96,7 +96,7 @@ describe('DomainException', () => {
 describe('ApplicationException', () => {
   it('should delegate category() to the concrete subclass implementation', () => {
     const err = new TestApplicationError('msg');
-    expect(err.category).toBe(ExceptionCategory.VALIDATION);
+    expect(err.category).toBe(EXCEPTION_CATEGORIES.VALIDATION);
   });
 
   it('should carry its own code independent of category', () => {
@@ -114,7 +114,7 @@ describe('ApplicationException', () => {
 describe('InfrastructureException', () => {
   it('should always report category INTERNAL regardless of the concrete subclass', () => {
     const err = new TestInfrastructureError('msg');
-    expect(err.category).toBe(ExceptionCategory.INTERNAL);
+    expect(err.category).toBe(EXCEPTION_CATEGORIES.INTERNAL);
   });
 
   it('should require each concrete subclass to define its own code', () => {

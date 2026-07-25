@@ -23,7 +23,7 @@ import {
 import { PasswordHash } from '../value-objects/password-hash.vo';
 import { PersonName } from '../value-objects/person-name.vo';
 import { UserID } from '../value-objects/user-id.vo';
-import { User, UserSnapshot } from './user.aggregate';
+import { User, type UserSnapshot } from './user.aggregate';
 
 const generateActiveUser = (overrides: Partial<UserSnapshot> = {}): User => {
   return feUser.generateFromSnapshot({ ...overrides, status: 'active' });

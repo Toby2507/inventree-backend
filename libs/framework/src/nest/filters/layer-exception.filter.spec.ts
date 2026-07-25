@@ -1,4 +1,9 @@
-import { ApplicationException, DomainException, ExceptionCategory } from '@app/shared-kernel';
+import {
+  ApplicationException,
+  DomainException,
+  EXCEPTION_CATEGORIES,
+  ExceptionCategory,
+} from '@app/shared-kernel';
 import { makeLoggerMock } from '@app/testing/core/observability';
 import { makeHostMock } from '@app/testing/system';
 import { HttpStatus } from '@nestjs/common';
@@ -11,7 +16,7 @@ class ProductNotFoundException extends ApplicationException {
   }
 
   get category(): ExceptionCategory {
-    return ExceptionCategory.NOT_FOUND;
+    return EXCEPTION_CATEGORIES.NOT_FOUND;
   }
 }
 

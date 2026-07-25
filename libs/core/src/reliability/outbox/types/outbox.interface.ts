@@ -1,7 +1,7 @@
-import { SerializedOutboxContext } from '@app/core/observability';
-import { OperationalSchema } from '@app/database';
-import { DomainEvent, JsonValue } from '@app/shared-kernel';
-import { Insertable, Selectable } from 'kysely';
+import type { SerializedOutboxContext } from '@app/core/observability';
+import type { OperationalSchema } from '@app/database';
+import type { DomainEvent, JsonValue } from '@app/shared-kernel';
+import type { Insertable, Selectable } from 'kysely';
 
 export type OutboxEventRow = Omit<Selectable<OperationalSchema['outbox_events']>, 'updated_at'>;
 export type NewOutboxEventRow = Insertable<OperationalSchema['outbox_events']>;

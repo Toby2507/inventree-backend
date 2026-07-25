@@ -1,4 +1,4 @@
-import { DatabaseListenerPort } from '@app/database';
+import type { DatabaseListener } from '@app/database';
 
 export const makeDatabaseListenerMock = () => {
   return {
@@ -6,5 +6,5 @@ export const makeDatabaseListenerMock = () => {
     stop: jest.fn(),
     isHealthy: true,
     subscribe: jest.fn().mockReturnValue(() => {}),
-  } as unknown as jest.Mocked<DatabaseListenerPort>;
+  } as unknown as jest.Mocked<DatabaseListener>;
 };

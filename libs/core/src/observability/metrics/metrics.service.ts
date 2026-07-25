@@ -1,17 +1,17 @@
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import {
-  Attributes,
-  Counter,
-  Histogram,
-  Meter,
+  type Attributes,
+  type Counter,
+  type Histogram,
+  type Meter,
   metrics,
-  ObservableGauge,
-  ObservableResult,
-  UpDownCounter,
+  type ObservableGauge,
+  type ObservableResult,
+  type UpDownCounter,
 } from '@opentelemetry/api';
 import { getOptionalObservationContext } from '../context/observation-context.storage';
-import { MetricsPort } from '../ports/metrics.port';
-import { MetricName, MetricNames } from './metric-names';
+import type { Metrics } from '../ports/metrics.port';
+import { METRIC_NAMES, type MetricName } from './metric-names';
 
 type GaugeDefinition = {
   instrument?: ObservableGauge;
@@ -20,24 +20,24 @@ type GaugeDefinition = {
 
 export const PRE_ALLOCATED_METRICS = {
   counters: [
-    MetricNames.COMMAND_TOTAL,
-    MetricNames.QUERY_TOTAL,
-    MetricNames.HTTP_TOTAL,
-    MetricNames.REPO_TOTAL,
-    MetricNames.JOB_TOTAL,
+    METRIC_NAMES.COMMAND_TOTAL,
+    METRIC_NAMES.QUERY_TOTAL,
+    METRIC_NAMES.HTTP_TOTAL,
+    METRIC_NAMES.REPO_TOTAL,
+    METRIC_NAMES.JOB_TOTAL,
   ],
   histograms: [
-    MetricNames.COMMAND_DURATION,
-    MetricNames.QUERY_DURATION,
-    MetricNames.HTTP_DURATION,
-    MetricNames.REPO_DURATION,
-    MetricNames.JOB_DURATION,
+    METRIC_NAMES.COMMAND_DURATION,
+    METRIC_NAMES.QUERY_DURATION,
+    METRIC_NAMES.HTTP_DURATION,
+    METRIC_NAMES.REPO_DURATION,
+    METRIC_NAMES.JOB_DURATION,
   ],
-  upDownCounters: [MetricNames.HTTP_ACTIVE],
+  upDownCounters: [METRIC_NAMES.HTTP_ACTIVE],
 };
 
 @Injectable()
-export class MetricsService implements MetricsPort, OnApplicationBootstrap {
+export class MetricsService implements OnApplicationBootstrap, Metrics {
   private meter!: Meter;
 
   private readonly counters = new Map<MetricName, Counter>();

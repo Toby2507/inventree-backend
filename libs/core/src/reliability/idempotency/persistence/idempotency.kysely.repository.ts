@@ -1,13 +1,13 @@
-import { OperationalDB } from '@app/database';
-import { JsonValue } from '@app/shared-kernel';
+import type { OperationalDB } from '@app/database';
+import type { JsonValue } from '@app/shared-kernel';
 import { Injectable } from '@nestjs/common';
 import { sql } from 'kysely';
-import {
+import type {
   CreateIdempotency,
   IdempotencyRecord,
   IdempotencyRow,
 } from './idempotency.persistence.types';
-import { IdempotencyRepository } from './idempotency.port';
+import type { IdempotencyRepository } from './idempotency.port';
 
 @Injectable()
 export class IdempotencyKyselyRepository implements IdempotencyRepository {

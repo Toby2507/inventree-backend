@@ -1,5 +1,5 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { getStoreContext, StoreContext } from '@app/database';
+import { getStoreContext, type StoreContext } from '@app/database';
+import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
 
 /**
  * Controller parameter decorator that injects the current StoreContext.

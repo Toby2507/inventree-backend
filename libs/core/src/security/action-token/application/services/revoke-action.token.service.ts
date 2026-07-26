@@ -44,6 +44,7 @@ export class RevokeActionTokenService implements RevokeActionToken {
     tokens: ActionToken[],
     reason: ActionTokenRevokeReason,
   ): Promise<void> {
+    if (!tokens.length) return;
     const now = this.clock.now();
     for (const token of tokens) token.revoke(reason, now);
     const tokenIds = tokens.map((t) => t.id.value);

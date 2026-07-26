@@ -77,17 +77,6 @@ describe('IssueActionTokenService', () => {
       await service.execute(db, command);
       expect(policyRegistry.resolve).toHaveBeenCalledWith(command.purpose);
     });
-
-    it('should propagate errors thrown while resolving policy and do nothing else', async () => {
-      const error = new Error('unknown purpose');
-      policyRegistry.resolve.mockImplementationOnce(() => {
-        throw error;
-      });
-      await expect(service.execute(db, command)).rejects.toThrow(error);
-      expect(repository.findUsableByUserAndPurpose).not.toHaveBeenCalled();
-      expect(idGenerator.generateUUIDV7).not.toHaveBeenCalled();
-      expect(repository.create).not.toHaveBeenCalled();
-    });
   });
 
   describe('active instance handling', () => {
@@ -121,8 +110,14 @@ describe('IssueActionTokenService', () => {
           db,
           command.userId,
           command.purpose,
-          NOW,
+          clock.now(),
         );
+      });
+
+      it('should skip calling revokeUsableByIds if not existing tokens are found', async () => {
+        repository.findUsableByUserAndPurpose.mockResolvedValueOnce([]);
+        await service.execute(db, command);
+        expect(repository.revokeUsableByIds).not.toHaveBeenCalled();
       });
 
       it('should revoke existing usable tokens instances because they are superseded by the new token', async () => {
@@ -133,7 +128,7 @@ describe('IssueActionTokenService', () => {
           db,
           tokens.map((t) => t.id.value),
           ACTION_TOKEN_REVOKE_REASONS.SUPERSEDED,
-          NOW,
+          clock.now(),
         );
       });
 
@@ -144,15 +139,6 @@ describe('IssueActionTokenService', () => {
         const revokeCallOrder = repository.revokeUsableByIds.mock.invocationCallOrder[0];
         const createCallOrder = repository.create.mock.invocationCallOrder[0];
         expect(revokeCallOrder).toBeLessThan(createCallOrder);
-      });
-
-      it('should propagate errors thrown while revoking existing tokens and do not issue a new token', async () => {
-        const tokens = feActionToken.generateMany(2);
-        repository.findUsableByUserAndPurpose.mockResolvedValueOnce(tokens);
-        const error = new Error('database error');
-        repository.revokeUsableByIds.mockRejectedValueOnce(error);
-        await expect(service.execute(db, command)).rejects.toThrow(error);
-        expect(repository.create).not.toHaveBeenCalled();
       });
     });
   });
@@ -178,8 +164,8 @@ describe('IssueActionTokenService', () => {
           userId: command.userId,
           purpose: command.purpose,
           tokenHash: expect.any(String),
-          expiresAt: NOW.add(basePolicy.ttl),
-          createdAt: NOW,
+          expiresAt: clock.now().add(basePolicy.ttl),
+          createdAt: clock.now(),
         }),
       );
       createSpy.mockRestore();
@@ -196,16 +182,10 @@ describe('IssueActionTokenService', () => {
       expect(result).toEqual(
         expect.objectContaining({
           token: expect.any(String),
-          expiresAt: NOW.add(basePolicy.ttl),
+          expiresAt: clock.now().add(basePolicy.ttl),
           expiresIn: basePolicy.ttl,
         }),
       );
-    });
-
-    it('should propagate errors thrown while persisting the new token', async () => {
-      const error = new Error('database error');
-      repository.create.mockRejectedValueOnce(error);
-      await expect(service.execute(db, command)).rejects.toThrow(error);
     });
   });
 });

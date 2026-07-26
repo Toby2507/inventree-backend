@@ -55,6 +55,7 @@ export class IssueActionTokenService implements IssueActionToken {
       command.purpose,
       this.clock.now(),
     );
+    if (!existingUsableTokens.length) return;
     const reason = ACTION_TOKEN_REVOKE_REASONS.SUPERSEDED;
     const tokenIds = existingUsableTokens.map((t) => t.id.value);
     for (const token of existingUsableTokens) token.revoke(reason, this.clock.now());

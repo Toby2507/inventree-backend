@@ -7,7 +7,7 @@ import { ActionTokenKyselyRepository } from '@app/core/security/action-token/inf
 import { type OperationalSchema, OptimisticConcurrencyControlException } from '@app/database';
 import { Duration, Instant } from '@app/shared-kernel';
 import { faker } from '@app/testing';
-import { feActionToken } from '@app/testing/core/security';
+import { feActionToken } from '@app/testing/core/security/action-token';
 import { createTestContext, type TestContext } from '@app/testing/database';
 import type { Kysely } from 'kysely';
 
@@ -78,7 +78,7 @@ describe('ActionTokenKyselyRepository (integration)', () => {
     it('should update action token correctly', async () => {
       const token = feActionToken.generate({ userId });
       await repo.create(db, token);
-      token.consume(now);
+      token.consume(token.purpose, now);
       await repo.update(db, token);
       const row = await db
         .selectFrom('action_tokens')
@@ -99,8 +99,8 @@ describe('ActionTokenKyselyRepository (integration)', () => {
         repo.findByHash(db, token.tokenHash),
         repo.findByHash(db, token.tokenHash),
       ]);
-      token1?.consume(now);
-      token2?.consume(now);
+      token1?.consume(token1.purpose, now);
+      token2?.consume(token2.purpose, now);
       await repo.update(db, token1!);
       await expect(repo.update(db, token2!)).rejects.toThrow(OptimisticConcurrencyControlException);
     });
@@ -114,8 +114,8 @@ describe('ActionTokenKyselyRepository (integration)', () => {
       expect(foundToken?.toSnapshot()).toEqual(token.toSnapshot());
     });
 
-    it('should return null if token hash does not exist', async () => {
-      const foundToken = await repo.findByHash(db, faker.string.uuid());
+    it('should return null if token with hash does not exist', async () => {
+      const foundToken = await repo.findByHash(db, faker.string.alphanumeric(44));
       expect(foundToken).toBeNull();
     });
   });
@@ -168,7 +168,7 @@ describe('ActionTokenKyselyRepository (integration)', () => {
     it('should return an empty array if the available tokens are not usable (consumed, revoked, or expired)', async () => {
       const purpose = ACTION_TOKEN_PURPOSES.PASSWORD_RESET;
       const consumeToken = feActionToken.generate({ userId, purpose });
-      consumeToken.consume(Instant.parse(dateString));
+      consumeToken.consume(purpose, Instant.parse(dateString));
       const revokeToken = feActionToken.generate({ userId, purpose });
       revokeToken.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, Instant.parse(dateString));
       const expireToken = feActionToken.generate({
@@ -202,6 +202,100 @@ describe('ActionTokenKyselyRepository (integration)', () => {
         Instant.parse(dateString),
       );
       expect(foundTokens).toHaveLength(0);
+    });
+  });
+
+  describe('findUsableByUser()', () => {
+    it('should return all usable action tokens for a user regardless of purpose', async () => {
+      const tokens = feActionToken.generateMany(2, { userId });
+      await Promise.all(tokens.map((t) => repo.create(db, t)));
+      const foundTokens = await repo.findUsableByUser(db, userId, Instant.parse(dateString));
+      expect(foundTokens).toHaveLength(2);
+    });
+
+    it('should return an empty array if no usable token exists for a user', async () => {
+      const foundTokens = await repo.findUsableByUser(db, userId, Instant.parse(dateString));
+      expect(foundTokens).toHaveLength(0);
+    });
+
+    it('should return an empty array if the available tokens are not usable (consumed, revoked, or expired)', async () => {
+      const token = feActionToken.generate({ userId });
+      token.consume(token.purpose, Instant.parse(dateString));
+      await repo.create(db, token);
+      const foundTokens = await repo.findUsableByUser(db, userId, Instant.parse(dateString));
+      expect(foundTokens).toHaveLength(0);
+    });
+  });
+
+  describe('findById()', () => {
+    it('should return action token by id', async () => {
+      const token = feActionToken.generate({ userId });
+      await repo.create(db, token);
+      const foundToken = await repo.findById(db, token.id.value);
+      expect(foundToken?.toSnapshot()).toEqual(token.toSnapshot());
+    });
+
+    it("should return null if token with given id doesn't exist", async () => {
+      const foundToken = await repo.findById(db, faker.string.uuid());
+      expect(foundToken).toBeNull();
+    });
+  });
+
+  describe('revokeUsableByIds()', () => {
+    it('should be no-op if ids array is empty', async () => {
+      await expect(
+        repo.revokeUsableByIds(
+          db,
+          [],
+          ACTION_TOKEN_REVOKE_REASONS.MANUAL,
+          Instant.parse(dateString),
+        ),
+      ).resolves.toBeUndefined();
+    });
+
+    it('should revoke all usable tokens by ids with the given reason', async () => {
+      const tokens = feActionToken.generateMany(3, { userId });
+      await Promise.all(tokens.map((t) => repo.create(db, t)));
+      const tokenIds = tokens.map((t) => t.id.value);
+      await repo.revokeUsableByIds(
+        db,
+        tokenIds,
+        ACTION_TOKEN_REVOKE_REASONS.MANUAL,
+        Instant.parse(dateString),
+      );
+      const foundTokens = await Promise.all(tokenIds.map((id) => repo.findById(db, id)));
+      for (const token of foundTokens) {
+        expect(token?.isRevoked()).toBe(true);
+        expect(token?.toSnapshot().revokedReason).toBe(ACTION_TOKEN_REVOKE_REASONS.MANUAL);
+      }
+    });
+
+    it('should be no-op if no usable tokens are found for the given ids', async () => {
+      const tokens = feActionToken.generateMany(2, { userId });
+      await Promise.all(tokens.map((t) => repo.create(db, t)));
+      const tokenIds = tokens.map((t) => t.id.value);
+      await repo.revokeUsableByIds(
+        db,
+        tokenIds,
+        ACTION_TOKEN_REVOKE_REASONS.MANUAL,
+        Instant.parse(dateString),
+      );
+      // Attempt to revoke again
+      await expect(
+        repo.revokeUsableByIds(
+          db,
+          tokenIds,
+          ACTION_TOKEN_REVOKE_REASONS.MANUAL,
+          Instant.parse(dateString).add(Duration.hours(1)),
+        ),
+      ).resolves.toBeUndefined();
+      const foundTokens = await Promise.all(tokenIds.map((id) => repo.findById(db, id)));
+      for (const token of foundTokens) {
+        expect(token?.isRevoked()).toBe(true);
+        const snapshot = token?.toSnapshot();
+        expect(snapshot?.revokedReason).toBe(ACTION_TOKEN_REVOKE_REASONS.MANUAL);
+        expect(snapshot?.revokedAt?.equals(Instant.parse(dateString))).toBe(true);
+      }
     });
   });
 });

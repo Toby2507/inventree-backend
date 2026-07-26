@@ -13,12 +13,12 @@ import {
   Text,
 } from 'react-email';
 
-export interface WelcomeEmailProps {
+export interface VerificationEmailProps {
   firstName: string;
   verificationUrl: string;
 }
 
-export function WelcomeEmail({ firstName, verificationUrl }: WelcomeEmailProps) {
+export function VerificationEmail({ firstName, verificationUrl }: VerificationEmailProps) {
   return (
     <Html>
       <Head />
@@ -102,4 +102,4 @@ export function WelcomeEmail({ firstName, verificationUrl }: WelcomeEmailProps) 
   );
 }
 
-export default WelcomeEmail;
+export default VerificationEmail;

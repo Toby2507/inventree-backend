@@ -1,12 +1,12 @@
-import { MAIL_CONFIG, MailConfig } from '@app/config';
+import { EMAIL_CONFIG, type EmailConfig } from '@app/config';
 import { Inject } from '@nestjs/common';
-import { createTransport, Transporter } from 'nodemailer';
-import { MailOptions, MailProviderPort } from '../ports/mail.port';
+import { createTransport, type Transporter } from 'nodemailer';
+import type { EmailOptions, EmailProvider } from '../ports/email.port';
 
-export class SmtpMailProvider implements MailProviderPort {
+export class SmtpEmailProvider implements EmailProvider {
   private transporter: Transporter;
 
-  constructor(@Inject(MAIL_CONFIG) private readonly config: MailConfig) {
+  constructor(@Inject(EMAIL_CONFIG) private readonly config: EmailConfig) {
     this.transporter = createTransport({
       host: this.config.smtp.host,
       port: this.config.smtp.port,
@@ -18,7 +18,7 @@ export class SmtpMailProvider implements MailProviderPort {
     });
   }
 
-  async send(options: MailOptions): Promise<void> {
+  async send(options: EmailOptions): Promise<void> {
     await this.transporter.sendMail({
       from: this.config.smtp.from,
       to: options.to,

@@ -9,7 +9,7 @@ import type {
   RevokeAllTokensForUserCommand,
   RevokeTokenByIdCommand,
   RevokeTokenByPurposeCommand,
-} from '../ports/revoke-action-token';
+} from '../ports/revoke-action-token.port';
 
 @Injectable()
 export class RevokeActionTokenService implements RevokeActionToken {

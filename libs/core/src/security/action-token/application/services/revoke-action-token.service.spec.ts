@@ -16,7 +16,7 @@ import {
   RevokeAllTokensForUserCommand,
   RevokeTokenByIdCommand,
   RevokeTokenByPurposeCommand,
-} from '../ports/revoke-action-token';
+} from '../ports/revoke-action-token.port';
 import { RevokeActionTokenService } from './revoke-action.token.service';
 
 const NOW = Instant.parse('2024-01-01T00:00:00Z');

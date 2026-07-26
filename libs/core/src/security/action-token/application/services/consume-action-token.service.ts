@@ -5,7 +5,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { type ActionTokenRepository, TOKEN_REPOSITORY } from '../../domain/action-token.repository';
 import type { ActionToken } from '../../domain/aggregates/action-token.aggregate';
 import { TokenNotFoundException } from '../exceptions/action-token.app.exceptions';
-import type { ConsumeActionToken, ConsumeActionTokenCommand } from '../ports/consume-action-token';
+import type {
+  ConsumeActionToken,
+  ConsumeActionTokenCommand,
+} from '../ports/consume-action-token.port';
 
 @Injectable()
 export class ConsumeActionTokenService implements ConsumeActionToken {

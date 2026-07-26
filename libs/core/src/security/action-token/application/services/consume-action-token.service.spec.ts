@@ -11,7 +11,7 @@ import { Test, type TestingModule } from '@nestjs/testing';
 import { TOKEN_REPOSITORY } from '../../domain/action-token.repository';
 import { ACTION_TOKEN_PURPOSES } from '../../domain/aggregates/action-token.types';
 import { TokenNotFoundException } from '../exceptions/action-token.app.exceptions';
-import type { ConsumeActionTokenCommand } from '../ports/consume-action-token';
+import type { ConsumeActionTokenCommand } from '../ports/consume-action-token.port';
 import { ConsumeActionTokenService } from './consume-action-token.service';
 
 const NOW = Instant.parse('2024-01-01T00:00:00Z');

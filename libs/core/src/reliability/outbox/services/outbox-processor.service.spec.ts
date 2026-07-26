@@ -270,7 +270,7 @@ describe('OutboxProcessorService', () => {
           expect(queue.add).toHaveBeenCalledWith(
             'user.created',
             (event.payload as any).data,
-            expect.objectContaining({ attempts: 3 }),
+            expect.objectContaining({ jobId: event.id, attempts: 3 }),
           );
           expect(repository.markPublished).toHaveBeenCalledWith(
             dbContext.operational,

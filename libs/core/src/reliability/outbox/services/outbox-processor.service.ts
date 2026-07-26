@@ -165,6 +165,7 @@ export class OutboxProcessorService implements OnApplicationBootstrap {
             routes.map((route) => {
               const queue = this.queueMapper.get(route.queue);
               return queue.add(route.jobName ?? row.eventType, payload, {
+                jobId: row.id,
                 attempts: 3,
                 backoff: { type: 'exponential', delay: 1000 },
               });

@@ -14,7 +14,6 @@ import {
   type DatabaseListener,
   LISTEN_CHANNELS,
 } from '@app/database';
-import type { JsonValue } from '@app/shared-kernel';
 import { Inject, Injectable, type OnApplicationBootstrap } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { SpanKind } from '@opentelemetry/api';
@@ -23,6 +22,7 @@ import { EVENT_ROUTER, type EventRouter } from '../ports/event-router.port';
 import { QUEUE_MAPPER, type QueueMapper } from '../ports/queue-mapper.port';
 import { OUTBOX_REPOSITORY, type OutboxRepository } from '../ports/repository.port';
 import type { OutboxEvent } from '../types/outbox.interface';
+import { JsonValue } from '@app/shared-kernel';
 
 @Injectable()
 export class OutboxProcessorService implements OnApplicationBootstrap {
@@ -136,7 +136,7 @@ export class OutboxProcessorService implements OnApplicationBootstrap {
   }
 
   private async processRow(row: OutboxEvent): Promise<void> {
-    const payload = (row.payload as any).data as JsonValue;
+    const data = (row.payload as any).data as JsonValue;
     const obs = (row.payload as any)._obs as SerializedBusinessContext | undefined;
     return withRestoredObservationContext(
       obs,
@@ -164,6 +164,7 @@ export class OutboxProcessorService implements OnApplicationBootstrap {
           await Promise.all(
             routes.map((route) => {
               const queue = this.queueMapper.get(route.queue);
+              const payload = route.toPayload ? route.toPayload(data) : data;
               return queue.add(route.jobName ?? row.eventType, payload, {
                 jobId: row.id,
                 attempts: 3,

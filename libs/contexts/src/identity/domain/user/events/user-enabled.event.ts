@@ -5,7 +5,7 @@ export interface UserEnabledPayload {
   reason?: string;
 }
 
-export class UserEnabledEvent extends DomainEvent<UserEnabledPayload> {
+export class UserEnabledEvent extends DomainEvent {
   static readonly EVENT_TYPE = 'identity.user.enabled';
 
   readonly eventType = UserEnabledEvent.EVENT_TYPE;

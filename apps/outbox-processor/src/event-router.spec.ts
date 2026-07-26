@@ -1,11 +1,20 @@
 import { QUEUE_NAMES } from '@app/core/infrastructure/queue';
 import { EventRoutingService } from './event-router';
+import { EventRouteDefinition } from '@app/core/reliability/outbox';
 
 describe('EventRoutingService', () => {
   let router: EventRoutingService;
+  const routes: EventRouteDefinition[] = [
+    {
+      eventType: 'identity.user.registered',
+      queue: QUEUE_NAMES.EMAIL,
+      jobName: 'send_verification_email',
+      toPayload: (payload) => payload,
+    },
+  ];
 
   beforeEach(() => {
-    router = new EventRoutingService();
+    router = new EventRoutingService(routes);
   });
 
   it('should resolve known event types to their corresponding routes', () => {

@@ -4,11 +4,11 @@ import {
   Injectable,
   type NestInterceptor,
 } from '@nestjs/common';
-import type { Reflector } from '@nestjs/core';
+import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import type { Observable } from 'rxjs';
 import { IDEMPOTENCY_KEY, type IdempotencyOptions } from '../decorators/idempotency.decorator';
-import type { IdempotencyStrategyFactory } from '../strategies/factory';
+import { IdempotencyStrategyFactory } from '../strategies/factory';
 
 @Injectable()
 export class IdempotencyInterceptor implements NestInterceptor {

@@ -1,7 +1,7 @@
 import { bullmqConfig } from '@app/config';
 import { BullModule } from '@nestjs/bullmq';
-import { DynamicModule, Module } from '@nestjs/common';
-import { QUEUE_NAMES, QueueName } from './queue.constants';
+import { type DynamicModule, Module } from '@nestjs/common';
+import { QUEUE_NAMES, type QueueName } from './queue.constants';
 import { defaultJobOptions } from './queue.registry';
 
 @Module({})

@@ -14,6 +14,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventRoutingService } from './event-router';
 import { QueueMappingService } from './queue-mapper';
+import { RouteDefinitions } from './route-definition';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { QueueMappingService } from './queue-mapper';
   ],
   providers: [
     OutboxProcessorService,
+    RouteDefinitions,
     { provide: QUEUE_MAPPER, useClass: QueueMappingService },
     { provide: EVENT_ROUTER, useClass: EventRoutingService },
   ],

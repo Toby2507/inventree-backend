@@ -7,7 +7,7 @@ export interface UserLockedOutPayload {
   failedAttempts: number;
 }
 
-export class UserLockedOutEvent extends DomainEvent<UserLockedOutPayload> {
+export class UserLockedOutEvent extends DomainEvent {
   static readonly EVENT_TYPE = 'identity.user.locked_out';
 
   readonly eventType = UserLockedOutEvent.EVENT_TYPE;

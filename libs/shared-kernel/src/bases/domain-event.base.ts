@@ -1,4 +1,4 @@
-export abstract class DomainEvent<T = object> {
+export abstract class DomainEvent<T = any> {
   readonly occurredAt: Date = new Date();
 
   abstract readonly eventType: string;

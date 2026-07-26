@@ -1,3 +1,4 @@
+import { GeneratorModule } from '@app/core/generators';
 import { QUEUE_NAMES, QueueModule } from '@app/core/infrastructure/queue';
 import { ObservabilityModule } from '@app/core/observability';
 import { DatabaseModule } from '@app/database';
@@ -14,6 +15,7 @@ import { EmailProcessorModule } from './email/email.module';
     DatabaseModule,
     ObservabilityModule,
     ClockModule,
+    GeneratorModule,
     // Queue
     QueueModule.forRoot(),
     QueueModule.register(QUEUE_NAMES.EMAIL),

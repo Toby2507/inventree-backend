@@ -5,7 +5,7 @@ export interface AuthenticationBlockedPayload {
   reason?: string;
 }
 
-export class AuthenticationBlockedEvent extends DomainEvent<AuthenticationBlockedPayload> {
+export class AuthenticationBlockedEvent extends DomainEvent {
   static readonly EVENT_TYPE = 'identity.user.authentication_blocked';
 
   readonly eventType = AuthenticationBlockedEvent.EVENT_TYPE;

@@ -279,6 +279,29 @@ describe('OutboxProcessorService', () => {
           );
         });
 
+        it('should clean the event payload before enqueuing if toPayload is defined', async () => {
+          event = fsOutboxEvent.generate({
+            payload: {
+              data: { firstName: faker.person.firstName(), lastName: faker.person.lastName() },
+            },
+          });
+          repository.claimBatch.mockReset();
+          repository.claimBatch.mockResolvedValueOnce([event]);
+          eventRouter.resolve.mockReturnValueOnce([
+            {
+              queue: QUEUE_NAMES.NOTIFICATIONS,
+              toPayload: (pl) => ({ name: `${pl.firstName} ${pl.lastName}` }),
+            },
+          ]);
+          await trigger();
+          const eventPayload = (event.payload as any).data;
+          expect(queue.add).toHaveBeenCalledWith(
+            event.eventType,
+            { name: `${eventPayload.firstName} ${eventPayload.lastName}` },
+            expect.anything(),
+          );
+        });
+
         it('should add the event to the resolved queue with event name if job name is absent', async () => {
           eventRouter.resolve.mockReturnValueOnce([{ queue: QUEUE_NAMES.NOTIFICATIONS }]);
           await trigger();

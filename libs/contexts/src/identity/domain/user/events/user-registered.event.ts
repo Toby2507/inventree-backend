@@ -8,7 +8,7 @@ export interface UserRegisteredPayload {
   registeredAt: Date;
 }
 
-export class UserRegisteredEvent extends DomainEvent<UserRegisteredPayload> {
+export class UserRegisteredEvent extends DomainEvent {
   static readonly EVENT_TYPE = 'identity.user.registered';
 
   readonly eventType = UserRegisteredEvent.EVENT_TYPE;

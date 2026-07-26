@@ -107,4 +107,20 @@ export class ActionTokenKyselyRepository implements ActionTokenRepository {
       .where('consumed_at', 'is', null)
       .executeTakeFirst();
   }
+
+  async deleteExpired(db: OperationalDB, before: Instant, limit: number): Promise<number> {
+    if (limit <= 0) return 0;
+    const { numDeletedRows } = await db
+      .with('expired_tokens', (qb) =>
+        qb
+          .selectFrom('action_tokens')
+          .select('id')
+          .where('expires_at', '<', before.toDate())
+          .limit(limit),
+      )
+      .deleteFrom('action_tokens')
+      .where('id', 'in', (eb) => eb.selectFrom('expired_tokens').select('id'))
+      .executeTakeFirst();
+    return Number(numDeletedRows ?? 0n);
+  }
 }

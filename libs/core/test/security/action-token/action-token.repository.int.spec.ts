@@ -143,7 +143,7 @@ describe('ActionTokenKyselyRepository (integration)', () => {
       const token2 = feActionToken.generate({
         userId,
         purpose: ACTION_TOKEN_PURPOSES.PASSWORD_RESET,
-        createdAt: Instant.parse(dateString).add(Duration.hours(1)),
+        createdAt: Instant.parse(dateString).plus(Duration.hours(1)),
       });
       await Promise.all([repo.create(db, token1), repo.create(db, token2)]);
       const foundTokens = await repo.findUsableByUserAndPurpose(
@@ -174,7 +174,7 @@ describe('ActionTokenKyselyRepository (integration)', () => {
       const expireToken = feActionToken.generate({
         userId,
         purpose,
-        createdAt: Instant.parse(dateString).subtract(Duration.hours(1)),
+        createdAt: Instant.parse(dateString).minus(Duration.hours(1)),
         expiresAt: Instant.parse(dateString),
       });
       await Promise.all([
@@ -186,7 +186,7 @@ describe('ActionTokenKyselyRepository (integration)', () => {
         db,
         userId,
         purpose,
-        Instant.parse(dateString).add(Duration.hours(1)),
+        Instant.parse(dateString).plus(Duration.hours(1)),
       );
       expect(foundTokens).toHaveLength(0);
     });
@@ -286,7 +286,7 @@ describe('ActionTokenKyselyRepository (integration)', () => {
           db,
           tokenIds,
           ACTION_TOKEN_REVOKE_REASONS.MANUAL,
-          Instant.parse(dateString).add(Duration.hours(1)),
+          Instant.parse(dateString).plus(Duration.hours(1)),
         ),
       ).resolves.toBeUndefined();
       const foundTokens = await Promise.all(tokenIds.map((id) => repo.findById(db, id)));
@@ -296,6 +296,47 @@ describe('ActionTokenKyselyRepository (integration)', () => {
         expect(snapshot?.revokedReason).toBe(ACTION_TOKEN_REVOKE_REASONS.MANUAL);
         expect(snapshot?.revokedAt?.equals(Instant.parse(dateString))).toBe(true);
       }
+    });
+  });
+
+  describe('deleteExpired()', () => {
+    it('should be no-op if limit is less than or equal to 0', async () => {
+      await expect(repo.deleteExpired(db, Instant.parse(dateString), 0)).resolves.toBe(0);
+      await expect(repo.deleteExpired(db, Instant.parse(dateString), -1)).resolves.toBe(0);
+    });
+
+    it('should delete expired tokens before the given time', async () => {
+      const tokens = feActionToken.generateMany(5, (idx: number) => ({
+        userId,
+        createdAt: Instant.parse(dateString).minus(Duration.hours(idx + 1)),
+        expiresAt: Instant.parse(dateString).minus(Duration.seconds(idx)),
+      }));
+      await Promise.all(tokens.map((t) => repo.create(db, t)));
+      const deletedCount = await repo.deleteExpired(
+        db,
+        Instant.parse(dateString).plus(Duration.minutes(1)),
+        10,
+      );
+      expect(deletedCount).toBe(5);
+      const remainingTokens = await db.selectFrom('action_tokens').select('id').execute();
+      expect(remainingTokens).toHaveLength(0);
+    });
+
+    it('should delete only up to the limit of expired tokens', async () => {
+      const tokens = feActionToken.generateMany(5, (idx: number) => ({
+        userId,
+        createdAt: Instant.parse(dateString).minus(Duration.hours(idx + 1)),
+        expiresAt: Instant.parse(dateString).minus(Duration.seconds(idx)),
+      }));
+      await Promise.all(tokens.map((t) => repo.create(db, t)));
+      const deletedCount = await repo.deleteExpired(
+        db,
+        Instant.parse(dateString).plus(Duration.minutes(1)),
+        3,
+      );
+      expect(deletedCount).toBe(3);
+      const remainingTokens = await db.selectFrom('action_tokens').select('id').execute();
+      expect(remainingTokens).toHaveLength(2);
     });
   });
 });

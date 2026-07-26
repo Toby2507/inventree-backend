@@ -32,7 +32,7 @@ export class IssueActionTokenService implements IssueActionToken {
     const id = this.idGenerator.generateUUIDV7();
     const token = this.crypto.randomToken();
     const tokenHash = this.crypto.sha256(token);
-    const expiresAt = this.clock.now().add(policy.ttl);
+    const expiresAt = this.clock.now().plus(policy.ttl);
     const actionToken = ActionToken.create({
       id,
       userId: command.userId,

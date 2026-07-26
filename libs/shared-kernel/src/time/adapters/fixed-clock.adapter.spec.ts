@@ -15,21 +15,21 @@ describe('FixedClock', () => {
     it('should move the clock forward by the given duration', () => {
       const clock = new FixedClock(START);
       clock.advance(Duration.hours(2));
-      expect(clock.now().equals(START.add(Duration.hours(2)))).toBe(true);
+      expect(clock.now().equals(START.plus(Duration.hours(2)))).toBe(true);
     });
 
     it('should accumulate across multiple advance calls', () => {
       const clock = new FixedClock(START);
       clock.advance(Duration.hours(1));
       clock.advance(Duration.minutes(30));
-      expect(clock.now().equals(START.add(Duration.of({ hours: 1, minutes: 30 })))).toBe(true);
+      expect(clock.now().equals(START.plus(Duration.of({ hours: 1, minutes: 30 })))).toBe(true);
     });
   });
 
   describe('set', () => {
     it('should replace the clock instant directly', () => {
       const clock = new FixedClock(START);
-      const target = START.add(Duration.days(1));
+      const target = START.plus(Duration.days(1));
       clock.set(target);
       expect(clock.now().equals(target)).toBe(true);
     });

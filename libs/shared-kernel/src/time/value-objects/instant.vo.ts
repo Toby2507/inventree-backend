@@ -21,13 +21,13 @@ export class Instant {
   }
 
   // ==== OPERATIONS ==============
-  add(duration: Duration): Instant {
+  plus(duration: Duration): Instant {
     return new Instant(
       this._instant.add(Temporal.Duration.from({ milliseconds: duration.toMs() })),
     );
   }
 
-  subtract(duration: Duration): Instant {
+  minus(duration: Duration): Instant {
     return new Instant(
       this._instant.subtract(Temporal.Duration.from({ milliseconds: duration.toMs() })),
     );

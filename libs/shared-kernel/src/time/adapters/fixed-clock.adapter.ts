@@ -10,7 +10,7 @@ export class FixedClock implements Clock {
   }
 
   advance(duration: Duration): void {
-    this.instant = this.instant.add(duration);
+    this.instant = this.instant.plus(duration);
   }
 
   set(instant: Instant): void {

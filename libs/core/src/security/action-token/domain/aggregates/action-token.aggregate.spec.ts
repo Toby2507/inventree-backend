@@ -2,7 +2,6 @@ import { Instant } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { feActionToken, fsActionToken } from '@app/testing/core/security/action-token';
 import {
-  TokenExpiredException,
   TokenExpiryBeforeCreationTimeException,
   TokenInvalidException,
 } from '../exceptions/action-token.exceptions';
@@ -103,7 +102,7 @@ describe('ActionToken Aggregate Root', () => {
           expiresAt: at(BASE_TIME),
         });
         const expiredTime = at(BASE_TIME + 1_000);
-        expect(() => token.consume(token.purpose, expiredTime)).toThrow(TokenExpiredException);
+        expect(() => token.consume(token.purpose, expiredTime)).toThrow(TokenInvalidException);
         expect(token.version).toBe(0);
       });
 

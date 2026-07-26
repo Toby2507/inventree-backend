@@ -21,6 +21,7 @@ export interface ActionTokenRepository {
     reason: ActionTokenRevokeReason,
     now: Instant,
   ): Promise<void>;
+  deleteExpired(db: OperationalDB, before: Instant, limit: number): Promise<number>;
 }
 
 export const TOKEN_REPOSITORY = Symbol('ACTION_TOKEN_REPOSITORY');

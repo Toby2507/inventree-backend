@@ -83,11 +83,11 @@ export class Duration {
   }
 
   // ==== OPERATIONS ==============
-  add(other: Duration): Duration {
+  plus(other: Duration): Duration {
     return Duration.fromMs(this.toMs() + other.toMs());
   }
 
-  subtract(other: Duration): Duration {
+  minus(other: Duration): Duration {
     const resultMs = this.toMs() - other.toMs();
     if (resultMs < 0) throw new InvalidDurationException();
     return Duration.fromMs(resultMs);
@@ -101,12 +101,12 @@ export class Duration {
     return Temporal.Duration.compare(this._duration, other._duration) > 0;
   }
 
-  isShorterThan(other: Duration): boolean {
-    return Temporal.Duration.compare(this._duration, other._duration) < 0;
+  isLongerThanOrEquals(other: Duration): boolean {
+    return Temporal.Duration.compare(this._duration, other._duration) >= 0;
   }
 
-  compareTo(other: Duration): number {
-    return Temporal.Duration.compare(this._duration, other._duration);
+  isShorterThan(other: Duration): boolean {
+    return Temporal.Duration.compare(this._duration, other._duration) < 0;
   }
 
   // ==== CONVERSIONS ==============

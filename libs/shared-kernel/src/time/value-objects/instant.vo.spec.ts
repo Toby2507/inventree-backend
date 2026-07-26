@@ -32,44 +32,44 @@ describe('Instant Value Object', () => {
   });
 
   describe('increments and decrements', () => {
-    describe('add', () => {
+    describe('plus', () => {
       it('should add a Duration and return a new later Instant', () => {
         const now = Instant.fromEpochMs(EPOCH_MS);
-        const later = now.add(Duration.hours(2));
+        const later = now.plus(Duration.hours(2));
         expect(later.toEpochMs()).toBe(EPOCH_MS + 2 * 60 * 60 * 1000);
       });
 
       it('should not mutate the original instant (immutability)', () => {
         const now = Instant.fromEpochMs(EPOCH_MS);
-        const later = now.add(Duration.hours(2));
+        const later = now.plus(Duration.hours(2));
         expect(now.toEpochMs()).toBe(EPOCH_MS);
         expect(later.toEpochMs()).not.toBe(now.toEpochMs());
       });
 
       it('should ensure adding a zero duration returns an equal instant', () => {
         const now = Instant.fromEpochMs(EPOCH_MS);
-        const same = now.add(Duration.milliseconds(0));
+        const same = now.plus(Duration.milliseconds(0));
         expect(same.equals(now)).toBe(true);
       });
 
       it('should compose correctly with a compound Duration', () => {
         const now = Instant.fromEpochMs(EPOCH_MS);
-        const later = now.add(Duration.of({ days: 1, hours: 6 }));
+        const later = now.plus(Duration.of({ days: 1, hours: 6 }));
         const expectedMs = EPOCH_MS + (24 + 6) * 60 * 60 * 1000;
         expect(later.toEpochMs()).toBe(expectedMs);
       });
     });
 
-    describe('subtract', () => {
+    describe('minus', () => {
       it('should subtract a Duration and return a new earlier Instant', () => {
         const now = Instant.fromEpochMs(EPOCH_MS);
-        const earlier = now.subtract(Duration.hours(2));
+        const earlier = now.minus(Duration.hours(2));
         expect(earlier.toEpochMs()).toBe(EPOCH_MS - 2 * 60 * 60 * 1000);
       });
 
       it('should ensure subtracting then adding returns to the original instant', () => {
         const now = Instant.fromEpochMs(EPOCH_MS);
-        const roundTrip = now.subtract(Duration.hours(3)).add(Duration.hours(3));
+        const roundTrip = now.minus(Duration.hours(3)).plus(Duration.hours(3));
         expect(roundTrip.equals(now)).toBe(true);
       });
     });
@@ -79,7 +79,7 @@ describe('Instant Value Object', () => {
     describe('isBefore', () => {
       it('should return true when this instant is earlier', () => {
         const earlier = Instant.fromEpochMs(EPOCH_MS);
-        const later = earlier.add(Duration.hours(1));
+        const later = earlier.plus(Duration.hours(1));
         expect(earlier.isBefore(later)).toBe(true);
       });
 
@@ -91,7 +91,7 @@ describe('Instant Value Object', () => {
 
       it('should return false when this instant is later', () => {
         const earlier = Instant.fromEpochMs(EPOCH_MS);
-        const later = earlier.add(Duration.hours(1));
+        const later = earlier.plus(Duration.hours(1));
         expect(later.isBefore(earlier)).toBe(false);
       });
     });
@@ -99,7 +99,7 @@ describe('Instant Value Object', () => {
     describe('isAfter', () => {
       it('should return true when this instant is later', () => {
         const earlier = Instant.fromEpochMs(EPOCH_MS);
-        const later = earlier.add(Duration.hours(1));
+        const later = earlier.plus(Duration.hours(1));
         expect(later.isAfter(earlier)).toBe(true);
       });
 
@@ -113,7 +113,7 @@ describe('Instant Value Object', () => {
     describe('isAfterOrEqual', () => {
       it('should return true when this instant is later', () => {
         const earlier = Instant.fromEpochMs(EPOCH_MS);
-        const later = earlier.add(Duration.hours(1));
+        const later = earlier.plus(Duration.hours(1));
         expect(later.isAfterOrEqual(earlier)).toBe(true);
       });
 
@@ -125,7 +125,7 @@ describe('Instant Value Object', () => {
 
       it('should return false when this instant is earlier', () => {
         const earlier = Instant.fromEpochMs(EPOCH_MS);
-        const later = earlier.add(Duration.hours(1));
+        const later = earlier.plus(Duration.hours(1));
         expect(earlier.isAfterOrEqual(later)).toBe(false);
       });
     });
@@ -151,7 +151,7 @@ describe('Instant Value Object', () => {
 
       it('should return true for two instants that are equal after adding and subtracting the same duration', () => {
         const a = Instant.fromEpochMs(EPOCH_MS);
-        const b = a.add(Duration.hours(1)).subtract(Duration.hours(1));
+        const b = a.plus(Duration.hours(1)).minus(Duration.hours(1));
         expect(a.equals(b)).toBe(true);
       });
     });

@@ -164,7 +164,7 @@ describe('IssueActionTokenService', () => {
           userId: command.userId,
           purpose: command.purpose,
           tokenHash: expect.any(String),
-          expiresAt: clock.now().add(basePolicy.ttl),
+          expiresAt: clock.now().plus(basePolicy.ttl),
           createdAt: clock.now(),
         }),
       );
@@ -182,7 +182,7 @@ describe('IssueActionTokenService', () => {
       expect(result).toEqual(
         expect.objectContaining({
           token: expect.any(String),
-          expiresAt: clock.now().add(basePolicy.ttl),
+          expiresAt: clock.now().plus(basePolicy.ttl),
           expiresIn: basePolicy.ttl,
         }),
       );

@@ -90,41 +90,39 @@ describe('Duration', () => {
   });
 
   describe('increments and decrements', () => {
-    describe('add', () => {
+    describe('plus', () => {
       it('should sum two durations correctly', () => {
-        const result = Duration.hours(1).add(Duration.minutes(30));
+        const result = Duration.hours(1).plus(Duration.minutes(30));
         expect(result.toMinutes()).toBe(90);
       });
 
       it('is not commutative-breaking (order does not matter)', () => {
-        const a = Duration.hours(1).add(Duration.minutes(30));
-        const b = Duration.minutes(30).add(Duration.hours(1));
+        const a = Duration.hours(1).plus(Duration.minutes(30));
+        const b = Duration.minutes(30).plus(Duration.hours(1));
         expect(a.equals(b)).toBe(true);
       });
 
       it('should not mutate the original instances (immutability)', () => {
         const original = Duration.hours(1);
-        const result = original.add(Duration.minutes(30));
+        const result = original.plus(Duration.minutes(30));
         expect(original.toMinutes()).toBe(60);
         expect(result.toMinutes()).toBe(90);
       });
     });
 
-    describe('subtract', () => {
+    describe('minus', () => {
       it('should subtract correctly when result is non-negative', () => {
-        const result = Duration.hours(2).subtract(Duration.hours(1));
+        const result = Duration.hours(2).minus(Duration.hours(1));
         expect(result.toHours()).toBe(1);
       });
 
       it('should allow a result of exactly zero', () => {
-        const result = Duration.hours(1).subtract(Duration.hours(1));
+        const result = Duration.hours(1).minus(Duration.hours(1));
         expect(result.toMs()).toBe(0);
       });
 
       it('should throw InvalidDurationException when result would be negative', () => {
-        expect(() => Duration.hours(1).subtract(Duration.hours(2))).toThrow(
-          InvalidDurationException,
-        );
+        expect(() => Duration.hours(1).minus(Duration.hours(2))).toThrow(InvalidDurationException);
       });
     });
   });
@@ -144,43 +142,45 @@ describe('Duration', () => {
       });
     });
 
-    describe('isLongerThan / isShorterThan', () => {
-      it('should return true for isLongerThan when this duration is greater', () => {
+    describe('isLongerThan', () => {
+      it('should return true when the first duration is greater', () => {
         expect(Duration.hours(2).isLongerThan(Duration.hours(1))).toBe(true);
       });
 
-      it('should return false for isLongerThan when equal', () => {
+      it('should return false when both durations are equal', () => {
         expect(Duration.hours(1).isLongerThan(Duration.minutes(60))).toBe(false);
       });
 
-      it('should return false for isLongerThan when this duration is smaller', () => {
+      it('should return false when the first duration is smaller', () => {
         expect(Duration.hours(1).isLongerThan(Duration.hours(2))).toBe(false);
-      });
-
-      it('should return true for isShorterThan when this duration is smaller', () => {
-        expect(Duration.hours(1).isShorterThan(Duration.hours(2))).toBe(true);
-      });
-
-      it('should return false for isShorterThan when equal', () => {
-        expect(Duration.hours(1).isShorterThan(Duration.minutes(60))).toBe(false);
-      });
-
-      it('should return false for isShorterThan when this duration is greater', () => {
-        expect(Duration.hours(2).isShorterThan(Duration.hours(1))).toBe(false);
       });
     });
 
-    describe('compareTo', () => {
-      it('should return 0 for equal durations', () => {
-        expect(Duration.hours(1).compareTo(Duration.minutes(60))).toBe(0);
+    describe('isLongerThanOrEquals', () => {
+      it('should return true when the first duration is greater', () => {
+        expect(Duration.hours(2).isLongerThanOrEquals(Duration.hours(1))).toBe(true);
       });
 
-      it('should return a positive number when this duration is greater', () => {
-        expect(Duration.hours(2).compareTo(Duration.hours(1))).toBeGreaterThan(0);
+      it('should return true when both durations are equal', () => {
+        expect(Duration.hours(1).isLongerThanOrEquals(Duration.minutes(60))).toBe(true);
       });
 
-      it('should return a negative number when this duration is smaller', () => {
-        expect(Duration.hours(1).compareTo(Duration.hours(2))).toBeLessThan(0);
+      it('should return false when the first duration is smaller', () => {
+        expect(Duration.hours(1).isLongerThanOrEquals(Duration.hours(2))).toBe(false);
+      });
+    });
+
+    describe('isShorterThan', () => {
+      it('should return true when the first duration is smaller', () => {
+        expect(Duration.hours(1).isShorterThan(Duration.hours(2))).toBe(true);
+      });
+
+      it('should return false when both durations are equal', () => {
+        expect(Duration.hours(1).isShorterThan(Duration.minutes(60))).toBe(false);
+      });
+
+      it('should return false when the first duration is greater', () => {
+        expect(Duration.hours(2).isShorterThan(Duration.hours(1))).toBe(false);
       });
     });
   });

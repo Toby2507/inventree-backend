@@ -9,5 +9,6 @@ export const makeActionTokenRepositoryMock = () => {
     findUsableByUser: jest.fn(),
     findById: jest.fn(),
     revokeUsableByIds: jest.fn(),
+    deleteExpired: jest.fn(),
   } as unknown as jest.Mocked<ActionTokenRepository>;
 };

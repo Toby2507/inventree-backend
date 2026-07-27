@@ -18,6 +18,7 @@ import { QUEUE_MAPPER } from '../ports/queue-mapper.port';
 import { OUTBOX_REPOSITORY } from '../ports/repository.port';
 import type { OutboxEvent } from '../types/outbox.interface';
 import { OutboxProcessorService } from './outbox-processor.service';
+import { Duration, Instant } from '@app/shared-kernel';
 
 const FIXED_UUID = faker.string.uuid();
 
@@ -164,7 +165,7 @@ describe('OutboxProcessorService', () => {
         dbContext.operational,
         service['BATCH_SIZE'],
         FIXED_UUID,
-        service['LOCK_DURATION_MS'],
+        service['LOCK_DURATION'].toMs(),
       );
     });
 
@@ -371,7 +372,7 @@ describe('OutboxProcessorService', () => {
           dbContext.operational,
           event.id,
           'Queue unavailable',
-          expect.any(Date),
+          expect.any(Instant),
           expect.any(Boolean),
         );
       });
@@ -397,7 +398,7 @@ describe('OutboxProcessorService', () => {
           dbContext.operational,
           event.id,
           'Queue down',
-          expect.any(Date),
+          expect.any(Instant),
           expect.any(Boolean),
         );
       });
@@ -413,8 +414,8 @@ describe('OutboxProcessorService', () => {
     });
 
     describe('handling backoff calculations', () => {
-      const BASE_BACKOFF_MS = 5_000;
-      const MAX_BACKOFF_MS = 5 * 60 * 1_000;
+      const BASE_BACKOFF = Duration.seconds(5);
+      const MAX_BACKOFF = Duration.minutes(5);
 
       beforeEach(() => {
         jest.useFakeTimers();
@@ -426,21 +427,23 @@ describe('OutboxProcessorService', () => {
       });
 
       it.each([
-        { publishAttempts: 0, expectedDelayMs: BASE_BACKOFF_MS * 2 ** 0 }, // 5 000
-        { publishAttempts: 1, expectedDelayMs: BASE_BACKOFF_MS * 2 ** 1 }, // 10 000
-        { publishAttempts: 2, expectedDelayMs: BASE_BACKOFF_MS * 2 ** 2 }, // 20 000
-        { publishAttempts: 3, expectedDelayMs: BASE_BACKOFF_MS * 2 ** 3 }, // 40 000
-        { publishAttempts: 4, expectedDelayMs: BASE_BACKOFF_MS * 2 ** 4 }, // 80 000
+        { publishAttempts: 0, expectedDelayMs: BASE_BACKOFF.toMs() * 2 ** 0 }, // 5 000
+        { publishAttempts: 1, expectedDelayMs: BASE_BACKOFF.toMs() * 2 ** 1 }, // 10 000
+        { publishAttempts: 2, expectedDelayMs: BASE_BACKOFF.toMs() * 2 ** 2 }, // 20 000
+        { publishAttempts: 3, expectedDelayMs: BASE_BACKOFF.toMs() * 2 ** 3 }, // 40 000
+        { publishAttempts: 4, expectedDelayMs: BASE_BACKOFF.toMs() * 2 ** 4 }, // 80 000
       ])(
         'should calculate nextAttemptAt as ~$expectedDelayMs ms in the future for attempt $publishAttempts',
         async ({ publishAttempts, expectedDelayMs }) => {
           repository.claimBatch.mockResolvedValueOnce(
             fsOutboxEvent.generateMany(1, { publishAttempts }),
           );
-          const expectedNextAttempt = new Date(Date.now() + expectedDelayMs);
+          const expectedNextAttempt = Instant.fromEpochMs(Date.now()).plus(
+            Duration.milliseconds(expectedDelayMs),
+          );
           await trigger();
           const [, , , nextAttemptAt] = repository.markFailed.mock.calls.at(-1)!;
-          expect(nextAttemptAt).toEqual(expectedNextAttempt);
+          expect(nextAttemptAt.toEpochMs()).toBe(expectedNextAttempt.toEpochMs());
         },
       );
 
@@ -448,10 +451,10 @@ describe('OutboxProcessorService', () => {
         repository.claimBatch.mockResolvedValueOnce(
           fsOutboxEvent.generateMany(1, { publishAttempts: 99 }),
         );
-        const expectedNextAttempt = new Date(Date.now() + MAX_BACKOFF_MS);
+        const expectedNextAttempt = Instant.fromEpochMs(Date.now()).plus(MAX_BACKOFF);
         await trigger();
         const [, , , nextAttemptAt] = repository.markFailed.mock.calls.at(-1)!;
-        expect(nextAttemptAt).toEqual(expectedNextAttempt);
+        expect(nextAttemptAt.toEpochMs()).toBe(expectedNextAttempt.toEpochMs());
       });
     });
 
@@ -555,7 +558,7 @@ describe('OutboxProcessorService', () => {
         dbContext.operational,
         failure.id,
         'Queue unavailable',
-        expect.any(Date),
+        expect.any(Instant),
         expect.any(Boolean),
       );
     });

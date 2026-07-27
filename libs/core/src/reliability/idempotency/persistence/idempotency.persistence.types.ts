@@ -1,4 +1,4 @@
-import type { JsonValue } from '@app/shared-kernel';
+import type { Instant, JsonValue } from '@app/shared-kernel';
 
 export type IdempotencyStatus = 'in_progress' | 'completed' | 'failed';
 
@@ -9,9 +9,9 @@ export interface IdempotencyRecord {
   status: IdempotencyStatus;
   response: JsonValue;
   error: JsonValue;
-  createdAt: Date;
-  expiresAt: Date;
-  resolvedAt: Date | null;
+  createdAt: Instant;
+  expiresAt: Instant;
+  resolvedAt: Instant | null;
 }
 
 export interface IdempotencyRedisRecord {

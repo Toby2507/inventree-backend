@@ -1,5 +1,7 @@
+import { Instant } from '../time/value-objects/instant.vo';
+
 export abstract class DomainEvent<T = any> {
-  readonly occurredAt: Date = new Date();
+  readonly occurredAt: Instant = Instant.fromDate(new Date());
 
   abstract readonly eventType: string;
   abstract readonly aggregateType: string;

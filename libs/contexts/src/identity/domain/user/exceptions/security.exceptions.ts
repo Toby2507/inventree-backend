@@ -1,4 +1,4 @@
-import { DomainException } from '@app/shared-kernel';
+import { DomainException, EXCEPTION_CATEGORIES, type ExceptionCategory } from '@app/shared-kernel';
 
 export class MfaAlreadyEnabledException extends DomainException {
   readonly code = 'MFA_ALREADY_ENABLED';
@@ -39,5 +39,9 @@ export class PhoneNotProvidedException extends DomainException {
   readonly code = 'PHONE_NOT_PROVIDED';
   constructor() {
     super('No phone number provided for this account');
+  }
+
+  override get category(): ExceptionCategory {
+    return EXCEPTION_CATEGORIES.VALIDATION;
   }
 }

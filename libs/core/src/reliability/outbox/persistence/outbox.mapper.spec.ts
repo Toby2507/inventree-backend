@@ -9,10 +9,11 @@ describe('Outbox Event Mapper', () => {
     mapper = new OutboxEventMapper();
   });
 
-  describe('OutboxEventMapper.toDomain()', () => {
+  describe('toDomain()', () => {
     it('should map persistence data to domain aggregate', () => {
       const row = fdOutboxEvent.generate();
-      expect(mapper.toDomain(row)).toEqual({
+      const event = mapper.toDomain(row);
+      expect(event).toMatchObject({
         id: row.id,
         storeId: row.store_id,
         destination: row.destination,
@@ -21,23 +22,23 @@ describe('Outbox Event Mapper', () => {
         schemaVersion: row.schema_version,
         aggregateType: row.aggregate_type,
         aggregateId: row.aggregate_id,
-        occurredAt: row.occurred_at,
         traceId: row.trace_id,
         correlationId: row.correlation_id,
         causationId: row.causation_id,
         partitionKey: row.partition_key,
         payload: row.payload,
-        lockedAt: row.locked_at,
         lockedBy: row.locked_by,
-        lockExpiresAt: row.lock_expires_at,
         publishAttempts: row.publish_attempts,
-        nextAttemptAt: row.next_attempt_at,
-        publishedAt: row.published_at,
         publishRef: row.publish_ref,
         lastError: row.last_error,
-        lastErrorAt: row.last_error_at,
-        createdAt: row.created_at,
       });
+      expect(event.occurredAt.toEpochMs()).toBe(row.occurred_at.getTime());
+      expect(event.lockedAt?.toEpochMs()).toBe(row.locked_at?.getTime());
+      expect(event.lockExpiresAt?.toEpochMs()).toBe(row.lock_expires_at?.getTime());
+      expect(event.nextAttemptAt?.toEpochMs()).toBe(row.next_attempt_at?.getTime());
+      expect(event.publishedAt?.toEpochMs()).toBe(row.published_at?.getTime());
+      expect(event.lastErrorAt?.toEpochMs()).toBe(row.last_error_at?.getTime());
+      expect(event.createdAt.toEpochMs()).toBe(row.created_at.getTime());
     });
 
     it('should map null values correctly', () => {
@@ -53,10 +54,11 @@ describe('Outbox Event Mapper', () => {
     });
   });
 
-  describe('OutboxEventMapper.toPersistence()', () => {
+  describe('toPersistence()', () => {
     it('should map domain aggregate to persistence data', () => {
       const event = fsOutboxEvent.generate();
-      expect(mapper.toPersistence(event)).toEqual({
+      const row = mapper.toPersistence(event);
+      expect(row).toMatchObject({
         id: event.id,
         store_id: event.storeId,
         destination: event.destination,
@@ -65,23 +67,23 @@ describe('Outbox Event Mapper', () => {
         schema_version: event.schemaVersion,
         aggregate_type: event.aggregateType,
         aggregate_id: event.aggregateId,
-        occurred_at: event.occurredAt,
         trace_id: event.traceId,
         correlation_id: event.correlationId,
         causation_id: event.causationId,
         partition_key: event.partitionKey,
         payload: event.payload,
-        locked_at: event.lockedAt,
         locked_by: event.lockedBy,
-        lock_expires_at: event.lockExpiresAt,
         publish_attempts: event.publishAttempts,
-        next_attempt_at: event.nextAttemptAt,
-        published_at: event.publishedAt,
         publish_ref: event.publishRef,
         last_error: event.lastError,
-        last_error_at: event.lastErrorAt,
-        created_at: event.createdAt,
       });
+      expect(row.occurred_at.getTime()).toBe(event.occurredAt.toEpochMs());
+      expect(row.locked_at?.getTime()).toBe(event.lockedAt?.toEpochMs());
+      expect(row.lock_expires_at?.getTime()).toBe(event.lockExpiresAt?.toEpochMs());
+      expect(row.next_attempt_at?.getTime()).toBe(event.nextAttemptAt?.toEpochMs());
+      expect(row.published_at?.getTime()).toBe(event.publishedAt?.toEpochMs());
+      expect(row.last_error_at?.getTime()).toBe(event.lastErrorAt?.toEpochMs());
+      expect(row.created_at.getTime()).toBe(event.createdAt.toEpochMs());
     });
 
     it('should map null values correctly in persistence data', () => {
@@ -97,7 +99,7 @@ describe('Outbox Event Mapper', () => {
     });
   });
 
-  describe('OutboxEventMapper.toPublish()', () => {
+  describe('toPublish()', () => {
     it('should map domain events to persistence data for publishing', () => {
       const events = feOutboxEvent.generateMany(1);
       const ctx = {
@@ -107,7 +109,7 @@ describe('Outbox Event Mapper', () => {
       };
       const result = mapper.toPublish({ events, ctx });
       expect(result).toHaveLength(events.length);
-      expect(result[0]).toEqual({
+      expect(result[0]).toMatchObject({
         store_id: ctx.serialized.actorStoreId,
         destination: 'bullmq',
         status: 'pending',
@@ -115,7 +117,6 @@ describe('Outbox Event Mapper', () => {
         schema_version: 1,
         aggregate_type: events[0].aggregateType,
         aggregate_id: events[0].aggregateId,
-        occurred_at: events[0].occurredAt,
         trace_id: ctx.traceId,
         correlation_id: ctx.serialized.correlationId,
         causation_id: ctx.serialized.causationId,
@@ -126,6 +127,7 @@ describe('Outbox Event Mapper', () => {
         },
         publish_attempts: 0,
       });
+      expect((result[0].occurred_at as Date).getTime()).toBe(events[0].occurredAt.toEpochMs());
     });
 
     it('should default to null for optional context values', () => {

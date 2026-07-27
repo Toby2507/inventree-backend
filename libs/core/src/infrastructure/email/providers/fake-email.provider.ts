@@ -1,7 +1,8 @@
+import { Instant } from '@app/shared-kernel';
 import type { EmailOptions, EmailProvider } from '../ports/email.port';
 
 interface SentEmail {
-  sentAt: Date;
+  sentAt: Instant;
   options: EmailOptions;
 }
 
@@ -17,7 +18,7 @@ export class FakeEmailProvider implements EmailProvider {
   }
 
   async send(options: EmailOptions): Promise<void> {
-    this.sentEmails.push({ options, sentAt: new Date() });
+    this.sentEmails.push({ options, sentAt: Instant.fromEpochMs(Date.now()) });
   }
 
   clear(): void {

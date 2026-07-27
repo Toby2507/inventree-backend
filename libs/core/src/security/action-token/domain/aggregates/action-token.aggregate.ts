@@ -113,7 +113,7 @@ export class ActionToken extends AggregateRoot<ActionTokenSnapshot> {
   }
 
   isExpired(now: Instant): boolean {
-    return now.isAfterOrEqual(this._expiresAt);
+    return now.isAfterOrEqualTo(this._expiresAt);
   }
 
   isUsable(now: Instant): boolean {

@@ -14,6 +14,7 @@ import {
   type DatabaseListener,
   LISTEN_CHANNELS,
 } from '@app/database';
+import { Duration, Instant, JsonValue } from '@app/shared-kernel';
 import { Inject, Injectable, type OnApplicationBootstrap } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { SpanKind } from '@opentelemetry/api';
@@ -22,15 +23,14 @@ import { EVENT_ROUTER, type EventRouter } from '../ports/event-router.port';
 import { QUEUE_MAPPER, type QueueMapper } from '../ports/queue-mapper.port';
 import { OUTBOX_REPOSITORY, type OutboxRepository } from '../ports/repository.port';
 import type { OutboxEvent } from '../types/outbox.interface';
-import { JsonValue } from '@app/shared-kernel';
 
 @Injectable()
 export class OutboxProcessorService implements OnApplicationBootstrap {
   private readonly BATCH_SIZE = 25;
-  private readonly LOCK_DURATION_MS = 30_000;
+  private readonly LOCK_DURATION = Duration.seconds(30);
   private readonly MAX_PUBLISH_ATTEMPTS = 5;
-  private readonly BASE_BACKOFF_MS = 5_000;
-  private readonly MAX_BACKOFF_MS = 5 * 60 * 1_000;
+  private readonly BASE_BACKOFF = Duration.seconds(5);
+  private readonly MAX_BACKOFF = Duration.minutes(5);
   private readonly CONCURRENCY_LIMIT = 5;
 
   private readonly instanceId: string;
@@ -107,7 +107,7 @@ export class OutboxProcessorService implements OnApplicationBootstrap {
           ctx.operational,
           this.BATCH_SIZE,
           this.instanceId,
-          this.LOCK_DURATION_MS,
+          this.LOCK_DURATION.toMs(),
         ),
       );
       if (!rows.length) return 0;
@@ -192,8 +192,11 @@ export class OutboxProcessorService implements OnApplicationBootstrap {
     const message = error instanceof Error ? error.message : String(error);
     const attempts = row.publishAttempts + 1;
     const deadLetter = attempts >= this.MAX_PUBLISH_ATTEMPTS;
-    const delayMs = Math.min(this.BASE_BACKOFF_MS * 2 ** row.publishAttempts, this.MAX_BACKOFF_MS);
-    const nextAttemptAt = new Date(Date.now() + delayMs);
+    const delayMs = Math.min(
+      this.BASE_BACKOFF.toMs() * 2 ** row.publishAttempts,
+      this.MAX_BACKOFF.toMs(),
+    );
+    const nextAttemptAt = Instant.fromEpochMs(Date.now() + delayMs);
     this.logger.error('Outbox event publish failed', {
       eventType: row.eventType,
       eventId: row.id,

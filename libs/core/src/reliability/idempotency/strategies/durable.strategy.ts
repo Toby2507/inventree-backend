@@ -3,7 +3,7 @@ import { CRYPTOGRAPHY, type Cryptography } from '@app/core/security/cryptography
 import { DATABASE_CONTEXT, type DatabaseContext } from '@app/database';
 import { IDEMPOTENCY_HEADER } from '@app/framework/nest/constants';
 import { mapExceptionCategoryToStatus } from '@app/framework/nest/utils';
-import type { JsonValue } from '@app/shared-kernel';
+import type { Instant, JsonValue } from '@app/shared-kernel';
 import {
   BadRequestException,
   type CallHandler,
@@ -157,8 +157,8 @@ export class DurableIdempotencyStrategy implements IdempotencyStrategy {
     return of(record.response as T);
   }
 
-  private getRemainingTtl(expiresAt: Date): number {
-    const remainingMs = expiresAt.getTime() - new Date().getTime();
+  private getRemainingTtl(expiresAt: Instant): number {
+    const remainingMs = expiresAt.toEpochMs() - Date.now();
     return remainingMs > 0 ? Math.ceil(remainingMs / 1000) : 0;
   }
 

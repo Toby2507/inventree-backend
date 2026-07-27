@@ -1,4 +1,4 @@
-import { AggregateRoot, Email, PhoneNumber } from '@app/shared-kernel';
+import { AggregateRoot, Email, Instant, PhoneNumber } from '@app/shared-kernel';
 import {
   type MfaType,
   UserSecurity,
@@ -42,16 +42,16 @@ export type UserStatus = 'active' | 'suspended' | 'pending' | 'disabled';
 export interface UserSnapshot {
   id: string;
   email: string;
-  emailVerifiedAt: Date | null;
+  emailVerifiedAt: Instant | null;
   phone: string | null;
-  phoneVerifiedAt: Date | null;
+  phoneVerifiedAt: Instant | null;
   firstName: string | null;
   lastName: string | null;
   displayName: string | null;
   status: UserStatus;
   passwordHash: string;
-  createdAt: Date;
-  deletedAt: Date | null;
+  createdAt: Instant;
+  deletedAt: Instant | null;
   security: UserSecuritySnapshot;
 }
 export interface CreateUserProps {
@@ -61,6 +61,7 @@ export interface CreateUserProps {
   firstName?: string;
   lastName?: string;
   displayName?: string;
+  createdAt: Instant;
 }
 export interface UpdateUserProfileProps {
   firstName?: string;
@@ -78,16 +79,16 @@ const ALLOWED_TRANSITIONS: Record<UserStatus, UserStatus[]> = {
 
 export class User extends AggregateRoot<UserSnapshot> {
   private readonly _email: Email;
-  private _emailVerifiedAt: Date | null;
+  private _emailVerifiedAt: Instant | null;
   private _phone: PhoneNumber | null;
-  private _phoneVerifiedAt: Date | null;
+  private _phoneVerifiedAt: Instant | null;
   private _firstName: PersonName | null;
   private _lastName: PersonName | null;
   private _displayName: PersonName | null;
   private _status: UserStatus;
   private _passwordHash: PasswordHash;
-  private readonly _createdAt: Date;
-  private _deletedAt: Date | null;
+  private readonly _createdAt: Instant;
+  private _deletedAt: Instant | null;
   private readonly _security: UserSecurity;
 
   private constructor(
@@ -119,7 +120,6 @@ export class User extends AggregateRoot<UserSnapshot> {
 
   // ==== FACTORY ==============
   static create(props: CreateUserProps): User {
-    const now = new Date();
     const user = new User(UserID.from(props.id), {
       email: Email.create(props.email),
       emailVerifiedAt: null,
@@ -130,7 +130,7 @@ export class User extends AggregateRoot<UserSnapshot> {
       displayName: props.displayName ? PersonName.create(props.displayName) : null,
       status: 'pending',
       passwordHash: PasswordHash.create(props.passwordHash),
-      createdAt: now,
+      createdAt: props.createdAt,
       deletedAt: null,
       security: UserSecurity.create({ userId: props.id }),
     });
@@ -141,7 +141,7 @@ export class User extends AggregateRoot<UserSnapshot> {
         email: user._email.value,
         firstName: user._firstName?.value ?? null,
         lastName: user._lastName?.value ?? null,
-        registeredAt: now,
+        registeredAt: props.createdAt,
       }),
     );
 
@@ -164,7 +164,7 @@ export class User extends AggregateRoot<UserSnapshot> {
   }
 
   // ==== COMMANDS ==============
-  verifyEmail(now: Date = new Date()): void {
+  verifyEmail(now: Instant): void {
     if (this._emailVerifiedAt !== null) return; // idempotent - already verified
     if (this._status !== 'pending' && !this.canPerformActions()) throw new UserNotActiveException();
     this._emailVerifiedAt = now;
@@ -186,14 +186,14 @@ export class User extends AggregateRoot<UserSnapshot> {
     }
   }
 
-  verifyPhone(now: Date = new Date()): void {
+  verifyPhone(now: Instant): void {
     this.ensureCanPerformActions();
     if (!this._phone) throw new PhoneNotProvidedException();
     if (this._phoneVerifiedAt !== null) return; // idempotent - already verified
     this._phoneVerifiedAt = now;
   }
 
-  changePassword(newHash: string, now: Date = new Date()): void {
+  changePassword(now: Instant, newHash: string): void {
     this.ensureCanPerformActions();
     this._passwordHash = PasswordHash.create(newHash);
     this._security.recordPasswordChange(now);
@@ -252,7 +252,7 @@ export class User extends AggregateRoot<UserSnapshot> {
     );
   }
 
-  recordFailedLogin(now: Date = new Date()): void {
+  recordFailedLogin(now: Instant): void {
     const canAuth = this.canAuthenticate(now);
     if (canAuth.allowed) {
       const events = this._security.recordFailedLogin(now);
@@ -264,7 +264,7 @@ export class User extends AggregateRoot<UserSnapshot> {
     }
   }
 
-  recordSuccessfulLogin(now: Date = new Date()): void {
+  recordSuccessfulLogin(now: Instant): void {
     const canAuth = this.canAuthenticate(now);
     if (canAuth.allowed) {
       const events = this._security.recordSuccessfulLogin(now);
@@ -278,12 +278,12 @@ export class User extends AggregateRoot<UserSnapshot> {
 
   startMfaSetup(type: MfaType, secretCiphertext?: Buffer, kid?: string): void {
     this.ensureCanPerformActions();
-    this._security.startMfaSetup(type, secretCiphertext, kid);
+    this._security.startMfaSetup(Instant.fromEpochMs(0), type, secretCiphertext, kid);
   }
 
   completeMfaSetup(): void {
     this.ensureCanPerformActions();
-    this._security.completeMfaSetup();
+    this._security.completeMfaSetup(Instant.fromEpochMs(0));
   }
 
   disableMfa(): void {
@@ -291,19 +291,19 @@ export class User extends AggregateRoot<UserSnapshot> {
     this._security.disableMfa();
   }
 
-  recordMfaUse(now: Date = new Date()): void {
+  recordMfaUse(now: Instant): void {
     this.ensureCanPerformActions();
     this._security.recordMfaUsed(now);
   }
 
-  softDelete(now: Date = new Date()): void {
+  softDelete(now: Instant): void {
     this.ensureCanPerformActions();
     if (this._deletedAt !== null) return; // idempotent
     this._deletedAt = now;
   }
 
   // ==== INVARIANTS ==============
-  ensureCanAuthenticate(now: Date = new Date()): void {
+  ensureCanAuthenticate(now: Instant): void {
     if (!this.canAuthenticate(now).allowed) throw new UserCannotAuthenticateException();
   }
 
@@ -319,7 +319,7 @@ export class User extends AggregateRoot<UserSnapshot> {
   }
 
   // ==== PREDICATES ==============
-  canAuthenticate(now: Date = new Date()): AuthenticationCheck {
+  canAuthenticate(now: Instant): AuthenticationCheck {
     if (this._deletedAt !== null) return { allowed: false, reason: 'account_deleted' };
     if (this._status === 'pending') return { allowed: false, reason: 'account_pending' };
     if (this._status === 'disabled') return { allowed: false, reason: 'account_disabled' };

@@ -2,6 +2,7 @@ import { ObservabilityModule } from '@app/core/observability';
 import { OUTBOX_PUBLISHER } from '@app/core/reliability/outbox';
 import { DATABASE_CONTEXT, DatabaseModule, storeContextStorage } from '@app/database';
 import { DatabaseContextService } from '@app/database/services/database.context.service';
+import { Instant } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { createOtelTestHarness } from '@app/testing/core/observability';
 import { fsStoreContext } from '@app/testing/identity';
@@ -174,7 +175,7 @@ describe('DatabaseContextService (integration)', () => {
       eventType: 'TestEvent',
       aggregateType: 'TestAggregate',
       aggregateId: 'test-id',
-      occurredAt: new Date(),
+      occurredAt: Instant.fromEpochMs(Date.now()),
       payload: { foo: 'bar' },
     });
 

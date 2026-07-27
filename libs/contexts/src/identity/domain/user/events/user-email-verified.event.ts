@@ -1,9 +1,9 @@
-import { DomainEvent } from '@app/shared-kernel';
+import { DomainEvent, Instant } from '@app/shared-kernel';
 
 export interface UserEmailVerifiedPayload {
   userId: string;
   email: string;
-  verifiedAt: Date;
+  verifiedAt: Instant;
 }
 
 export class UserEmailVerifiedEvent extends DomainEvent {

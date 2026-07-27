@@ -1,4 +1,4 @@
-import { Instant } from '@app/shared-kernel';
+import { Duration, Instant } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { feActionToken, fsActionToken } from '@app/testing/core/security/action-token';
 import {
@@ -9,8 +9,9 @@ import { ActionTokenID } from '../value-objects/action-token-id.vo';
 import { ActionToken } from './action-token.aggregate';
 import { ACTION_TOKEN_PURPOSES, ACTION_TOKEN_REVOKE_REASONS } from './action-token.types';
 
-const at = (ms: number) => Instant.fromEpochMs(ms);
-const BASE_TIME = 1_700_000_000_000;
+// const at = (ms: number) => Instant.fromEpochMs(ms);
+// const BASE_TIME = 1_700_000_000_000;
+const NOW = Instant.parse('2024-01-01T00:00:00Z');
 
 describe('ActionToken Aggregate Root', () => {
   // ==== FACTORY ==============
@@ -33,8 +34,8 @@ describe('ActionToken Aggregate Root', () => {
 
     it('should throw if expiresAt is before createdAt', () => {
       const snapshot = fsActionToken.generate({
-        createdAt: at(BASE_TIME + 1_000),
-        expiresAt: at(BASE_TIME),
+        createdAt: NOW.plus(Duration.minutes(1)),
+        expiresAt: NOW,
       });
       expect(() => ActionToken.reconstitute(snapshot)).toThrow(
         TokenExpiryBeforeCreationTimeException,
@@ -59,8 +60,8 @@ describe('ActionToken Aggregate Root', () => {
 
     it('should preserve the consumed and revoked state when reconstituting', () => {
       const snapshot = fsActionToken.generate({
-        consumedAt: at(BASE_TIME + 1_000),
-        revokedAt: at(BASE_TIME + 5_000),
+        consumedAt: NOW.plus(Duration.seconds(1)),
+        revokedAt: NOW.plus(Duration.seconds(5)),
         revokedReason: ACTION_TOKEN_REVOKE_REASONS.MANUAL,
       });
       const token = ActionToken.reconstitute(snapshot);
@@ -71,8 +72,6 @@ describe('ActionToken Aggregate Root', () => {
 
   // ==== COMMANDS ==============
   describe('consume()', () => {
-    const NOW = at(new Date().getTime());
-
     it('should mark the token as consumed and bump the version', () => {
       const token = feActionToken.generate();
       token.consume(token.purpose, NOW);
@@ -98,10 +97,10 @@ describe('ActionToken Aggregate Root', () => {
 
       it('should throw if token is expired', () => {
         const token = feActionToken.generate({
-          createdAt: at(BASE_TIME - 1_000),
-          expiresAt: at(BASE_TIME),
+          createdAt: NOW.minus(Duration.seconds(1)),
+          expiresAt: NOW,
         });
-        const expiredTime = at(BASE_TIME + 1_000);
+        const expiredTime = NOW.plus(Duration.seconds(1));
         expect(() => token.consume(token.purpose, expiredTime)).toThrow(TokenInvalidException);
         expect(token.version).toBe(0);
       });
@@ -125,8 +124,6 @@ describe('ActionToken Aggregate Root', () => {
   });
 
   describe('revoke()', () => {
-    const NOW = at(new Date().getTime());
-
     it('should mark the token as revoked and bump the version', () => {
       const token = feActionToken.generate();
       token.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, NOW);
@@ -156,41 +153,41 @@ describe('ActionToken Aggregate Root', () => {
   describe('predicates', () => {
     it('should return true for isConsumed() if token is consumed', () => {
       const token = feActionToken.generate();
-      token.consume(token.purpose, at(BASE_TIME));
+      token.consume(token.purpose, NOW);
       expect(token.isConsumed()).toBe(true);
     });
 
     it('should return true for isRevoked() if token is revoked', () => {
       const token = feActionToken.generate();
-      token.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, at(BASE_TIME));
+      token.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, NOW);
       expect(token.isRevoked()).toBe(true);
     });
 
     it('should return true for isExpired() if token is expired relative to the expiration time', () => {
       const token = feActionToken.generate({
-        createdAt: at(BASE_TIME - 500),
-        expiresAt: at(BASE_TIME),
+        createdAt: NOW.minus(Duration.milliseconds(500)),
+        expiresAt: NOW,
       });
-      expect(token.isExpired(at(BASE_TIME - 1_000))).toBe(false);
-      expect(token.isExpired(at(BASE_TIME))).toBe(true);
-      expect(token.isExpired(at(BASE_TIME + 1_000))).toBe(true);
+      expect(token.isExpired(NOW.minus(Duration.seconds(1)))).toBe(false);
+      expect(token.isExpired(NOW)).toBe(true);
+      expect(token.isExpired(NOW.plus(Duration.seconds(1)))).toBe(true);
     });
 
     it('should return true for isUsable() only if token is not consumed, not revoked, and not expired', () => {
       const token = feActionToken.generate({
-        createdAt: at(BASE_TIME),
-        expiresAt: at(BASE_TIME + 1_000),
+        createdAt: NOW,
+        expiresAt: NOW.plus(Duration.seconds(1)),
       });
-      expect(token.isUsable(at(BASE_TIME))).toBe(true);
-      expect(token.isUsable(at(BASE_TIME + 2_000))).toBe(false);
+      expect(token.isUsable(NOW)).toBe(true);
+      expect(token.isUsable(NOW.plus(Duration.seconds(2)))).toBe(false);
       // Consumed token should also be unusable
       const token2 = feActionToken.generate();
-      token2.consume(token2.purpose, at(BASE_TIME));
-      expect(token2.isUsable(at(BASE_TIME))).toBe(false);
+      token2.consume(token2.purpose, NOW);
+      expect(token2.isUsable(NOW)).toBe(false);
       // Revoked token should also be unusable
       const token3 = feActionToken.generate();
-      token3.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, at(BASE_TIME));
-      expect(token3.isUsable(at(BASE_TIME))).toBe(false);
+      token3.revoke(ACTION_TOKEN_REVOKE_REASONS.MANUAL, NOW);
+      expect(token3.isUsable(NOW)).toBe(false);
     });
   });
 
@@ -202,14 +199,14 @@ describe('ActionToken Aggregate Root', () => {
         userId: 'user-id-456',
         purpose: 'email_verification',
         tokenHash: 'hashed-token',
-        createdAt: at(BASE_TIME - 1_000),
-        expiresAt: at(BASE_TIME),
+        createdAt: NOW.minus(Duration.seconds(1)),
+        expiresAt: NOW,
       });
       expect(token.id.value).toBe(id);
       expect(token.userId).toBe('user-id-456');
       expect(token.purpose).toBe('email_verification');
       expect(token.tokenHash).toBe('hashed-token');
-      expect(token.expiresAt.toEpochMs()).toBe(BASE_TIME);
+      expect(token.expiresAt.toEpochMs()).toBe(NOW.toEpochMs());
       expect(token.version).toBe(0);
     });
   });
@@ -220,8 +217,8 @@ describe('ActionToken Aggregate Root', () => {
       userId: faker.string.uuid(),
       purpose: 'password_reset',
       tokenHash: 'hashed-token-2',
-      expiresAt: at(BASE_TIME + 5_000),
-      createdAt: at(BASE_TIME),
+      expiresAt: NOW.plus(Duration.seconds(5)),
+      createdAt: NOW,
     });
 
     it('should include all relevant properties in the snapshot', () => {
@@ -244,9 +241,9 @@ describe('ActionToken Aggregate Root', () => {
 
     it('should reflect mutations made after reconstitution in the snapshot', () => {
       const original = feActionToken.generateFromSnapshot(originalSnapshot);
-      original.consume(original.purpose, at(BASE_TIME + 1_000));
+      original.consume(original.purpose, NOW.plus(Duration.seconds(1)));
       const snapshot = original.toSnapshot();
-      expect(snapshot.consumedAt?.toEpochMs()).toBe(BASE_TIME + 1_000);
+      expect(snapshot.consumedAt?.toEpochMs()).toBe(NOW.plus(Duration.seconds(1)).toEpochMs());
     });
   });
 });

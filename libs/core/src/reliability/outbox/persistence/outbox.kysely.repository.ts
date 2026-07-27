@@ -1,4 +1,5 @@
 import type { OperationalDB } from '@app/database';
+import type { Instant } from '@app/shared-kernel';
 import { Injectable } from '@nestjs/common';
 import { sql } from 'kysely';
 import type { OutboxRepository } from '../ports/repository.port';
@@ -64,7 +65,7 @@ export class OutboxKyselyRepository implements OutboxRepository {
     db: OperationalDB,
     id: string,
     error: string,
-    nextAttemptAt: Date,
+    nextAttemptAt: Instant,
     deadLetter: boolean,
   ): Promise<void> {
     await db
@@ -74,7 +75,7 @@ export class OutboxKyselyRepository implements OutboxRepository {
         publish_attempts: sql`publish_attempts + 1`,
         last_error: error,
         last_error_at: sql`now()`,
-        next_attempt_at: deadLetter ? null : nextAttemptAt,
+        next_attempt_at: deadLetter ? null : nextAttemptAt.toDate(),
         locked_at: null,
         locked_by: null,
         lock_expires_at: null,
@@ -93,7 +94,7 @@ export class OutboxKyselyRepository implements OutboxRepository {
         lock_expires_at: null,
       })
       .where('status', '=', 'locked')
-      .where('lock_expires_at', '<', new Date())
+      .where('lock_expires_at', '<', sql<Date>`now()`)
       .execute();
     return Number(numUpdatedRows ?? 0);
   }

@@ -1,5 +1,6 @@
 import { ID_GENERATOR, type IDGenerator } from '@app/core/generators';
 import { DATABASE_CONTEXT, type DatabaseContext } from '@app/database';
+import { type Clock, CLOCK } from '@app/shared-kernel';
 import { Inject } from '@nestjs/common';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { User } from '../../../domain/user/aggregates/user.aggregate';
@@ -14,10 +15,11 @@ import { RegisterUserCommand } from './register-user.command';
 @CommandHandler(RegisterUserCommand)
 export class RegisterUserCommandHandler implements ICommandHandler<RegisterUserCommand> {
   constructor(
+    @Inject(CLOCK) private readonly clock: Clock,
+    @Inject(DATABASE_CONTEXT) private readonly db: DatabaseContext,
     @Inject(HASHING) private readonly hasher: Hashing,
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
     @Inject(ID_GENERATOR) private readonly idGenerator: IDGenerator,
-    @Inject(DATABASE_CONTEXT) private readonly db: DatabaseContext,
   ) {}
 
   async execute(command: RegisterUserCommand): Promise<void> {
@@ -25,7 +27,15 @@ export class RegisterUserCommandHandler implements ICommandHandler<RegisterUserC
     await this.ensureUserCanRegister(email);
     const id = this.idGenerator.generateUUIDV7();
     const passwordHash = await this.hasher.hash(password);
-    const user = User.create({ id, email, passwordHash, firstName, lastName, displayName });
+    const user = User.create({
+      id,
+      email,
+      passwordHash,
+      firstName,
+      lastName,
+      displayName,
+      createdAt: this.clock.now(),
+    });
     await this.db.platformCommand(async (ctx) => {
       await this.userRepository.create(ctx.operational, user);
       ctx.events.emit(...user.pullDomainEvents());

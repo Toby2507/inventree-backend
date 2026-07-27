@@ -1,4 +1,4 @@
-import { Email } from '@app/shared-kernel';
+import { Duration, Email, Instant } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { feUser, fsUser } from '@app/testing/identity';
 import { AuthenticationBlockedEvent } from '../events/authentication-blocked.event';
@@ -25,16 +25,18 @@ import { PersonName } from '../value-objects/person-name.vo';
 import { UserID } from '../value-objects/user-id.vo';
 import { User, type UserSnapshot } from './user.aggregate';
 
+const NOW = Instant.parse('2024-01-01T00:00:00Z');
+
 const generateActiveUser = (overrides: Partial<UserSnapshot> = {}): User => {
   return feUser.generateFromSnapshot({ ...overrides, status: 'active' });
 };
-const recordFailures = (user: User, count: number, now?: Date) => {
+const recordFailures = (user: User, count: number, now: Instant) => {
   for (let i = 0; i < count; i++) user.recordFailedLogin(now);
 };
 
 describe('User Aggregate Root', () => {
   // ==== FACTORY ==============
-  describe('User.create()', () => {
+  describe('create()', () => {
     const user = feUser.generate();
 
     it('should create a user with the correct properties', () => {
@@ -79,7 +81,7 @@ describe('User Aggregate Root', () => {
               email: user.email.value,
               firstName: null,
               lastName: null,
-              registeredAt: expect.any(Date),
+              registeredAt: expect.any(Instant),
             }),
           }),
         ]),
@@ -87,7 +89,7 @@ describe('User Aggregate Root', () => {
     });
   });
 
-  describe('User.reconstitute()', () => {
+  describe('reconstitute()', () => {
     it('should reconstitute a user from a snapshot', () => {
       const snapshot = fsUser.generate({
         firstName: 'John',
@@ -107,7 +109,7 @@ describe('User Aggregate Root', () => {
       expect(events).toHaveLength(0);
     });
 
-    it('round-trips through toSnapshot() without data loss', () => {
+    it('should round-trip through toSnapshot() without data loss', () => {
       const snapshot = fsUser.generate({
         firstName: 'John',
         lastName: 'Doe',
@@ -124,38 +126,40 @@ describe('User Aggregate Root', () => {
     describe('guards', () => {
       it('should throw if user is account is disabled', () => {
         const user = feUser.generateFromSnapshot({ status: 'disabled' });
-        expect(() => user.verifyEmail()).toThrow(UserNotActiveException);
+        expect(() => user.verifyEmail(NOW)).toThrow(UserNotActiveException);
       });
 
       it('should throw if user is suspended', () => {
         const user = feUser.generateFromSnapshot({ status: 'suspended' });
-        expect(() => user.verifyEmail()).toThrow(UserNotActiveException);
+        expect(() => user.verifyEmail(NOW)).toThrow(UserNotActiveException);
       });
 
       it('should throw if user is active but cannot perform actions', () => {
-        const user = feUser.generateFromSnapshot({ status: 'active', deletedAt: new Date() });
-        expect(() => user.verifyEmail()).toThrow(UserNotActiveException);
+        const user = feUser.generateFromSnapshot({
+          status: 'active',
+          deletedAt: NOW.minus(Duration.days(3)),
+        });
+        expect(() => user.verifyEmail(NOW)).toThrow(UserNotActiveException);
       });
     });
 
     describe('when user is active but pending email verification', () => {
       it('should mark isEmailVerified as true', () => {
         const user = generateActiveUser();
-        user.verifyEmail();
+        user.verifyEmail(NOW);
         expect(user.isEmailVerified).toBe(true);
       });
 
       it('should emit a UserEmailVerifiedEvent', () => {
         const user = generateActiveUser();
-        user.verifyEmail();
+        user.verifyEmail(NOW);
         const events = user.pullDomainEvents();
         expect(events).toEqual(expect.arrayContaining([expect.any(UserEmailVerifiedEvent)]));
       });
 
       it('should emit the correct payload in UserEmailVerifiedEvent', () => {
         const user = generateActiveUser();
-        const now = new Date('2026-01-15T10:00:00Z');
-        user.verifyEmail(now);
+        user.verifyEmail(NOW);
         const events = user.pullDomainEvents();
         expect(events).toEqual(
           expect.arrayContaining([
@@ -164,7 +168,7 @@ describe('User Aggregate Root', () => {
               payload: expect.objectContaining({
                 userId: user.id.value,
                 email: user.email.value,
-                verifiedAt: now,
+                verifiedAt: NOW,
               }),
             }),
           ]),
@@ -175,20 +179,20 @@ describe('User Aggregate Root', () => {
     describe('when user is pending due to incomplete registration', () => {
       it('should transition user to active status', () => {
         const user = feUser.generateFromSnapshot();
-        user.verifyEmail();
+        user.verifyEmail(NOW);
         expect(user.status).toBe('active');
       });
 
       it('should emit UserEnabledEvent', () => {
         const user = feUser.generateFromSnapshot();
-        user.verifyEmail();
+        user.verifyEmail(NOW);
         const events = user.pullDomainEvents();
         expect(events).toEqual(expect.arrayContaining([expect.any(UserEnabledEvent)]));
       });
 
       it('should emit the correct payload in UserEnabledEvent', () => {
         const user = feUser.generateFromSnapshot();
-        user.verifyEmail();
+        user.verifyEmail(NOW);
         const events = user.pullDomainEvents();
         expect(events).toEqual(
           expect.arrayContaining([
@@ -206,15 +210,15 @@ describe('User Aggregate Root', () => {
 
     describe('idempotency checks', () => {
       it('should be idempotent if already verified', () => {
-        const user = feUser.generateFromSnapshot({ emailVerifiedAt: new Date() });
-        expect(() => user.verifyEmail()).not.toThrow();
+        const user = feUser.generateFromSnapshot({ emailVerifiedAt: NOW.minus(Duration.weeks(1)) });
+        expect(() => user.verifyEmail(NOW)).not.toThrow();
         expect(user.pullDomainEvents()).toHaveLength(0);
       });
 
       it('should emit event only once even if called multiple times', () => {
         const user = generateActiveUser();
-        user.verifyEmail();
-        user.verifyEmail();
+        user.verifyEmail(NOW);
+        user.verifyEmail(NOW);
         const events = user.pullDomainEvents();
         expect(events).toHaveLength(1);
       });
@@ -224,32 +228,32 @@ describe('User Aggregate Root', () => {
   describe('User.verifyPhone()', () => {
     it('should throw if user cannot perform actions', () => {
       const user = feUser.generateFromSnapshot({ phone: '+2349058731812' });
-      expect(() => user.verifyPhone()).toThrow(UserNotActiveException);
+      expect(() => user.verifyPhone(NOW)).toThrow(UserNotActiveException);
     });
 
     it('should throw when phone number is not available', () => {
       const user = generateActiveUser();
-      expect(() => user.verifyPhone()).toThrow(PhoneNotProvidedException);
+      expect(() => user.verifyPhone(NOW)).toThrow(PhoneNotProvidedException);
     });
 
     it('should mark isPhoneVerified as true', () => {
       const user = generateActiveUser({ phone: '+2349058731812' });
-      user.verifyPhone();
+      user.verifyPhone(NOW);
       expect(user.isPhoneVerified).toBe(true);
     });
 
     it('should be idempotent if already verified', () => {
       const user = generateActiveUser({
         phone: '+2349058731812',
-        phoneVerifiedAt: new Date(),
+        phoneVerifiedAt: NOW.minus(Duration.days(1)),
       });
-      expect(() => user.verifyPhone()).not.toThrow();
+      expect(() => user.verifyPhone(NOW)).not.toThrow();
     });
 
     it('should be callable multiple times without throwing', () => {
       const user = generateActiveUser({ phone: '+2349058731812' });
-      user.verifyPhone();
-      user.verifyPhone();
+      user.verifyPhone(NOW);
+      user.verifyPhone(NOW);
       expect(user.isPhoneVerified).toBe(true);
     });
   });
@@ -259,18 +263,18 @@ describe('User Aggregate Root', () => {
 
     it('should throw if user cannot perform actions', () => {
       const user = feUser.generate();
-      expect(() => user.changePassword(hash)).toThrow(UserNotActiveException);
+      expect(() => user.changePassword(NOW, hash)).toThrow(UserNotActiveException);
     });
 
     it('should update the passwordHash', () => {
       const user = generateActiveUser();
-      user.changePassword(hash);
+      user.changePassword(NOW, hash);
       expect(user.passwordHash.value).toBe(hash);
     });
 
     it('should update security metadata when password changes', () => {
       const user = generateActiveUser();
-      user.changePassword(hash);
+      user.changePassword(NOW, hash);
       const security = user.toSnapshot().security;
       expect(security.lastPasswordChangeAt).not.toBeNull();
     });
@@ -313,7 +317,7 @@ describe('User Aggregate Root', () => {
     it('should reset phone verification when phone is updated', () => {
       const user = generateActiveUser({
         phone: '+2348000000000',
-        phoneVerifiedAt: new Date(),
+        phoneVerifiedAt: NOW,
       });
       expect(user.isPhoneVerified).toBe(true);
       user.updateProfile({ phone: '+2349058731812' });
@@ -525,14 +529,14 @@ describe('User Aggregate Root', () => {
       it('should record failed login attempts', () => {
         const user = generateActiveUser();
         const initialAttempts = user.toSnapshot().security.failedLoginAttempts;
-        user.recordFailedLogin();
+        user.recordFailedLogin(NOW);
         expect(user.toSnapshot().security.failedLoginAttempts).toBe(initialAttempts + 1);
       });
 
       it('should emit an event when max attempts reached', () => {
         const user = generateActiveUser();
-        recordFailures(user, 9);
-        user.recordFailedLogin();
+        recordFailures(user, 9, NOW);
+        user.recordFailedLogin(NOW);
         const events = user.pullDomainEvents();
         expect(events).toEqual(expect.arrayContaining([expect.any(UserLockedOutEvent)]));
         expect(events).toEqual(
@@ -556,18 +560,18 @@ describe('User Aggregate Root', () => {
 
       it('should not record failed login attempts', () => {
         const initialAttempts = user.toSnapshot().security.failedLoginAttempts;
-        user.recordFailedLogin();
+        user.recordFailedLogin(NOW);
         expect(user.toSnapshot().security.failedLoginAttempts).toBe(initialAttempts);
       });
 
       it('should emit a AuthenticationBlockedEvent', () => {
-        user.recordFailedLogin();
+        user.recordFailedLogin(NOW);
         const events = user.pullDomainEvents();
         expect(events).toEqual(expect.arrayContaining([expect.any(AuthenticationBlockedEvent)]));
       });
 
       it('should emit the correct payload in AuthenticationBlockedEvent', () => {
-        user.recordFailedLogin();
+        user.recordFailedLogin(NOW);
         const events = user.pullDomainEvents();
         expect(events).toEqual(
           expect.arrayContaining([
@@ -589,13 +593,13 @@ describe('User Aggregate Root', () => {
       it('should record successful login', () => {
         const user = generateActiveUser();
         const initialAttemptAt = user.toSnapshot().security.lastLoginAttemptedAt;
-        user.recordSuccessfulLogin();
+        user.recordSuccessfulLogin(NOW);
         expect(user.toSnapshot().security.lastLoginAttemptedAt).not.toBe(initialAttemptAt);
       });
 
       it('should emit an event on successful login', () => {
         const user = generateActiveUser();
-        user.recordSuccessfulLogin();
+        user.recordSuccessfulLogin(NOW);
         const events = user.pullDomainEvents();
         expect(events).toEqual(expect.arrayContaining([expect.any(UserLoggedInEvent)]));
         expect(events).toEqual(
@@ -618,18 +622,18 @@ describe('User Aggregate Root', () => {
 
       it('should not record successful login attempts', () => {
         const initialAttemptAt = user.toSnapshot().security.lastLoginAttemptedAt;
-        user.recordSuccessfulLogin();
+        user.recordSuccessfulLogin(NOW);
         expect(user.toSnapshot().security.lastLoginAttemptedAt).toBe(initialAttemptAt);
       });
 
       it('should emit a AuthenticationBlockedEvent', () => {
-        user.recordSuccessfulLogin();
+        user.recordSuccessfulLogin(NOW);
         const events = user.pullDomainEvents();
         expect(events).toEqual(expect.arrayContaining([expect.any(AuthenticationBlockedEvent)]));
       });
 
       it('should emit the correct payload in AuthenticationBlockedEvent', () => {
-        user.recordSuccessfulLogin();
+        user.recordSuccessfulLogin(NOW);
         const events = user.pullDomainEvents();
         expect(events).toEqual(
           expect.arrayContaining([
@@ -730,19 +734,19 @@ describe('User Aggregate Root', () => {
   describe('User.recordMfaUse()', () => {
     it('should throw if user cannot perform actions', () => {
       const user = feUser.generateFromSnapshot();
-      expect(() => user.recordMfaUse()).toThrow(UserNotActiveException);
+      expect(() => user.recordMfaUse(NOW)).toThrow(UserNotActiveException);
     });
 
     it('should throw if user does not have MFA enabled', () => {
       const user = generateActiveUser();
-      expect(() => user.recordMfaUse()).toThrow(MfaNotEnabledException);
+      expect(() => user.recordMfaUse(NOW)).toThrow(MfaNotEnabledException);
     });
 
     it('should record MFA use correctly', () => {
       const user = generateActiveUser();
       user.startMfaSetup('email');
       const initialUsedAt = user.toSnapshot().security.mfaLastUsedAt;
-      user.recordMfaUse();
+      user.recordMfaUse(NOW);
       expect(user.toSnapshot().security.mfaLastUsedAt).not.toBe(initialUsedAt);
     });
   });
@@ -750,21 +754,19 @@ describe('User Aggregate Root', () => {
   describe('User.softDelete()', () => {
     it('should throw if user cannot perform actions', () => {
       const user = feUser.generateFromSnapshot();
-      expect(() => user.softDelete()).toThrow(UserNotActiveException);
+      expect(() => user.softDelete(NOW)).toThrow(UserNotActiveException);
     });
 
     it('should set deletedAt timestamp', () => {
       const user = generateActiveUser();
       expect(user.toSnapshot().deletedAt).toBeNull();
-      const now = new Date('2026-01-15T10:00:00Z');
-      user.softDelete(now);
-      expect(user.toSnapshot().deletedAt).toEqual(now);
+      user.softDelete(NOW);
+      expect(user.toSnapshot().deletedAt?.toEpochMs()).toBe(NOW.toEpochMs());
     });
 
     it('should throw if user is already deleted', () => {
-      const now = faker.date.past();
-      const user = generateActiveUser({ deletedAt: now });
-      expect(() => user.softDelete()).toThrow(UserNotActiveException);
+      const user = generateActiveUser({ deletedAt: NOW.minus(Duration.hours(1)) });
+      expect(() => user.softDelete(NOW)).toThrow(UserNotActiveException);
     });
   });
 
@@ -772,28 +774,28 @@ describe('User Aggregate Root', () => {
   describe('User.ensureCanAuthenticate()', () => {
     it('should throw if user is pending', () => {
       const user = feUser.generate();
-      expect(() => user.ensureCanAuthenticate()).toThrow(UserCannotAuthenticateException);
+      expect(() => user.ensureCanAuthenticate(NOW)).toThrow(UserCannotAuthenticateException);
     });
 
     it('should throw if user is disabled', () => {
       const user = feUser.generateFromSnapshot({ status: 'disabled' });
-      expect(() => user.ensureCanAuthenticate()).toThrow(UserCannotAuthenticateException);
+      expect(() => user.ensureCanAuthenticate(NOW)).toThrow(UserCannotAuthenticateException);
     });
 
     it('should throw if user is locked out', () => {
       const user = generateActiveUser();
-      recordFailures(user, 10);
-      expect(() => user.ensureCanAuthenticate()).toThrow(UserCannotAuthenticateException);
+      recordFailures(user, 10, NOW);
+      expect(() => user.ensureCanAuthenticate(NOW)).toThrow(UserCannotAuthenticateException);
     });
 
     it('should throw if user is deleted', () => {
-      const user = feUser.generateFromSnapshot({ deletedAt: new Date() });
-      expect(() => user.ensureCanAuthenticate()).toThrow(UserCannotAuthenticateException);
+      const user = feUser.generateFromSnapshot({ deletedAt: NOW.minus(Duration.hours(1)) });
+      expect(() => user.ensureCanAuthenticate(NOW)).toThrow(UserCannotAuthenticateException);
     });
 
     it('should not throw if user is active', () => {
       const user = generateActiveUser();
-      expect(() => user.ensureCanAuthenticate()).not.toThrow();
+      expect(() => user.ensureCanAuthenticate(NOW)).not.toThrow();
     });
   });
 
@@ -804,7 +806,7 @@ describe('User Aggregate Root', () => {
     });
 
     it('should throw if user status is active but account is deleted', () => {
-      const user = generateActiveUser({ deletedAt: new Date() });
+      const user = generateActiveUser({ deletedAt: NOW.minus(Duration.days(1)) });
       expect(() => user.ensureCanPerformActions()).toThrow(UserNotActiveException);
     });
 
@@ -832,32 +834,32 @@ describe('User Aggregate Root', () => {
   describe('User.canAuthenticate()', () => {
     it('should return false with reason "account_pending" if user is pending', () => {
       const user = feUser.generate();
-      const result = user.canAuthenticate();
+      const result = user.canAuthenticate(NOW);
       expect(result).toMatchObject({ allowed: false, reason: 'account_pending' });
     });
 
     it('should return false with reason "account_disabled" if user is disabled', () => {
       const user = feUser.generateFromSnapshot({ status: 'disabled' });
-      const result = user.canAuthenticate();
+      const result = user.canAuthenticate(NOW);
       expect(result).toMatchObject({ allowed: false, reason: 'account_disabled' });
     });
 
     it('should return false with reason "locked_out" if user is locked out', () => {
       const user = generateActiveUser();
-      recordFailures(user, 10);
-      const result = user.canAuthenticate();
+      recordFailures(user, 10, NOW);
+      const result = user.canAuthenticate(NOW);
       expect(result).toMatchObject({ allowed: false, reason: 'locked_out' });
     });
 
     it('should return false with reason "account_deleted" if user is deleted', () => {
-      const user = generateActiveUser({ deletedAt: new Date() });
-      const result = user.canAuthenticate();
+      const user = generateActiveUser({ deletedAt: NOW.minus(Duration.days(2)) });
+      const result = user.canAuthenticate(NOW);
       expect(result).toMatchObject({ allowed: false, reason: 'account_deleted' });
     });
 
     it('should return true if user is active and not deleted', () => {
       const user = generateActiveUser();
-      const result = user.canAuthenticate();
+      const result = user.canAuthenticate(NOW);
       expect(result).toMatchObject({ allowed: true });
     });
   });
@@ -870,7 +872,7 @@ describe('User Aggregate Root', () => {
     });
 
     it('should return false if user status is active but account is deleted', () => {
-      const user = generateActiveUser({ deletedAt: new Date() });
+      const user = generateActiveUser({ deletedAt: NOW });
       const result = user.canPerformActions();
       expect(result).toBe(false);
     });

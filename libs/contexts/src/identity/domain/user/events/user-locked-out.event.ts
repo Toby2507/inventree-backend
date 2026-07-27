@@ -1,8 +1,8 @@
-import { DomainEvent } from '@app/shared-kernel';
+import { DomainEvent, Instant } from '@app/shared-kernel';
 
 export interface UserLockedOutPayload {
   userId: string;
-  lockoutUntil: Date;
+  lockoutUntil: Instant;
   reason: string;
   failedAttempts: number;
 }

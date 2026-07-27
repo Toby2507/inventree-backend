@@ -4,16 +4,17 @@ import {
   type UserSecuritySnapshot,
 } from '@app/contexts/identity/domain/user/entities/user-security.entity';
 import type { UserSecuritySnapRow } from '@app/contexts/identity/infrastructure/persistence/mappers/user/user.persistence.types';
+import { Instant } from '@app/shared-kernel';
 import { createEntityFaker, createFaker } from '@app/testing/faker-factory';
 import { faker } from '@faker-js/faker';
 
 export const fsUserSecurity = createFaker<UserSecuritySnapshot>(() => ({
   userId: faker.string.uuid(),
   failedLoginAttempts: 0,
-  lastLoginAttemptedAt: faker.date.past(),
+  lastLoginAttemptedAt: Instant.fromDate(faker.date.past()),
   lockoutUntil: null,
   lockoutReason: null,
-  lastPasswordChangeAt: faker.date.past(),
+  lastPasswordChangeAt: Instant.fromDate(faker.date.past()),
   mfaStatus: 'disabled',
   mfaType: null,
   mfaSecretCiphertext: null,

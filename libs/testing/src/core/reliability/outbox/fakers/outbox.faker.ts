@@ -2,20 +2,21 @@ import type {
   OutboxEvent,
   OutboxEventRow,
 } from '@app/core/reliability/outbox/types/outbox.interface';
+import { Instant } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { createClassFaker, createFaker } from '@app/testing/faker-factory';
 import { FDEvent, type FDEventPayload } from './event.faker';
 
 export const fsOutboxEvent = createFaker<OutboxEvent>(() => ({
   id: faker.string.uuid(),
-  storeId: faker.helpers.maybe(() => faker.string.uuid()),
+  storeId: faker.helpers.maybe(() => faker.string.uuid()) ?? null,
   destination: faker.helpers.arrayElement(['bullmq']),
   status: faker.helpers.arrayElement(['cancelled', 'failed', 'locked', 'pending', 'published']),
   eventType: faker.word.words(2).replace(/\s/g, '_'),
   schemaVersion: faker.number.int({ min: 1, max: 10 }),
   aggregateType: faker.word.noun(),
   aggregateId: faker.string.uuid(),
-  occurredAt: faker.date.recent(),
+  occurredAt: Instant.fromDate(faker.date.recent()),
   traceId: faker.string.uuid(),
   correlationId: faker.string.uuid(),
   causationId: faker.string.uuid(),
@@ -24,16 +25,16 @@ export const fsOutboxEvent = createFaker<OutboxEvent>(() => ({
     data: { message: faker.lorem.sentence() },
     _obs: { correlationId: faker.string.uuid() },
   },
-  lockedAt: faker.date.recent(),
+  lockedAt: Instant.fromDate(faker.date.recent()),
   lockedBy: faker.string.uuid(),
-  lockExpiresAt: faker.date.recent(),
+  lockExpiresAt: Instant.fromDate(faker.date.recent()),
   publishAttempts: faker.number.int({ min: 0, max: 5 }),
-  nextAttemptAt: faker.date.recent(),
-  publishedAt: faker.date.recent(),
+  nextAttemptAt: Instant.fromDate(faker.date.recent()),
+  publishedAt: Instant.fromDate(faker.date.recent()),
   publishRef: faker.string.uuid(),
   lastError: faker.lorem.sentence(),
-  lastErrorAt: faker.date.recent(),
-  createdAt: faker.date.recent(),
+  lastErrorAt: Instant.fromDate(faker.date.recent()),
+  createdAt: Instant.fromDate(faker.date.recent()),
 }));
 
 export const fdOutboxEvent = createFaker<OutboxEventRow>(() => ({

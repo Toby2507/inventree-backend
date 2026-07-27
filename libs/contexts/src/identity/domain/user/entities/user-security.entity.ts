@@ -1,4 +1,4 @@
-import { BaseEntity, type DomainEvent } from '@app/shared-kernel';
+import { BaseEntity, Duration, Instant, type DomainEvent } from '@app/shared-kernel';
 import { UserLockedOutEvent } from '../events/user-locked-out.event';
 import { UserLoggedInEvent } from '../events/user-logged-in.event';
 import {
@@ -15,16 +15,16 @@ export type MfaStatus = 'pending' | 'enabled' | 'disabled';
 export interface UserSecuritySnapshot {
   userId: string;
   failedLoginAttempts: number;
-  lastLoginAttemptedAt: Date | null;
-  lockoutUntil: Date | null;
+  lastLoginAttemptedAt: Instant | null;
+  lockoutUntil: Instant | null;
   lockoutReason: string | null;
-  lastPasswordChangeAt: Date | null;
+  lastPasswordChangeAt: Instant | null;
   mfaStatus: MfaStatus;
   mfaType: MfaType | null;
   mfaSecretCiphertext: Buffer | null;
   mfaSecretKid: string | null;
-  mfaEnabledAt: Date | null;
-  mfaLastUsedAt: Date | null;
+  mfaEnabledAt: Instant | null;
+  mfaLastUsedAt: Instant | null;
 }
 
 export interface CreateUserSecurityProps {
@@ -33,19 +33,19 @@ export interface CreateUserSecurityProps {
 
 export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
   private readonly MAX_FAILED_ATTEMPTS = 10;
-  private readonly LOCKOUT_DURATION_MS = 30 * 60 * 1000; // 30 minutes
+  private readonly LOCKOUT_DURATION = Duration.minutes(30);
 
   private _failedLoginAttempts: number;
-  private _lastLoginAttemptedAt: Date | null;
-  private _lockoutUntil: Date | null;
+  private _lastLoginAttemptedAt: Instant | null;
+  private _lockoutUntil: Instant | null;
   private _lockoutReason: string | null;
-  private _lastPasswordChangeAt: Date | null;
+  private _lastPasswordChangeAt: Instant | null;
   private _mfaStatus: MfaStatus;
   private _mfaType: MfaType | null;
   private _mfaSecretCiphertext: Buffer | null;
   private _mfaSecretKid: string | null;
-  private _mfaEnabledAt: Date | null;
-  private _mfaLastUsedAt: Date | null;
+  private _mfaEnabledAt: Instant | null;
+  private _mfaLastUsedAt: Instant | null;
 
   private constructor(
     private readonly _userId: string,
@@ -88,14 +88,14 @@ export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
   }
 
   // ==== COMMANDS ==============
-  recordFailedLogin(now: Date = new Date()): DomainEvent[] {
+  recordFailedLogin(now: Instant): DomainEvent[] {
     this._lastLoginAttemptedAt = now;
     const events: DomainEvent[] = [];
     // Don't increment attempts if already locked out
-    if (this.isLockedOut()) return events;
+    if (this.isLockedOut(now)) return events;
     this._failedLoginAttempts += 1;
     if (this._failedLoginAttempts >= this.MAX_FAILED_ATTEMPTS) {
-      this._lockoutUntil = new Date(now.getTime() + this.LOCKOUT_DURATION_MS);
+      this._lockoutUntil = now.plus(this.LOCKOUT_DURATION);
       this._lockoutReason = 'Too many failed login attempts';
       events.push(
         new UserLockedOutEvent({
@@ -109,7 +109,7 @@ export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
     return events;
   }
 
-  recordSuccessfulLogin(now: Date = new Date()): DomainEvent[] {
+  recordSuccessfulLogin(now: Instant): DomainEvent[] {
     this._lastLoginAttemptedAt = now;
     this.unlock();
     return [
@@ -119,27 +119,27 @@ export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
     ];
   }
 
-  recordPasswordChange(now: Date = new Date()): void {
+  recordPasswordChange(now: Instant): void {
     this._lastPasswordChangeAt = now;
     this.unlock();
   }
 
-  startMfaSetup(type: MfaType, secretCiphertext?: Buffer, kid?: string): void {
+  startMfaSetup(now: Instant, type: MfaType, secretCiphertext?: Buffer, kid?: string): void {
     if (this.isMfaEnabled()) throw new MfaAlreadyEnabledException();
     if (this._mfaStatus === 'pending') throw new MfaSetupInProgressException();
     this._mfaStatus = 'pending';
     this._mfaType = type;
-    if (type === 'email') return this.completeMfaSetup();
+    if (type === 'email') return this.completeMfaSetup(now);
     if (!secretCiphertext || !kid) throw new MfaSecretRequiredException();
     this._mfaSecretCiphertext = secretCiphertext;
     this._mfaSecretKid = kid;
   }
 
-  completeMfaSetup(): void {
+  completeMfaSetup(now: Instant): void {
     if (this.isMfaEnabled()) throw new MfaAlreadyEnabledException();
     if (this._mfaStatus !== 'pending') throw new MfaSetupNotInProgressException();
     this._mfaStatus = 'enabled';
-    this._mfaEnabledAt = new Date();
+    this._mfaEnabledAt = now;
   }
 
   disableMfa(): void {
@@ -151,7 +151,7 @@ export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
     this._mfaEnabledAt = null;
   }
 
-  recordMfaUsed(now: Date = new Date()): void {
+  recordMfaUsed(now: Instant): void {
     if (!this.isMfaEnabled()) throw new MfaNotEnabledException();
     this._mfaLastUsedAt = now;
   }
@@ -161,8 +161,8 @@ export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
     return this._mfaStatus === 'enabled';
   }
 
-  isLockedOut(now: Date = new Date()): boolean {
-    return this._lockoutUntil !== null && this._lockoutUntil > now;
+  isLockedOut(now: Instant): boolean {
+    return this._lockoutUntil !== null && this._lockoutUntil.isAfterOrEqualTo(now);
   }
 
   // ==== GETTERS ==============
@@ -178,7 +178,7 @@ export class UserSecurity extends BaseEntity<UserSecuritySnapshot> {
   get mfaType(): MfaType | null {
     return this._mfaType;
   }
-  get lockoutUntil(): Date | null {
+  get lockoutUntil(): Instant | null {
     return this._lockoutUntil;
   }
 

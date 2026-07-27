@@ -2,7 +2,7 @@ import { REDIS } from '@app/core/infrastructure/redis';
 import { CRYPTOGRAPHY } from '@app/core/security/cryptography';
 import { DATABASE_CONTEXT } from '@app/database';
 import { IDEMPOTENCY_HEADER } from '@app/framework/nest/constants';
-import { EXCEPTION_CATEGORIES } from '@app/shared-kernel';
+import { Duration, EXCEPTION_CATEGORIES, Instant } from '@app/shared-kernel';
 import { makeRedisMock } from '@app/testing/core/infrastructure';
 import {
   fsIdempotencyRecord,
@@ -235,11 +235,10 @@ describe('DurableIdempotencyStrategy', () => {
 
         it('should update redis ttl removing lapsed time when marking completed', async () => {
           mockHandle.mockReturnValue(of(record.response));
-          const time30minsLater = new Date(Date.now() + 30 * 60 * 1000);
           const updateRecord: IdempotencyRecord = {
             ...record,
             status: 'completed',
-            expiresAt: time30minsLater,
+            expiresAt: Instant.fromEpochMs(Date.now()).plus(Duration.minutes(30)),
           };
           idempotencyRepository.markCompleted.mockResolvedValue(updateRecord);
           const options = { ...OPTIONS, ttlSeconds: 3600 };
@@ -255,11 +254,10 @@ describe('DurableIdempotencyStrategy', () => {
         it('should update redis ttl removing lapsed time when marking failed', async () => {
           const err = new BadRequestException('Invalid input');
           mockHandle.mockReturnValue(throwError(() => err));
-          const time30minsLater = new Date(Date.now() + 30 * 60 * 1000);
           const updateRecord: IdempotencyRecord = {
             ...record,
             status: 'failed',
-            expiresAt: time30minsLater,
+            expiresAt: Instant.fromEpochMs(Date.now()).plus(Duration.minutes(30)),
             error: { message: err.message, status: err.getStatus() },
           };
           idempotencyRepository.markFailed.mockResolvedValue(updateRecord);

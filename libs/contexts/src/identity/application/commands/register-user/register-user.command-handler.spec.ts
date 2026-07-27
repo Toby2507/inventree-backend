@@ -12,11 +12,13 @@ import { USER_REPOSITORY } from '../../../domain/user/ports/repositories/user.re
 import { HASHING } from '../../ports/hashing.port';
 import { RegisterUserCommand } from './register-user.command';
 import { RegisterUserCommandHandler } from './register-user.command-handler';
+import { CLOCK, FixedClock, Instant } from '@app/shared-kernel';
 
 describe('RegisterUserCommandHandler', () => {
   let module: TestingModule;
   let handler: RegisterUserCommandHandler;
 
+  const clock = new FixedClock(Instant.parse('2024-01-01T00:00:00Z'));
   const argon2Hasher = makeArgon2HasherMock();
   const dbContext = makeDatabaseContextMock();
   const idGenerator = makeIdGeneratorMock();
@@ -34,6 +36,7 @@ describe('RegisterUserCommandHandler', () => {
     module = await Test.createTestingModule({
       providers: [
         RegisterUserCommandHandler,
+        { provide: CLOCK, useValue: clock },
         { provide: HASHING, useValue: argon2Hasher },
         { provide: USER_REPOSITORY, useValue: userRepository },
         { provide: ID_GENERATOR, useValue: idGenerator },

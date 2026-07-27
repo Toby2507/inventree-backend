@@ -27,6 +27,10 @@ const validKeys: Set<keyof DurationParts> = new Set([
   'milliseconds',
 ]);
 
+/**
+ * Represents a non-negative elapsed duration, stored internally as milliseconds.
+ * Sub-millisecond precision is not supported — inputs are rounded via Math.round.
+ */
 export class Duration {
   private constructor(private readonly _duration: Temporal.Duration) {}
 
@@ -39,47 +43,51 @@ export class Duration {
   }
 
   // ==== FACTORY ==============
+  static zero(): Duration {
+    return Duration.fromMs(0);
+  }
+
   static milliseconds(milliseconds: number): Duration {
     Duration.validate(milliseconds);
-    return this.fromMs(milliseconds);
+    return Duration.fromMs(milliseconds);
   }
 
   static seconds(seconds: number): Duration {
     Duration.validate(seconds);
-    return this.fromMs(seconds * MS_PER_UNIT.seconds);
+    return Duration.fromMs(seconds * MS_PER_UNIT.seconds);
   }
 
   static minutes(minutes: number): Duration {
     Duration.validate(minutes);
-    return this.fromMs(minutes * MS_PER_UNIT.minutes);
+    return Duration.fromMs(minutes * MS_PER_UNIT.minutes);
   }
 
   static hours(hours: number): Duration {
     Duration.validate(hours);
-    return this.fromMs(hours * MS_PER_UNIT.hours);
+    return Duration.fromMs(hours * MS_PER_UNIT.hours);
   }
 
   static days(days: number): Duration {
     Duration.validate(days);
-    return this.fromMs(days * MS_PER_UNIT.days);
+    return Duration.fromMs(days * MS_PER_UNIT.days);
   }
 
   static weeks(weeks: number): Duration {
     Duration.validate(weeks);
-    return this.fromMs(weeks * MS_PER_UNIT.weeks);
+    return Duration.fromMs(weeks * MS_PER_UNIT.weeks);
   }
 
   static of(parts: DurationParts): Duration {
     const totalMs = (Object.entries(parts) as Array<[keyof DurationParts, number]>).reduce(
       (sum, [key, value]) => {
         if (value === undefined) return sum;
-        if (!Number.isFinite(value) || value < 0) throw new InvalidDurationException(key);
         if (!validKeys.has(key)) throw new InvalidDurationPartException(key);
+        if (!Number.isFinite(value) || value < 0) throw new InvalidDurationException(key);
         return sum + value * MS_PER_UNIT[key];
       },
       0,
     );
-    return this.fromMs(totalMs);
+    return Duration.fromMs(totalMs);
   }
 
   // ==== OPERATIONS ==============
@@ -94,19 +102,23 @@ export class Duration {
   }
 
   equals(other: Duration): boolean {
-    return Temporal.Duration.compare(this._duration, other._duration) === 0;
+    return this.comparedTo(other) === 0;
   }
 
   isLongerThan(other: Duration): boolean {
-    return Temporal.Duration.compare(this._duration, other._duration) > 0;
+    return this.comparedTo(other) > 0;
   }
 
-  isLongerThanOrEquals(other: Duration): boolean {
-    return Temporal.Duration.compare(this._duration, other._duration) >= 0;
+  isLongerThanOrEqualTo(other: Duration): boolean {
+    return this.comparedTo(other) >= 0;
   }
 
   isShorterThan(other: Duration): boolean {
-    return Temporal.Duration.compare(this._duration, other._duration) < 0;
+    return this.comparedTo(other) < 0;
+  }
+
+  comparedTo(other: Duration): number {
+    return Temporal.Duration.compare(this._duration, other._duration);
   }
 
   // ==== CONVERSIONS ==============

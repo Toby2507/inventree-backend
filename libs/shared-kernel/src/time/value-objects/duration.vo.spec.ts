@@ -33,6 +33,11 @@ describe('Duration', () => {
     it('should allow zero as a valid value', () => {
       expect(Duration.hours(0).toMs()).toBe(0);
     });
+
+    it('should round sub-millisecond input to the nearest millisecond', () => {
+      expect(Duration.milliseconds(2.4).toMs()).toBe(2);
+      expect(Duration.milliseconds(2.5).toMs()).toBe(3);
+    });
   });
 
   describe('factories - validation', () => {
@@ -87,9 +92,14 @@ describe('Duration', () => {
       // @ts-expect-error - months/years are intentionally excluded from DurationParts
       expect(() => Duration.of({ months: 1 })).toThrow(InvalidDurationPartException);
     });
+
+    it('should throw InvalidDurationPartException (not InvalidDurationException) for an invalid key with an invalid value', () => {
+      // @ts-expect-error - months/years are intentionally excluded from DurationParts
+      expect(() => Duration.of({ months: -5 })).toThrow(InvalidDurationPartException);
+    });
   });
 
-  describe('increments and decrements', () => {
+  describe('arithmetic', () => {
     describe('plus', () => {
       it('should sum two durations correctly', () => {
         const result = Duration.hours(1).plus(Duration.minutes(30));
@@ -158,15 +168,15 @@ describe('Duration', () => {
 
     describe('isLongerThanOrEquals', () => {
       it('should return true when the first duration is greater', () => {
-        expect(Duration.hours(2).isLongerThanOrEquals(Duration.hours(1))).toBe(true);
+        expect(Duration.hours(2).isLongerThanOrEqualTo(Duration.hours(1))).toBe(true);
       });
 
       it('should return true when both durations are equal', () => {
-        expect(Duration.hours(1).isLongerThanOrEquals(Duration.minutes(60))).toBe(true);
+        expect(Duration.hours(1).isLongerThanOrEqualTo(Duration.minutes(60))).toBe(true);
       });
 
       it('should return false when the first duration is smaller', () => {
-        expect(Duration.hours(1).isLongerThanOrEquals(Duration.hours(2))).toBe(false);
+        expect(Duration.hours(1).isLongerThanOrEqualTo(Duration.hours(2))).toBe(false);
       });
     });
 
@@ -181,6 +191,20 @@ describe('Duration', () => {
 
       it('should return false when the first duration is greater', () => {
         expect(Duration.hours(2).isShorterThan(Duration.hours(1))).toBe(false);
+      });
+    });
+
+    describe('comparedTo', () => {
+      it('should return 0 for equal durations', () => {
+        expect(Duration.hours(1).comparedTo(Duration.minutes(60))).toBe(0);
+      });
+
+      it('should return a positive number when the first duration is greater', () => {
+        expect(Duration.hours(2).comparedTo(Duration.hours(1))).toBeGreaterThan(0);
+      });
+
+      it('should return a negative number when the first duration is smaller', () => {
+        expect(Duration.hours(1).comparedTo(Duration.hours(2))).toBeLessThan(0);
       });
     });
   });

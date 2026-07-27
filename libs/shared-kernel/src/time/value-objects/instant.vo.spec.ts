@@ -1,3 +1,4 @@
+import { InvalidInstantException } from '../exceptions/instant.exception';
 import { Duration } from './duration.vo';
 import { Instant } from './instant.vo';
 
@@ -29,9 +30,33 @@ describe('Instant Value Object', () => {
       const b = Instant.fromTemporal(Temporal.Instant.fromEpochMilliseconds(EPOCH_MS));
       expect(a.equals(b)).toBe(true);
     });
+
+    it('should throw for epoch ms beyond Temporal.Instant range', () => {
+      expect(() => Instant.fromEpochMs(Number.MAX_SAFE_INTEGER)).toThrow(InvalidInstantException);
+    });
+
+    it('should not throw for epoch ms within Temporal.Instant range', () => {
+      const maxValidMs = 8_640_000_000_000_000;
+      expect(() => Instant.fromEpochMs(maxValidMs)).not.toThrow();
+      expect(() => Instant.fromEpochMs(-maxValidMs)).not.toThrow();
+    });
+
+    describe('invalid input', () => {
+      it('should throw InvalidInstantException for a malformed ISO string', () => {
+        expect(() => Instant.parse('not-a-date')).toThrow(InvalidInstantException);
+      });
+
+      it('should throw InvalidInstantException for NaN epoch ms', () => {
+        expect(() => Instant.fromEpochMs(NaN)).toThrow(InvalidInstantException);
+      });
+
+      it('should throw InvalidInstantException for an invalid Date', () => {
+        expect(() => Instant.fromDate(new Date('garbage'))).toThrow(InvalidInstantException);
+      });
+    });
   });
 
-  describe('increments and decrements', () => {
+  describe('arithmetic', () => {
     describe('plus', () => {
       it('should add a Duration and return a new later Instant', () => {
         const now = Instant.fromEpochMs(EPOCH_MS);
@@ -114,19 +139,19 @@ describe('Instant Value Object', () => {
       it('should return true when this instant is later', () => {
         const earlier = Instant.fromEpochMs(EPOCH_MS);
         const later = earlier.plus(Duration.hours(1));
-        expect(later.isAfterOrEqual(earlier)).toBe(true);
+        expect(later.isAfterOrEqualTo(earlier)).toBe(true);
       });
 
       it('should return true when equal', () => {
         const a = Instant.fromEpochMs(EPOCH_MS);
         const b = Instant.fromEpochMs(EPOCH_MS);
-        expect(a.isAfterOrEqual(b)).toBe(true);
+        expect(a.isAfterOrEqualTo(b)).toBe(true);
       });
 
       it('should return false when this instant is earlier', () => {
         const earlier = Instant.fromEpochMs(EPOCH_MS);
         const later = earlier.plus(Duration.hours(1));
-        expect(earlier.isAfterOrEqual(later)).toBe(false);
+        expect(earlier.isAfterOrEqualTo(later)).toBe(false);
       });
     });
 
@@ -155,6 +180,26 @@ describe('Instant Value Object', () => {
         expect(a.equals(b)).toBe(true);
       });
     });
+
+    describe('comparedTo', () => {
+      it('should return 0 for two equal instants', () => {
+        const a = Instant.fromEpochMs(EPOCH_MS);
+        const b = Instant.fromEpochMs(EPOCH_MS);
+        expect(a.comparedTo(b)).toBe(0);
+      });
+
+      it('should return a negative number when this instant is earlier', () => {
+        const earlier = Instant.fromEpochMs(EPOCH_MS);
+        const later = earlier.plus(Duration.hours(1));
+        expect(earlier.comparedTo(later)).toBeLessThan(0);
+      });
+
+      it('should return a positive number when this instant is later', () => {
+        const earlier = Instant.fromEpochMs(EPOCH_MS);
+        const later = earlier.plus(Duration.hours(1));
+        expect(later.comparedTo(earlier)).toBeGreaterThan(0);
+      });
+    });
   });
 
   describe('conversions', () => {
@@ -172,6 +217,11 @@ describe('Instant Value Object', () => {
 
     it('should return the correct epoch milliseconds when toEpochMs is called', () => {
       expect(Instant.fromEpochMs(EPOCH_MS).toEpochMs()).toBe(EPOCH_MS);
+    });
+
+    it('should serialize to its ISO string via JSON.stringify', () => {
+      const instant = Instant.fromEpochMs(EPOCH_MS);
+      expect(JSON.stringify({ at: instant })).toBe(`{"at":"2024-07-22T00:00:00Z"}`);
     });
   });
 });

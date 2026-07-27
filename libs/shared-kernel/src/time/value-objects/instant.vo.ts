@@ -1,23 +1,41 @@
+import { InvalidInstantException } from '../exceptions/instant.exception';
 import type { Duration } from './duration.vo';
 
+/**
+ * Value object wrapping Temporal.Instant.
+ * Use `.equals()` for comparisons — reference equality and
+ * structural equality (Map/Set keys, Jest `toEqual`) do NOT hold.
+ * For test assertions, compare via `.toISOString()` or `.equals()`.
+ */
 export class Instant {
   private constructor(private readonly _instant: Temporal.Instant) {}
 
   // ==== FACTORY ==============
+  static fromDate(date: Date): Instant {
+    const ms = date.getTime();
+    if (Number.isNaN(ms)) throw new InvalidInstantException(date);
+    return Instant.fromEpochMs(ms);
+  }
+
   static fromEpochMs(epochMs: number): Instant {
-    return new Instant(Temporal.Instant.fromEpochMilliseconds(epochMs));
+    if (!Number.isFinite(epochMs)) throw new InvalidInstantException(epochMs);
+    try {
+      return new Instant(Temporal.Instant.fromEpochMilliseconds(epochMs));
+    } catch (error: unknown) {
+      throw new InvalidInstantException(epochMs, error);
+    }
   }
 
   static fromTemporal(instant: Temporal.Instant): Instant {
     return new Instant(instant);
   }
 
-  static fromDate(date: Date): Instant {
-    return new Instant(Temporal.Instant.fromEpochMilliseconds(date.getTime()));
-  }
-
   static parse(isoString: string): Instant {
-    return new Instant(Temporal.Instant.from(isoString));
+    try {
+      return new Instant(Temporal.Instant.from(isoString));
+    } catch (error: unknown) {
+      throw new InvalidInstantException(isoString, error);
+    }
   }
 
   // ==== OPERATIONS ==============
@@ -33,23 +51,31 @@ export class Instant {
     );
   }
 
-  isBefore(other: Instant): boolean {
-    return Temporal.Instant.compare(this._instant, other._instant) < 0;
+  equals(other: Instant): boolean {
+    return this.comparedTo(other) === 0;
   }
 
   isAfter(other: Instant): boolean {
-    return Temporal.Instant.compare(this._instant, other._instant) > 0;
+    return this.comparedTo(other) > 0;
   }
 
-  isAfterOrEqual(other: Instant): boolean {
-    return Temporal.Instant.compare(this._instant, other._instant) >= 0;
+  isAfterOrEqualTo(other: Instant): boolean {
+    return this.comparedTo(other) >= 0;
   }
 
-  equals(other: Instant): boolean {
-    return Temporal.Instant.compare(this._instant, other._instant) === 0;
+  isBefore(other: Instant): boolean {
+    return this.comparedTo(other) < 0;
+  }
+
+  comparedTo(other: Instant): number {
+    return Temporal.Instant.compare(this._instant, other._instant);
   }
 
   // ==== CONVERSIONS ==============
+  toDate(): Date {
+    return new Date(this._instant.epochMilliseconds);
+  }
+
   toEpochMs(): number {
     return this._instant.epochMilliseconds;
   }
@@ -58,7 +84,7 @@ export class Instant {
     return this._instant.toString();
   }
 
-  toDate(): Date {
-    return new Date(this._instant.epochMilliseconds);
+  toJSON(): string {
+    return this.toISOString();
   }
 }

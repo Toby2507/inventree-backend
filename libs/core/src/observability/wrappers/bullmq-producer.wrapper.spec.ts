@@ -6,7 +6,7 @@ import { ObservedQueueWrapper } from './bullmq-producer.wrapper';
 
 describe('ObservedQueueWrapper', () => {
   let queue: jest.Mocked<Queue>;
-  let wrapper: ObservedQueueWrapper;
+  let wrapper: ObservedQueueWrapper<Record<string, unknown>>;
   const ctx = fsObservationContext.generate();
   const { logger, contextLogger } = makeLoggerMock();
 

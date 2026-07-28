@@ -1,5 +1,5 @@
 import { ID_GENERATOR } from '@app/core/generators';
-import { QUEUE_NAMES } from '@app/core/infrastructure/queue';
+import { QUEUE_NAMES, QueueName } from '@app/core/infrastructure/queue';
 import { LOGGER } from '@app/core/observability';
 import { DATABASE_CONTEXT, DATABASE_LISTENER, LISTEN_CHANNELS } from '@app/database';
 import { faker } from '@app/testing';
@@ -195,7 +195,7 @@ describe('OutboxProcessorService', () => {
       repository.claimBatch
         .mockResolvedValueOnce(fsOutboxEvent.generateMany(2))
         .mockResolvedValueOnce([]);
-      eventRouter.resolve.mockReturnValue([{ queue: QUEUE_NAMES.BILLING }]);
+      eventRouter.resolve.mockReturnValue([{ queue: QUEUE_NAMES.EMAIL }]);
       queue.add.mockRejectedValueOnce(new Error('Queue down'));
       await trigger();
       expect(repository.claimBatch).toHaveBeenCalledTimes(2);
@@ -261,13 +261,13 @@ describe('OutboxProcessorService', () => {
       describe('when atleast one route is configured for the event type', () => {
         beforeEach(() => {
           eventRouter.resolve.mockReturnValue([
-            { queue: QUEUE_NAMES.NOTIFICATIONS, jobName: 'user.created' },
+            { queue: QUEUE_NAMES.EMAIL, jobName: 'user.created' },
           ]);
         });
 
         it('should add the event to the resolved queue and mark it as published', async () => {
           await trigger();
-          expect(queueMapper.get).toHaveBeenCalledWith(QUEUE_NAMES.NOTIFICATIONS);
+          expect(queueMapper.get).toHaveBeenCalledWith(QUEUE_NAMES.EMAIL);
           expect(queue.add).toHaveBeenCalledWith(
             'user.created',
             (event.payload as any).data,
@@ -290,7 +290,7 @@ describe('OutboxProcessorService', () => {
           repository.claimBatch.mockResolvedValueOnce([event]);
           eventRouter.resolve.mockReturnValueOnce([
             {
-              queue: QUEUE_NAMES.NOTIFICATIONS,
+              queue: QUEUE_NAMES.EMAIL,
               toPayload: (pl) => ({ name: `${pl.firstName} ${pl.lastName}` }),
             },
           ]);
@@ -304,7 +304,7 @@ describe('OutboxProcessorService', () => {
         });
 
         it('should add the event to the resolved queue with event name if job name is absent', async () => {
-          eventRouter.resolve.mockReturnValueOnce([{ queue: QUEUE_NAMES.NOTIFICATIONS }]);
+          eventRouter.resolve.mockReturnValueOnce([{ queue: QUEUE_NAMES.EMAIL }]);
           await trigger();
           expect(queue.add).toHaveBeenCalledWith(
             event.eventType,
@@ -315,8 +315,8 @@ describe('OutboxProcessorService', () => {
 
         it('should fan out to every mapped route and marks published once', async () => {
           eventRouter.resolve.mockReturnValue([
-            { queue: QUEUE_NAMES.NOTIFICATIONS, jobName: 'notify.user.created' },
-            { queue: QUEUE_NAMES.ANALYTICS, jobName: 'track.user.created' },
+            { queue: QUEUE_NAMES.EMAIL, jobName: 'notify.user.created' },
+            { queue: 'analytics' as unknown as QueueName, jobName: 'track.user.created' },
           ]);
           await trigger();
           expect(queue.add).toHaveBeenCalledTimes(2);
@@ -352,9 +352,7 @@ describe('OutboxProcessorService', () => {
 
   describe('when outbox event processing fails', () => {
     beforeEach(() => {
-      eventRouter.resolve.mockReturnValue([
-        { queue: QUEUE_NAMES.NOTIFICATIONS, jobName: 'user.created' },
-      ]);
+      eventRouter.resolve.mockReturnValue([{ queue: QUEUE_NAMES.EMAIL, jobName: 'user.created' }]);
       queue.add.mockRejectedValue(new Error('Queue unavailable'));
     });
 
@@ -508,9 +506,7 @@ describe('OutboxProcessorService', () => {
 
     it('should process all rows in the batch even when some fail', async () => {
       repository.claimBatch.mockResolvedValueOnce(fsOutboxEvent.generateMany(3));
-      eventRouter.resolve.mockReturnValue([
-        { queue: QUEUE_NAMES.NOTIFICATIONS, jobName: 'user.created' },
-      ]);
+      eventRouter.resolve.mockReturnValue([{ queue: QUEUE_NAMES.EMAIL, jobName: 'user.created' }]);
       queue.add
         .mockResolvedValueOnce('ok' as any)
         .mockRejectedValueOnce(new Error('Transient'))
@@ -524,12 +520,12 @@ describe('OutboxProcessorService', () => {
       const [success1, failure, unrouted, success2] = fsOutboxEvent.generateMany(4);
       repository.claimBatch.mockResolvedValueOnce([success1, failure, unrouted, success2]);
       eventRouter.resolve
-        .mockReturnValueOnce([{ queue: QUEUE_NAMES.NOTIFICATIONS, jobName: 'success1' }])
-        .mockReturnValueOnce([{ queue: QUEUE_NAMES.NOTIFICATIONS, jobName: 'failure' }])
+        .mockReturnValueOnce([{ queue: QUEUE_NAMES.EMAIL, jobName: 'success1' }])
+        .mockReturnValueOnce([{ queue: QUEUE_NAMES.EMAIL, jobName: 'failure' }])
         .mockReturnValueOnce([])
         .mockReturnValueOnce([
-          { queue: QUEUE_NAMES.NOTIFICATIONS, jobName: 'success2' },
-          { queue: QUEUE_NAMES.ANALYTICS, jobName: 'success2' },
+          { queue: QUEUE_NAMES.EMAIL, jobName: 'success2' },
+          { queue: 'analytics' as unknown as QueueName, jobName: 'success2' },
         ]);
       queue.add
         .mockResolvedValueOnce('ok' as any)

@@ -24,4 +24,4 @@ export { SPAN_ATTRIBUTES } from './tracing/span-attributes';
 export { bootstrapTelemetry } from './tracing/tracer.provider';
 // Wrappers
 export { createObservedProcessor } from './wrappers/bullmq-consumer.wrapper';
-export type { JobPayload } from './wrappers/bullmq-producer.wrapper';
+export { ObservedQueueWrapper, type JobPayload } from './wrappers/bullmq-producer.wrapper';

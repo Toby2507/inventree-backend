@@ -11,7 +11,7 @@ export interface JobPayload<T = unknown> {
   _obs?: SerializedBusinessContext;
 }
 
-export class ObservedQueueWrapper<T = unknown> {
+export class ObservedQueueWrapper<JobDataMap extends Record<string, unknown>> {
   private readonly logger;
 
   constructor(
@@ -21,9 +21,13 @@ export class ObservedQueueWrapper<T = unknown> {
     this.logger = logger.forContext(`Queue.${queue.name}`);
   }
 
-  async add(jobName: string, data: T, opts?: JobsOptions): Promise<void> {
+  async add<JobName extends keyof JobDataMap & string>(
+    jobName: JobName,
+    data: JobDataMap[JobName],
+    opts?: JobsOptions,
+  ): Promise<void> {
     const ctx = getOptionalObservationContext();
-    const payload: JobPayload<T> = {
+    const payload: JobPayload<JobDataMap[JobName]> = {
       data,
       _obs: ctx ? serializeBusinessContext(ctx) : undefined,
     };

@@ -11,34 +11,30 @@ export class AppLoggerService implements Logger, LoggerService {
   private readonly pino: PinoLogger;
 
   constructor(@Inject(OBSERVABILITY_CONFIG) config: ObservabilityConfig) {
-    this.pino = pino({
-      level: config.logLevel,
-      base: undefined, // strip pid/hostname — use OTEL resource attributes instead
-      timestamp: pino.stdTimeFunctions.isoTime,
-      formatters: {
-        level: (label) => ({ level: label }),
-      },
-      redact: {
-        paths: ['*.password', '*.passwordHash', '*.mfaSecret', '*.token', '*.secret'],
-        censor: '[REDACTED]',
-      },
-      ...(config.prettyPrint && {
-        transport: {
-          target: 'pino-pretty',
-          options: { colorize: true, translateTime: false, singleLine: true },
+    this.pino = pino(
+      {
+        level: config.logLevel,
+        base: undefined, // strip pid/hostname — use OTEL resource attributes instead
+        timestamp: pino.stdTimeFunctions.isoTime,
+        messageKey: 'message',
+        errorKey: 'error',
+        redact: {
+          paths: ['*.password', '*.passwordHash', '*.mfaSecret', '*.token', '*.secret'],
+          censor: '[REDACTED]',
         },
-      }),
-      mixin(): Record<string, unknown> {
-        const ctx = getOptionalObservationContext();
-        if (!ctx) return {};
-        return {
-          correlationId: ctx.correlationId,
-          ...(ctx.causationId ? { causationId: ctx.causationId } : {}),
-          ...(ctx.actor?.userId ? { actorUserId: ctx.actor.userId } : {}),
-          ...(ctx.actor?.storeId ? { actorStoreId: ctx.actor.storeId } : {}),
-        };
+        mixin(): Record<string, unknown> {
+          const ctx = getOptionalObservationContext();
+          if (!ctx) return {};
+          return {
+            correlationId: ctx.correlationId,
+            ...(ctx.causationId ? { causationId: ctx.causationId } : {}),
+            ...(ctx.actor?.userId ? { actorUserId: ctx.actor.userId } : {}),
+            ...(ctx.actor?.storeId ? { actorStoreId: ctx.actor.storeId } : {}),
+          };
+        },
       },
-    });
+      pino.destination(1),
+    );
   }
 
   log(message: string, meta?: LogMeta | string): void {

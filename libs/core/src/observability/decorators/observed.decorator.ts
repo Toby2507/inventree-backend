@@ -1,8 +1,8 @@
-import { copyMethodMetadata } from '@app/common/utils';
-import { LoggerPort } from '../ports/logger.port';
-import { Trace, TraceOptions } from './trace.decorator';
+import { copyMethodMetadata } from '@app/framework/nest/utils';
+import type { Logger } from '../ports/logger.port';
+import { Trace, type TraceOptions } from './trace.decorator';
 
-type LoggableInstance = { logger?: LoggerPort };
+type LoggableInstance = { logger?: Logger };
 export interface ObservedOptions extends TraceOptions {
   logContext?: string;
   logArgs?: boolean;
@@ -17,7 +17,7 @@ const isDev = process.env.NODE_ENV !== 'production';
  * `@Observed()` — method decorator.
  *
  * Automatically logs and traces execution of decorated method.
- * The class must expose `this.logger: LoggerPort` (injected via DI).
+ * The class must expose `this.logger: Logger` (injected via DI).
  */
 export function Observed(options: ObservedOptions = {}): MethodDecorator {
   return function (

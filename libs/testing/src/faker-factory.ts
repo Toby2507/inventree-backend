@@ -1,4 +1,4 @@
-import { EntityConstructor } from '@app/common/bases';
+import type { EntityConstructor } from '@app/shared-kernel';
 
 export function createFaker<T>(generator: () => T) {
   return {

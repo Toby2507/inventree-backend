@@ -1,7 +1,7 @@
 import { makeIdempotencyStrategyMock } from '@app/testing/core/reliability/idempotency';
-import { DurableIdempotencyStrategy } from './durable.strategy';
+import type { DurableIdempotencyStrategy } from './durable.strategy';
 import { IdempotencyStrategyFactory } from './factory';
-import { RedisIdempotencyStrategy } from './redis.strategy';
+import type { RedisIdempotencyStrategy } from './redis.strategy';
 
 describe('IdempotencyStrategyFactory', () => {
   let factory: IdempotencyStrategyFactory;

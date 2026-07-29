@@ -1,4 +1,4 @@
-import { DomainException } from '@app/common/exceptions';
+import { DomainException, EXCEPTION_CATEGORIES, type ExceptionCategory } from '@app/shared-kernel';
 import { UserStatus } from '../aggregates/user.aggregate';
 
 export class UserCannotAuthenticateException extends DomainException {
@@ -32,12 +32,20 @@ export class PasswordHashCannotBeEmptyException extends DomainException {
   constructor() {
     super('Password hash cannot be empty');
   }
+
+  override get category(): ExceptionCategory {
+    return EXCEPTION_CATEGORIES.VALIDATION;
+  }
 }
 
 export class PasswordHashInvalidException extends DomainException {
   readonly code = 'PASSWORD_HASH_INVALID';
   constructor() {
     super('Value does not appear to be a valid password hash');
+  }
+
+  override get category(): ExceptionCategory {
+    return EXCEPTION_CATEGORIES.VALIDATION;
   }
 }
 
@@ -46,6 +54,10 @@ export class PersonNameCannotBeEmptyException extends DomainException {
   constructor() {
     super('Name cannot be empty');
   }
+
+  override get category(): ExceptionCategory {
+    return EXCEPTION_CATEGORIES.VALIDATION;
+  }
 }
 
 export class PersonNameMaxLengthExceededException extends DomainException {
@@ -53,11 +65,19 @@ export class PersonNameMaxLengthExceededException extends DomainException {
   constructor(max: number) {
     super(`Name must not exceed ${max} characters`);
   }
+
+  override get category(): ExceptionCategory {
+    return EXCEPTION_CATEGORIES.VALIDATION;
+  }
 }
 
 export class PersonNameInvalidException extends DomainException {
   readonly code = 'PERSON_NAME_INVALID';
   constructor(value: string) {
     super('Name contains invalid characters', { value });
+  }
+
+  override get category(): ExceptionCategory {
+    return EXCEPTION_CATEGORIES.VALIDATION;
   }
 }

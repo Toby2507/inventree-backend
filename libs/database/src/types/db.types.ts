@@ -396,6 +396,19 @@ export interface KyselyMigrationOperational {
   timestamp: string;
 }
 
+export interface OperationalActionTokens {
+  consumed_at: Timestamp | null;
+  created_at: Generated<Timestamp>;
+  expires_at: Timestamp;
+  id: Generated<string>;
+  purpose: string;
+  revoked_at: Timestamp | null;
+  revoked_reason: string | null;
+  token_hash: string;
+  user_id: string;
+  version: Generated<number>;
+}
+
 export interface OperationalAuditLogs {
   action: OperationalAuditAction;
   actor_store_member_id: string | null;
@@ -750,7 +763,6 @@ export interface OperationalInventoryLotItems {
 
 export interface OperationalInventoryLotMovements {
   created_at: Generated<Timestamp>;
-  id: Generated<string>;
   lot_id: string;
   movement_id: string;
   quantity: Numeric;
@@ -793,7 +805,6 @@ export interface OperationalInventoryMovements {
 
 export interface OperationalInventorySerialMovements {
   created_at: Generated<Timestamp>;
-  id: Generated<string>;
   movement_id: string;
   serial_id: string;
   status_after: OperationalInventorySerialStatus;
@@ -970,7 +981,7 @@ export interface OperationalOutboxEvents {
   lock_expires_at: Timestamp | null;
   locked_at: Timestamp | null;
   locked_by: string | null;
-  next_attempt_at: Timestamp | null;
+  next_attempt_at: Generated<Timestamp | null>;
   occurred_at: Generated<Timestamp>;
   partition_key: string | null;
   payload: Json;
@@ -1478,7 +1489,6 @@ export interface OperationalStoreMembers {
 export interface OperationalStoreNumberSequences {
   created_at: Generated<Timestamp>;
   current_value: Generated<Int8>;
-  id: Generated<string>;
   include_day: Generated<boolean>;
   include_month: Generated<boolean>;
   include_year: Generated<boolean>;
@@ -2381,6 +2391,7 @@ export interface DB {
   kysely_migration_analytics: KyselyMigrationAnalytics;
   kysely_migration_bootstrap: KyselyMigrationBootstrap;
   kysely_migration_operational: KyselyMigrationOperational;
+  'operational.action_tokens': OperationalActionTokens;
   'operational.audit_logs': OperationalAuditLogs;
   'operational.barcode_registry': OperationalBarcodeRegistry;
   'operational.billing_customers': OperationalBillingCustomers;

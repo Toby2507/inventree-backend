@@ -1,12 +1,14 @@
 import { IdempotencyKyselyRepository } from '@app/core/reliability/idempotency/persistence/idempotency.kysely.repository';
-import { CreateIdempotency } from '@app/core/reliability/idempotency/persistence/idempotency.persistence.types';
-import { OperationalDB, OperationalSchema } from '@app/database';
+import type { CreateIdempotency } from '@app/core/reliability/idempotency/persistence/idempotency.persistence.types';
+import type { OperationalSchema } from '@app/database';
+import { Instant } from '@app/shared-kernel';
 import { fsCreateIdempotencyInput } from '@app/testing/core/reliability/idempotency';
-import { createTestContext, TestContext } from '@app/testing/database';
+import { createTestContext, type TestContext } from '@app/testing/database';
+import type { Kysely } from 'kysely';
 
 describe('IdempotencyKyselyRepository (integration)', () => {
   let ctx: TestContext<OperationalSchema>;
-  let db: OperationalDB;
+  let db: Kysely<OperationalSchema>;
   let repo: IdempotencyKyselyRepository;
 
   const expireRecord = async (input: CreateIdempotency) => {
@@ -40,7 +42,7 @@ describe('IdempotencyKyselyRepository (integration)', () => {
     await ctx.dispose();
   });
 
-  describe('IdempotencyKyselyRepository.tryClaim()', () => {
+  describe('tryClaim()', () => {
     it('should persist a new idempotency record correctly', async () => {
       const input = fsCreateIdempotencyInput.generate();
       const claimed = await repo.tryClaim(db, input);
@@ -102,8 +104,8 @@ describe('IdempotencyKyselyRepository (integration)', () => {
         requestHash: input.hash,
         scope: input.scope,
         status: 'in_progress',
-        createdAt: expect.any(Date),
-        expiresAt: expect.any(Date),
+        createdAt: expect.any(Instant),
+        expiresAt: expect.any(Instant),
         resolvedAt: null,
       });
     });

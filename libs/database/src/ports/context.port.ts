@@ -1,5 +1,5 @@
-import { DomainEvent } from '@app/common/bases';
-import { AnalyticsDB, OperationalDB } from '../types/db.schema.types';
+import type { DomainEvent } from '@app/shared-kernel';
+import type { AnalyticsDB, OperationalDB } from '../types/db.schema.types';
 
 export interface CommandDbContext {
   operational: OperationalDB;
@@ -12,7 +12,7 @@ export interface QueryDbContext {
   analytics: AnalyticsDB;
 }
 
-export interface DatabaseContextPort {
+export interface DatabaseContext {
   command<T>(operation: (ctx: CommandDbContext) => Promise<T>): Promise<T>;
   query<T>(operation: (ctx: QueryDbContext) => Promise<T>): Promise<T>;
   platformCommand<T>(operation: (ctx: CommandDbContext) => Promise<T>): Promise<T>;

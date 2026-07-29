@@ -1,12 +1,14 @@
-import { DomainExceptionFilter } from '@app/common/filters';
 import { appConfig } from '@app/config';
 import { GeneratorModule } from '@app/core/generators';
 import { RedisModule } from '@app/core/infrastructure/redis';
 import { ObservabilityModule, ObservationContextMiddleware } from '@app/core/observability';
 import { IdempotencyModule } from '@app/core/reliability/idempotency';
-import { SecurityModule } from '@app/core/security';
+import { CryptographyModule } from '@app/core/security/cryptography';
 import { DatabaseModule } from '@app/database';
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { LayerExceptionFilter } from '@app/framework/nest/filters';
+import { InfrastructureExceptionFilter } from '@app/framework/nest/filters/infrastructure-exception.filter';
+import { ClockModule } from '@app/shared-kernel';
+import { type MiddlewareConsumer, Module, type NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -24,11 +26,15 @@ import { IdentityModule } from './identity';
     GeneratorModule,
     IdempotencyModule,
     RedisModule,
-    SecurityModule,
+    CryptographyModule,
+    ClockModule,
     // Modules
     IdentityModule,
   ],
-  providers: [{ provide: APP_FILTER, useClass: DomainExceptionFilter }],
+  providers: [
+    { provide: APP_FILTER, useClass: LayerExceptionFilter },
+    { provide: APP_FILTER, useClass: InfrastructureExceptionFilter },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

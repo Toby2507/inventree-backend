@@ -1,14 +1,14 @@
-import { DomainEvent } from '@app/common/bases';
+import { DomainEvent, Instant } from '@app/shared-kernel';
 
 export interface UserRegisteredPayload {
   userId: string;
   email: string;
   firstName: string | null;
   lastName: string | null;
-  registeredAt: Date;
+  registeredAt: Instant;
 }
 
-export class UserRegisteredEvent extends DomainEvent<UserRegisteredPayload> {
+export class UserRegisteredEvent extends DomainEvent {
   static readonly EVENT_TYPE = 'identity.user.registered';
 
   readonly eventType = UserRegisteredEvent.EVENT_TYPE;

@@ -1,9 +1,9 @@
 // Context
 export {
-  SerializedBusinessContext,
-  SerializedOutboxContext,
   serializeBusinessContext,
   serializeOutboxContext,
+  type SerializedBusinessContext,
+  type SerializedOutboxContext,
 } from './context/observation-context';
 export { getOptionalObservationContext } from './context/observation-context.storage';
 export { withRestoredObservationContext } from './context/restore-context';
@@ -17,11 +17,11 @@ export { ObservationContextMiddleware } from './middlewares/observation-context.
 // Module
 export { ObservabilityModule } from './observability.module';
 // Ports
-export { LOGGER, LoggerPort } from './ports/logger.port';
-export { METRICS, MetricsPort } from './ports/metrics.port';
+export { LOGGER, type Logger } from './ports/logger.port';
+export { METRICS, type Metrics } from './ports/metrics.port';
 // Tracing
-export { SpanAttributes } from './tracing/span-attributes';
+export { SPAN_ATTRIBUTES } from './tracing/span-attributes';
 export { bootstrapTelemetry } from './tracing/tracer.provider';
 // Wrappers
 export { createObservedProcessor } from './wrappers/bullmq-consumer.wrapper';
-export { JobPayload } from './wrappers/bullmq-producer.wrapper';
+export { ObservedQueueWrapper, type JobPayload } from './wrappers/bullmq-producer.wrapper';

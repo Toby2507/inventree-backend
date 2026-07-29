@@ -1,8 +1,8 @@
-import { OperationalDB } from '@app/database';
+import { isUniqueViolation, type OperationalDB } from '@app/database';
 import { Injectable } from '@nestjs/common';
-import { User } from '../../../domain/user/aggregates/user.aggregate';
+import type { User } from '../../../domain/user/aggregates/user.aggregate';
 import { UserEmailAlreadyExistsException } from '../../../domain/user/exceptions/registration.exceptions';
-import { UserRepository } from '../../../domain/user/ports/repositories/user.repository';
+import type { UserRepository } from '../../../domain/user/ports/repositories/user.repository';
 import { UserMapper } from '../mappers/user/user.mapper';
 
 @Injectable()
@@ -32,7 +32,7 @@ export class UserKyselyRepository implements UserRepository {
       await db.insertInto('users').values(userData).execute();
       await db.insertInto('user_security').values(security).execute();
     } catch (error: any) {
-      if (error.code === '23505') throw new UserEmailAlreadyExistsException(userData.email);
+      if (isUniqueViolation(error)) throw new UserEmailAlreadyExistsException(userData.email);
       throw error;
     }
   }

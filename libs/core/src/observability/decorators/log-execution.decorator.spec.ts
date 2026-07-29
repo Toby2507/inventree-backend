@@ -1,9 +1,9 @@
 import { makeLoggerMock } from '@app/testing/core/observability';
-import { LoggerPort } from '../ports/logger.port';
+import type { Logger } from '../ports/logger.port';
 import { LogExecution } from './log-execution.decorator';
 
 class SomeService {
-  constructor(private readonly logger?: LoggerPort) {}
+  constructor(private readonly logger?: Logger) {}
 
   @LogExecution()
   async doWork(): Promise<unknown> {

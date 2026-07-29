@@ -1,8 +1,8 @@
-import { DatabaseContextPort } from '@app/database';
+import type { DatabaseContext } from '@app/database';
 import { makeDatabaseConnectionMock } from './provider.mocks';
 
 type ContextMock = jest.Mocked<
-  DatabaseContextPort & { operational: any; analytics: any; events: { emit: jest.Mock } }
+  DatabaseContext & { operational: any; analytics: any; events: { emit: jest.Mock } }
 >;
 
 export const makeDatabaseContextMock = (): ContextMock => {

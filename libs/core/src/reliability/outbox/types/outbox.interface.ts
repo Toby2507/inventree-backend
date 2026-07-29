@@ -1,8 +1,7 @@
-import { DomainEvent } from '@app/common/bases';
-import { JsonValue } from '@app/common/types';
-import { SerializedOutboxContext } from '@app/core/observability';
-import { OperationalSchema } from '@app/database';
-import { Insertable, Selectable } from 'kysely';
+import type { SerializedOutboxContext } from '@app/core/observability';
+import type { OperationalSchema } from '@app/database';
+import type { DomainEvent, Instant, JsonValue } from '@app/shared-kernel';
+import type { Insertable, Selectable } from 'kysely';
 
 export type OutboxEventRow = Omit<Selectable<OperationalSchema['outbox_events']>, 'updated_at'>;
 export type NewOutboxEventRow = Insertable<OperationalSchema['outbox_events']>;
@@ -18,22 +17,22 @@ export interface OutboxEvent {
   schemaVersion: number;
   aggregateType?: string | null;
   aggregateId?: string | null;
-  occurredAt: Date;
+  occurredAt: Instant;
   traceId?: string | null;
   correlationId?: string | null;
   causationId?: string | null;
   partitionKey?: string | null;
   payload: JsonValue;
-  lockedAt?: Date | null;
+  lockedAt?: Instant | null;
   lockedBy?: string | null;
-  lockExpiresAt?: Date | null;
+  lockExpiresAt?: Instant | null;
   publishAttempts: number;
-  nextAttemptAt?: Date | null;
-  publishedAt?: Date | null;
+  nextAttemptAt?: Instant | null;
+  publishedAt?: Instant | null;
   publishRef?: string | null;
   lastError?: string | null;
-  lastErrorAt?: Date | null;
-  createdAt: Date;
+  lastErrorAt?: Instant | null;
+  createdAt: Instant;
 }
 
 export interface CreateOutboxEvent {

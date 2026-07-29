@@ -1,0 +1,7 @@
+{
+  "colorize": true,
+  "translateTime": false,
+  "singleLine": true,
+  "messageFormat": "{if message}{message}{end}{if msg}{msg}{end}",
+  "ignore": "pid,hostname,msg,message"
+}

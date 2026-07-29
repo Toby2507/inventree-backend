@@ -1,31 +1,23 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { QueueMapper } from './queue-mapper';
-import { getQueueToken } from '@nestjs/bullmq';
-import { QUEUE_NAMES, QueueName } from '@app/core/infrastructure/queue';
+import { QUEUE_NAMES, type QueueName } from '@app/core/infrastructure/queue';
+import { OBSERVED_QUEUE } from '@app/core/infrastructure/queue/queue.token';
 import { makeQueueMock } from '@app/testing/system';
+import { Test, type TestingModule } from '@nestjs/testing';
+import { QueueMappingService } from './queue-mapper';
 
-describe('QueueMapper', () => {
+describe('QueueMappingService', () => {
   let module: TestingModule;
-  let mapper: QueueMapper;
+  let mapper: QueueMappingService;
 
-  const notificationQueue = makeQueueMock(QUEUE_NAMES.NOTIFICATIONS);
-  const inventoryQueue = makeQueueMock(QUEUE_NAMES.INVENTORY);
-  const analyticsQueue = makeQueueMock(QUEUE_NAMES.ANALYTICS);
-  const billingQueue = makeQueueMock(QUEUE_NAMES.BILLING);
-  const reportQueue = makeQueueMock(QUEUE_NAMES.REPORTS);
+  const emailQueue = makeQueueMock(QUEUE_NAMES.EMAIL);
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
       providers: [
-        QueueMapper,
-        { provide: getQueueToken(QUEUE_NAMES.NOTIFICATIONS), useValue: notificationQueue },
-        { provide: getQueueToken(QUEUE_NAMES.INVENTORY), useValue: inventoryQueue },
-        { provide: getQueueToken(QUEUE_NAMES.ANALYTICS), useValue: analyticsQueue },
-        { provide: getQueueToken(QUEUE_NAMES.BILLING), useValue: billingQueue },
-        { provide: getQueueToken(QUEUE_NAMES.REPORTS), useValue: reportQueue },
+        QueueMappingService,
+        { provide: OBSERVED_QUEUE(QUEUE_NAMES.EMAIL), useValue: emailQueue },
       ],
     }).compile();
-    mapper = module.get(QueueMapper);
+    mapper = module.get(QueueMappingService);
   });
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,15 +26,12 @@ describe('QueueMapper', () => {
     await module.close();
   });
 
-  it.each([
-    [QUEUE_NAMES.NOTIFICATIONS, notificationQueue],
-    [QUEUE_NAMES.INVENTORY, inventoryQueue],
-    [QUEUE_NAMES.ANALYTICS, analyticsQueue],
-    [QUEUE_NAMES.BILLING, billingQueue],
-    [QUEUE_NAMES.REPORTS, reportQueue],
-  ])('should resolve %s queue correctly', (name, expected) => {
-    expect(mapper.get(name)).toBe(expected);
-  });
+  it.each([[QUEUE_NAMES.EMAIL, emailQueue]])(
+    'should resolve %s queue correctly',
+    (name, expected) => {
+      expect(mapper.get(name)).toBe(expected);
+    },
+  );
 
   it('should throw if queue is not registered', () => {
     expect(() => mapper.get('UNKNOWN_QUEUE' as QueueName)).toThrow(/No queue registered/);

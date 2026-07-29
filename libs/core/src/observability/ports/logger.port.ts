@@ -1,19 +1,19 @@
 type LogMeta = Record<string, unknown>;
 
-export interface ContextLoggerPort {
+export interface ContextLogger {
   log(message: string, meta?: Record<string, unknown>): void;
   error(message: string, meta?: Record<string, unknown>): void;
   warn(message: string, meta?: Record<string, unknown>): void;
   debug(message: string, meta?: Record<string, unknown>): void;
 }
 
-export interface LoggerPort {
+export interface Logger {
   log(message: string, meta?: LogMeta | string): void;
   error(message: string, meta?: LogMeta | string): void;
   warn(message: string, meta?: LogMeta | string): void;
   debug(message: string, meta?: LogMeta | string): void;
   verbose(message: string, meta?: LogMeta | string): void;
-  forContext(contextName: string): ContextLoggerPort;
+  forContext(contextName: string): ContextLogger;
 }
 
 export const LOGGER = Symbol('LOGGER');

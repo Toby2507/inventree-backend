@@ -1,16 +1,16 @@
-import { ConfigService } from '@nestjs/config';
+import { CACHE_CONFIG, type CacheConfig } from '@app/config';
 import Redis from 'ioredis';
 
 export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
 
 export default {
   provide: REDIS_CLIENT,
-  inject: [ConfigService],
-  useFactory: async (config: ConfigService) => {
+  inject: [CACHE_CONFIG],
+  useFactory: async (config: CacheConfig) => {
     return new Redis({
-      host: config.get('REDIS_HOST', 'localhost'),
-      port: config.get<number>('REDIS_PORT', 6379),
-      password: config.get('REDIS_PASSWORD', undefined),
+      host: config.host,
+      port: config.port,
+      password: config.password,
     });
   },
 };

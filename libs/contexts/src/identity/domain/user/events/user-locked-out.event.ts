@@ -1,13 +1,13 @@
-import { DomainEvent } from '@app/common/bases';
+import { DomainEvent, Instant } from '@app/shared-kernel';
 
 export interface UserLockedOutPayload {
   userId: string;
-  lockoutUntil: Date;
+  lockoutUntil: Instant;
   reason: string;
   failedAttempts: number;
 }
 
-export class UserLockedOutEvent extends DomainEvent<UserLockedOutPayload> {
+export class UserLockedOutEvent extends DomainEvent {
   static readonly EVENT_TYPE = 'identity.user.locked_out';
 
   readonly eventType = UserLockedOutEvent.EVENT_TYPE;

@@ -1,35 +1,37 @@
-import { IDEMPOTENCY_HEADER } from '@app/common/constants';
-import { mapCodeToStatus } from '@app/common/exceptions';
-import { JsonValue } from '@app/common/types';
-import { REDIS, RedisPort } from '@app/core/infrastructure/redis';
-import { ObfuscationPort } from '@app/core/security';
-import { OBFUSCATION } from '@app/core/security/ports/obfuscation.port';
-import { DATABASE_CONTEXT, DatabaseContextPort } from '@app/database';
+import { REDIS, type Redis } from '@app/core/infrastructure/redis';
+import { CRYPTOGRAPHY, type Cryptography } from '@app/core/security/cryptography';
+import { DATABASE_CONTEXT, type DatabaseContext } from '@app/database';
+import { IDEMPOTENCY_HEADER } from '@app/framework/nest/constants';
+import { mapExceptionCategoryToStatus } from '@app/framework/nest/utils';
+import type { Instant, JsonValue } from '@app/shared-kernel';
 import {
   BadRequestException,
-  CallHandler,
+  type CallHandler,
   ConflictException,
   Inject,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { Observable, catchError, defer, from, of, throwError } from 'rxjs';
+import type { Request } from 'express';
+import { type Observable, catchError, defer, from, of, throwError } from 'rxjs';
 import { map, mergeMap, switchMap } from 'rxjs/operators';
-import { IdempotencyOptions } from '../decorators/idempotency.decorator';
+import type { IdempotencyOptions } from '../decorators/idempotency.decorator';
 import { IdempotencyException } from '../exceptions/idempotency.exception';
-import { IdempotencyRecord } from '../persistence/idempotency.persistence.types';
-import { IDEMPOTENCY_REPOSITORY, IdempotencyRepository } from '../persistence/idempotency.port';
-import { IdempotencyStrategy } from './interface';
+import type { IdempotencyRecord } from '../persistence/idempotency.persistence.types';
+import {
+  IDEMPOTENCY_REPOSITORY,
+  type IdempotencyRepository,
+} from '../persistence/idempotency.port';
+import type { IdempotencyStrategy } from './interface';
 
 @Injectable()
 export class DurableIdempotencyStrategy implements IdempotencyStrategy {
   private readonly TTL_SECONDS = 86_400; // 24 hours
 
   constructor(
-    @Inject(REDIS) private readonly redis: RedisPort,
-    @Inject(OBFUSCATION) private readonly obfuscation: ObfuscationPort,
-    @Inject(DATABASE_CONTEXT) private readonly db: DatabaseContextPort,
+    @Inject(REDIS) private readonly redis: Redis,
+    @Inject(CRYPTOGRAPHY) private readonly crypto: Cryptography,
+    @Inject(DATABASE_CONTEXT) private readonly db: DatabaseContext,
     @Inject(IDEMPOTENCY_REPOSITORY) private readonly repository: IdempotencyRepository,
   ) {}
 
@@ -37,7 +39,7 @@ export class DurableIdempotencyStrategy implements IdempotencyStrategy {
     return defer(async () => {
       const key = request.header(IDEMPOTENCY_HEADER);
       if (!key) throw new BadRequestException('Missing Idempotency-Key');
-      const hash = this.obfuscation.hash(request.body);
+      const hash = this.crypto.sha256(request.body);
       const existingRecord = await this.getRecord(key, options.scope);
       if (existingRecord) {
         const record = this.resolveExistingRecord(existingRecord, hash);
@@ -55,6 +57,7 @@ export class DurableIdempotencyStrategy implements IdempotencyStrategy {
               const errorPayload = {
                 message: err.message,
                 code: err.code,
+                category: err.category,
                 status: err.status ?? err.getStatus?.(),
                 name: err.name,
               };
@@ -131,8 +134,8 @@ export class DurableIdempotencyStrategy implements IdempotencyStrategy {
     let status = 0;
     if (err && typeof err.getStatus === 'function') status = err.getStatus();
     else if (err?.status) status = err.status;
-    if (status === 0 && err.code) {
-      status = mapCodeToStatus(err.code);
+    if (status === 0 && err.category) {
+      status = mapExceptionCategoryToStatus(err.category);
       err.status = status; // Attach mapped status back to error for later use
     }
     if (status >= 400 && status < 500) return status !== 429 && status !== 408;
@@ -154,14 +157,14 @@ export class DurableIdempotencyStrategy implements IdempotencyStrategy {
     return of(record.response as T);
   }
 
-  private getRemainingTtl(expiresAt: Date): number {
-    const remainingMs = expiresAt.getTime() - new Date().getTime();
+  private getRemainingTtl(expiresAt: Instant): number {
+    const remainingMs = expiresAt.toEpochMs() - Date.now();
     return remainingMs > 0 ? Math.ceil(remainingMs / 1000) : 0;
   }
 
   private reconstructError(error: JsonValue): Error {
-    const { message, code } = error as any;
-    const err = new IdempotencyException(message, code);
+    const { message, code, category } = error as any;
+    const err = new IdempotencyException(message, code, category);
     return err;
   }
 }

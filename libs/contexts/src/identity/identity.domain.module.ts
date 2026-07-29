@@ -1,3 +1,4 @@
+import { ActionTokenModule } from '@app/core/security/action-token';
 import { Module } from '@nestjs/common';
 import { RegisterUserCommandHandler } from './application/commands/register-user/register-user.command-handler';
 import { HASHING } from './application/ports/hashing.port';
@@ -6,6 +7,7 @@ import { UserKyselyRepository } from './infrastructure/persistence/repositories/
 import { Argon2HashingAdapter } from './infrastructure/security/hashing/argon2.hashing.adapter';
 
 @Module({
+  imports: [ActionTokenModule],
   providers: [
     RegisterUserCommandHandler,
     { provide: HASHING, useClass: Argon2HashingAdapter },

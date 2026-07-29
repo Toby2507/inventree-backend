@@ -1,8 +1,8 @@
-import { Fn } from '@app/common/types';
+import type { Fn } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { createOtelTestHarness, makeLoggerMock } from '@app/testing/core/observability';
 import { fsJob } from '@app/testing/system';
-import { SpanAttributes } from '../tracing/span-attributes';
+import { SPAN_ATTRIBUTES } from '../tracing/span-attributes';
 import { createObservedProcessor } from './bullmq-consumer.wrapper';
 
 const generatedUUID = faker.string.uuid();
@@ -34,7 +34,7 @@ describe('createObservedProcessor()', () => {
       const jobWithoutObs = fsJob.generate({ data: { ...job.data, _obs: undefined } });
       await observed(jobWithoutObs);
       expect(otel.span.setAttributes).toHaveBeenCalledWith(
-        expect.objectContaining({ [SpanAttributes.CORRELATION_ID]: generatedUUID }),
+        expect.objectContaining({ [SPAN_ATTRIBUTES.CORRELATION_ID]: generatedUUID }),
       );
       expect(mockObservationRun).toHaveBeenCalledWith(
         expect.objectContaining({ correlationId: generatedUUID }),
@@ -46,10 +46,10 @@ describe('createObservedProcessor()', () => {
       await observed(job);
       expect(otel.span.setAttributes).toHaveBeenCalledWith(
         expect.objectContaining({
-          [SpanAttributes.JOB_QUEUE]: 'notifications',
-          [SpanAttributes.JOB_NAME]: job.name,
-          [SpanAttributes.JOB_ID]: job.id,
-          [SpanAttributes.JOB_ATTEMPT]: job.attemptsMade,
+          [SPAN_ATTRIBUTES.JOB_QUEUE]: 'notifications',
+          [SPAN_ATTRIBUTES.JOB_NAME]: job.name,
+          [SPAN_ATTRIBUTES.JOB_ID]: job.id,
+          [SPAN_ATTRIBUTES.JOB_ATTEMPT]: job.attemptsMade,
         }),
       );
     });

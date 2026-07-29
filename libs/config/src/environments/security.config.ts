@@ -5,11 +5,11 @@ import { createConfig } from '../utils/factory.config';
 class SecurityEnvConfig {
   @IsDefined()
   @IsString()
-  OBFUSCATION_KEY!: string;
+  CRYPTOGRAPHY_KEY!: string;
 }
 
 export const securityConfig = createConfig('security', SecurityEnvConfig, (cfg) => ({
-  obfuscationKey: cfg.OBFUSCATION_KEY,
+  cryptographyKey: cfg.CRYPTOGRAPHY_KEY,
 }));
 
 export const SECURITY_CONFIG = securityConfig.KEY;

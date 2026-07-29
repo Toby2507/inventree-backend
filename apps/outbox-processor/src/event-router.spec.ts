@@ -1,17 +1,26 @@
 import { QUEUE_NAMES } from '@app/core/infrastructure/queue';
-import { EventRouter } from './event-router';
+import { EventRoutingService } from './event-router';
+import { EventRouteDefinition } from '@app/core/reliability/outbox';
 
-describe('EventRouter', () => {
-  let router: EventRouter;
+describe('EventRoutingService', () => {
+  let router: EventRoutingService;
+  const routes: EventRouteDefinition[] = [
+    {
+      eventType: 'identity.user.registered',
+      queue: QUEUE_NAMES.EMAIL,
+      jobName: 'send_verification_email',
+      toPayload: (payload) => payload,
+    },
+  ];
 
   beforeEach(() => {
-    router = new EventRouter();
+    router = new EventRoutingService(routes);
   });
 
   it('should resolve known event types to their corresponding routes', () => {
     const routes = router.resolve('identity.user.registered');
     expect(routes).toEqual(
-      expect.arrayContaining([expect.objectContaining({ queue: QUEUE_NAMES.NOTIFICATIONS })]),
+      expect.arrayContaining([expect.objectContaining({ queue: QUEUE_NAMES.EMAIL })]),
     );
   });
 

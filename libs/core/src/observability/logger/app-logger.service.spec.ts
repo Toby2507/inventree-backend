@@ -1,8 +1,8 @@
-import { LogLevel } from '@app/common/types';
-import { ObservabilityConfig } from '@app/config';
+import type { ObservabilityConfig } from '@app/config';
+import { LogLevel } from '@app/shared-kernel';
 import { fsObservationContext, makeMockPino } from '@app/testing/core/observability';
 import { observationStorage } from '../context/observation-context.storage';
-import { AppLoggerService, ContextLogger } from './app-logger.service';
+import { AppLoggerService, ContextLoggerService } from './app-logger.service';
 
 let capturedPinoConfig: Record<string, unknown> = {};
 const mockPinoInstance = makeMockPino();
@@ -15,6 +15,7 @@ jest.mock('pino', () => {
   (pinoFactory as any).stdTimeFunctions = {
     isoTime: jest.fn(() => new Date().toISOString()),
   };
+  (pinoFactory as any).destination = jest.fn(() => 1);
   return pinoFactory;
 });
 
@@ -23,7 +24,6 @@ describe('AppLoggerService', () => {
   const ctx = fsObservationContext.generate();
 
   const obsConfig: ObservabilityConfig = {
-    prettyPrint: false,
     logLevel: LogLevel.INFO,
   };
   const callMixin = (): Record<string, unknown> => {
@@ -58,27 +58,6 @@ describe('AppLoggerService', () => {
           mixin: expect.any(Function),
         }),
       );
-    });
-
-    it('should set a prettyPrint transport when config.prettyPrint is true', () => {
-      const config = { ...obsConfig, prettyPrint: true };
-      new AppLoggerService(config);
-      expect(capturedPinoConfig['transport']).toEqual(
-        expect.objectContaining({
-          target: 'pino-pretty',
-          options: expect.objectContaining({
-            colorize: true,
-            translateTime: false,
-            singleLine: true,
-          }),
-        }),
-      );
-    });
-
-    it('should include a formatters.level function that returns { level: label }', () => {
-      const formatters = capturedPinoConfig['formatters'] as any;
-      expect(typeof formatters?.level).toBe('function');
-      expect(formatters.level('warn')).toEqual({ level: 'warn' });
     });
   });
 
@@ -166,7 +145,7 @@ describe('AppLoggerService', () => {
 
     it('should return a ContextLogger instance', () => {
       const result = service.forContext('SomeHandler');
-      expect(result).toBeInstanceOf(ContextLogger);
+      expect(result).toBeInstanceOf(ContextLoggerService);
     });
 
     it('should return a different ContextLogger instance for each call', () => {
@@ -177,12 +156,12 @@ describe('AppLoggerService', () => {
   });
 });
 
-describe('ContextLogger', () => {
-  let contextLogger: ContextLogger;
+describe('ContextLoggerService', () => {
+  let contextLogger: ContextLoggerService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    contextLogger = new ContextLogger(mockPinoInstance as any);
+    contextLogger = new ContextLoggerService(mockPinoInstance as any);
   });
 
   describe('method routing', () => {

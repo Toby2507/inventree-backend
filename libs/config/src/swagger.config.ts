@@ -1,6 +1,6 @@
-import { INestApplication } from '@nestjs/common';
-import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
-import { APP_CONFIG, AppConfig } from './environments';
+import { type INestApplication } from '@nestjs/common';
+import { DocumentBuilder, type OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
+import { APP_CONFIG, type AppConfig } from './environments';
 
 const DOCUMENTATION_URL_PATH = 'api/docs';
 

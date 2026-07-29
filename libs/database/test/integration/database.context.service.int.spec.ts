@@ -1,12 +1,13 @@
 import { ObservabilityModule } from '@app/core/observability';
-import { OUTBOX_SERVICE } from '@app/core/reliability/outbox';
+import { OUTBOX_PUBLISHER } from '@app/core/reliability/outbox';
 import { DATABASE_CONTEXT, DatabaseModule, storeContextStorage } from '@app/database';
 import { DatabaseContextService } from '@app/database/services/database.context.service';
+import { Instant } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { createOtelTestHarness } from '@app/testing/core/observability';
 import { fsStoreContext } from '@app/testing/identity';
 import { UnauthorizedException } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { sql } from 'kysely';
 
 const storeContext = fsStoreContext.generate();
@@ -174,12 +175,12 @@ describe('DatabaseContextService (integration)', () => {
       eventType: 'TestEvent',
       aggregateType: 'TestAggregate',
       aggregateId: 'test-id',
-      occurredAt: new Date(),
+      occurredAt: Instant.fromEpochMs(Date.now()),
       payload: { foo: 'bar' },
     });
 
     beforeEach(() => {
-      const outbox = module.get(OUTBOX_SERVICE);
+      const outbox = module.get(OUTBOX_PUBLISHER);
       publishAllSpy = jest.spyOn(outbox, 'publishAll');
       publishAllSpy.mockResolvedValue(undefined);
     });

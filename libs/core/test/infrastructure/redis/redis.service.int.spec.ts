@@ -1,9 +1,9 @@
-import { Fn } from '@app/common/types';
 import { REDIS_CLIENT } from '@app/core/infrastructure/redis/redis.provider';
 import { RedisService } from '@app/core/infrastructure/redis/redis.service';
+import type { Fn } from '@app/shared-kernel';
 import { createTestRedis } from '@app/testing/core/infrastructure';
-import { Test, TestingModule } from '@nestjs/testing';
-import { Redis } from 'ioredis';
+import { Test, type TestingModule } from '@nestjs/testing';
+import type { Redis } from 'ioredis';
 
 describe('RedisService (integration)', () => {
   let module: TestingModule;

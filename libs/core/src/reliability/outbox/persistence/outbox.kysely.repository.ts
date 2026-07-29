@@ -1,8 +1,9 @@
-import { OperationalDB } from '@app/database';
+import type { OperationalDB } from '@app/database';
+import type { Instant } from '@app/shared-kernel';
 import { Injectable } from '@nestjs/common';
 import { sql } from 'kysely';
-import { OutboxRepository } from '../ports/repository.port';
-import { CreateOutboxEvent, OutboxEvent, OutboxEventRow } from '../types/outbox.interface';
+import type { OutboxRepository } from '../ports/repository.port';
+import type { CreateOutboxEvent, OutboxEvent } from '../types/outbox.interface';
 import { OutboxEventMapper } from './outbox.mapper';
 
 @Injectable()
@@ -20,23 +21,28 @@ export class OutboxKyselyRepository implements OutboxRepository {
     lockedBy: string,
     lockDurationMs: number,
   ): Promise<OutboxEvent[]> {
-    const result = await sql<OutboxEventRow>`
-      UPDATE operational.outbox_events
-      SET status = 'locked',
-          locked_at = now(),
-          locked_by = ${lockedBy},
-          lock_expires_at = now() + (${lockDurationMs}::int * interval '1 millisecond')
-      WHERE id IN (
-        SELECT id
-        FROM operational.outbox_events
-        WHERE status = 'pending' AND next_attempt_at <= now()
-        ORDER BY occurred_at ASC
-        LIMIT ${limit}
-        FOR UPDATE SKIP LOCKED
+    const rows = await db
+      .updateTable('outbox_events')
+      .set({
+        status: 'locked',
+        locked_at: sql`now()`,
+        locked_by: lockedBy,
+        lock_expires_at: sql`now() + (${lockDurationMs}::int * interval '1 millisecond')`,
+      })
+      .where('id', 'in', (eb) =>
+        eb
+          .selectFrom('outbox_events')
+          .select('id')
+          .where('status', '=', 'pending')
+          .where('next_attempt_at', '<=', sql<Date>`now()`)
+          .orderBy('occurred_at', 'asc')
+          .limit(limit)
+          .forUpdate()
+          .skipLocked(),
       )
-      RETURNING *
-    `.execute(db);
-    return this.mapper.toDomainBulk(result.rows);
+      .returningAll()
+      .execute();
+    return this.mapper.toDomainBulk(rows);
   }
 
   async markPublished(db: OperationalDB, ids: string[], publishedBy: string): Promise<void> {
@@ -59,7 +65,7 @@ export class OutboxKyselyRepository implements OutboxRepository {
     db: OperationalDB,
     id: string,
     error: string,
-    nextAttemptAt: Date,
+    nextAttemptAt: Instant,
     deadLetter: boolean,
   ): Promise<void> {
     await db
@@ -69,7 +75,7 @@ export class OutboxKyselyRepository implements OutboxRepository {
         publish_attempts: sql`publish_attempts + 1`,
         last_error: error,
         last_error_at: sql`now()`,
-        next_attempt_at: deadLetter ? null : nextAttemptAt,
+        next_attempt_at: deadLetter ? null : nextAttemptAt.toDate(),
         locked_at: null,
         locked_by: null,
         lock_expires_at: null,
@@ -78,8 +84,8 @@ export class OutboxKyselyRepository implements OutboxRepository {
       .execute();
   }
 
-  async releaseExpiredLocks(db: OperationalDB): Promise<void> {
-    await db
+  async releaseExpiredLocks(db: OperationalDB): Promise<number> {
+    const [{ numUpdatedRows }] = await db
       .updateTable('outbox_events')
       .set({
         status: 'pending',
@@ -88,7 +94,8 @@ export class OutboxKyselyRepository implements OutboxRepository {
         lock_expires_at: null,
       })
       .where('status', '=', 'locked')
-      .where('lock_expires_at', '<', new Date())
+      .where('lock_expires_at', '<', sql<Date>`now()`)
       .execute();
+    return Number(numUpdatedRows ?? 0);
   }
 }

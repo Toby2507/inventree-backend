@@ -1,6 +1,6 @@
 import { createOtelTestHarness, fsObservationContext } from '@app/testing/core/observability';
 import { observationStorage } from '../context/observation-context.storage';
-import { MetricNames } from './metric-names';
+import { METRIC_NAMES } from './metric-names';
 import { MetricsService, PRE_ALLOCATED_METRICS } from './metrics.service';
 
 describe('MetricsService', () => {
@@ -29,7 +29,7 @@ describe('MetricsService', () => {
     });
 
     it('should not re-initialize gauges already initialized via .gauge()', () => {
-      service.gauge(MetricNames.JOB_TOTAL, () => 1);
+      service.gauge(METRIC_NAMES.JOB_TOTAL, () => 1);
       jest.clearAllMocks();
       service.onApplicationBootstrap();
       expect(otel.meter.createObservableGauge).toHaveBeenCalledTimes(0);
@@ -38,7 +38,7 @@ describe('MetricsService', () => {
 
   describe('MetricsService.increment()', () => {
     it('should increment counter by provided amount and attach attributes', () => {
-      service.increment(MetricNames.COMMAND_TOTAL, { command: 'RegisterUser' }, 5);
+      service.increment(METRIC_NAMES.COMMAND_TOTAL, { command: 'RegisterUser' }, 5);
       expect(otel.instruments.counter.add).toHaveBeenCalledWith(
         5,
         expect.objectContaining({ command: 'RegisterUser' }),
@@ -46,19 +46,19 @@ describe('MetricsService', () => {
     });
 
     it('should increment counter by 1 and attach an empty object when no amount and attributes are provided', () => {
-      service.increment(MetricNames.COMMAND_TOTAL);
+      service.increment(METRIC_NAMES.COMMAND_TOTAL);
       expect(otel.instruments.counter.add).toHaveBeenCalledWith(1, expect.any(Object));
     });
 
     it('should not increment counter if amount is less than 1', () => {
-      service.increment(MetricNames.COMMAND_TOTAL, {}, 0);
-      service.increment(MetricNames.COMMAND_TOTAL, {}, -5);
+      service.increment(METRIC_NAMES.COMMAND_TOTAL, {}, 0);
+      service.increment(METRIC_NAMES.COMMAND_TOTAL, {}, -5);
       expect(otel.instruments.counter.add).not.toHaveBeenCalled();
     });
 
     it('enriches attributes with actor.role from ALS', async () => {
       await observationStorage.run(ctx, async () => {
-        service.increment(MetricNames.COMMAND_TOTAL, { context: 'MyContext' });
+        service.increment(METRIC_NAMES.COMMAND_TOTAL, { context: 'MyContext' });
       });
       expect(otel.instruments.counter.add).toHaveBeenCalledWith(
         1,
@@ -69,7 +69,7 @@ describe('MetricsService', () => {
 
   describe('MetricsService.record()', () => {
     it('should record the correct histogram value', () => {
-      service.record(MetricNames.COMMAND_DURATION, 123, { command: 'Foo' });
+      service.record(METRIC_NAMES.COMMAND_DURATION, 123, { command: 'Foo' });
       expect(otel.instruments.histogram.record).toHaveBeenCalledWith(
         123,
         expect.objectContaining({ command: 'Foo' }),
@@ -77,18 +77,18 @@ describe('MetricsService', () => {
     });
 
     it('should record with empty attributes when none are provided', () => {
-      service.record(MetricNames.COMMAND_DURATION, 123);
+      service.record(METRIC_NAMES.COMMAND_DURATION, 123);
       expect(otel.instruments.histogram.record).toHaveBeenCalledWith(123, expect.any(Object));
     });
 
     it("should not record histogram value if it's negative", () => {
-      service.record(MetricNames.COMMAND_DURATION, -1);
+      service.record(METRIC_NAMES.COMMAND_DURATION, -1);
       expect(otel.instruments.histogram.record).not.toHaveBeenCalled();
     });
 
     it('should enrich attributes with actor.role from ALS', async () => {
       await observationStorage.run(ctx, async () => {
-        service.record(MetricNames.COMMAND_DURATION, 123, { context: 'MyContext' });
+        service.record(METRIC_NAMES.COMMAND_DURATION, 123, { context: 'MyContext' });
       });
       expect(otel.instruments.histogram.record).toHaveBeenCalledWith(
         123,
@@ -99,7 +99,7 @@ describe('MetricsService', () => {
 
   describe('MetricsService.adjust()', () => {
     it('should update the upDownCounter with the correct value', () => {
-      service.adjust(MetricNames.HTTP_ACTIVE, 1, { route: '/api/v1/auth' });
+      service.adjust(METRIC_NAMES.HTTP_ACTIVE, 1, { route: '/api/v1/auth' });
       expect(otel.instruments.upDown.add).toHaveBeenCalledWith(
         1,
         expect.objectContaining({ route: '/api/v1/auth' }),
@@ -107,18 +107,18 @@ describe('MetricsService', () => {
     });
 
     it('should update the upDownCounter with empty attributes when none are provided', () => {
-      service.adjust(MetricNames.HTTP_ACTIVE, -1);
+      service.adjust(METRIC_NAMES.HTTP_ACTIVE, -1);
       expect(otel.instruments.upDown.add).toHaveBeenCalledWith(-1, expect.any(Object));
     });
 
     it('should not update upDownCounter if delta is zero', () => {
-      service.adjust(MetricNames.HTTP_ACTIVE, 0);
+      service.adjust(METRIC_NAMES.HTTP_ACTIVE, 0);
       expect(otel.instruments.upDown.add).not.toHaveBeenCalled();
     });
 
     it('should enrich attributes with actor.role from ALS', async () => {
       await observationStorage.run(ctx, async () => {
-        service.adjust(MetricNames.HTTP_ACTIVE, 1, { route: '/api/v1/auth' });
+        service.adjust(METRIC_NAMES.HTTP_ACTIVE, 1, { route: '/api/v1/auth' });
       });
       expect(otel.instruments.upDown.add).toHaveBeenCalledWith(
         1,
@@ -130,8 +130,8 @@ describe('MetricsService', () => {
   describe('MetricsService.timeAsync()', () => {
     it('should return callback result and record duration and increment total on success', async () => {
       const result = await service.timeAsync(
-        MetricNames.COMMAND_DURATION,
-        MetricNames.COMMAND_TOTAL,
+        METRIC_NAMES.COMMAND_DURATION,
+        METRIC_NAMES.COMMAND_TOTAL,
         { command: 'RegisterUser' },
         async () => 'result',
       );
@@ -152,8 +152,8 @@ describe('MetricsService', () => {
       const error = new Error('UserEmailAlreadyExistsException');
       await expect(
         service.timeAsync(
-          MetricNames.COMMAND_DURATION,
-          MetricNames.COMMAND_TOTAL,
+          METRIC_NAMES.COMMAND_DURATION,
+          METRIC_NAMES.COMMAND_TOTAL,
           { command: 'RegisterUser' },
           async () => {
             throw error;

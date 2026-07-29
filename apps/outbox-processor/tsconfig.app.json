@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "declaration": false,
-    "root": "src",
+    "rootDir": "../../",
     "outDir": "../../dist/apps/outbox-processor"
   },
   "include": ["src/**/*"],

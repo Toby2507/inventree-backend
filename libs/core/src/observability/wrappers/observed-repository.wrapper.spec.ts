@@ -5,7 +5,7 @@ import {
 } from '@app/testing/core/observability';
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api';
 import { observationStorage } from '../context/observation-context.storage';
-import { SpanAttributes } from '../tracing/span-attributes';
+import { SPAN_ATTRIBUTES } from '../tracing/span-attributes';
 import { ObservedRepositoryWrapper } from './observed-repository.wrapper';
 
 interface FakeRepo {
@@ -45,8 +45,8 @@ describe('ObservedRepositoryWrapper', () => {
       expect.objectContaining({
         kind: SpanKind.INTERNAL,
         attributes: expect.objectContaining({
-          [SpanAttributes.REPOSITORY_ENTITY]: 'user',
-          [SpanAttributes.REPOSITORY_OPERATION]: 'findById',
+          [SPAN_ATTRIBUTES.REPOSITORY_ENTITY]: 'user',
+          [SPAN_ATTRIBUTES.REPOSITORY_OPERATION]: 'findById',
         }),
       }),
       expect.any(Function),
@@ -61,7 +61,7 @@ describe('ObservedRepositoryWrapper', () => {
       expect.any(String),
       expect.objectContaining({
         attributes: expect.objectContaining({
-          [SpanAttributes.CORRELATION_ID]: ctx.correlationId,
+          [SPAN_ATTRIBUTES.CORRELATION_ID]: ctx.correlationId,
         }),
       }),
       expect.any(Function),
@@ -74,7 +74,7 @@ describe('ObservedRepositoryWrapper', () => {
       expect.any(String),
       expect.not.objectContaining({
         attributes: expect.objectContaining({
-          [SpanAttributes.CORRELATION_ID]: expect.anything(),
+          [SPAN_ATTRIBUTES.CORRELATION_ID]: expect.anything(),
         }),
       }),
       expect.any(Function),

@@ -7,15 +7,15 @@ import {
   trace,
 } from '@opentelemetry/api';
 import { v4 as uuidV4 } from 'uuid';
-import { SpanAttributes } from '../tracing/span-attributes';
+import { SPAN_ATTRIBUTES, type SpanAttribute } from '../tracing/span-attributes';
 import { INVENTREE_TRACER } from '../tracing/tracer.provider';
-import { ObservationContext, SerializedOutboxContext } from './observation-context';
+import type { ObservationContext, SerializedOutboxContext } from './observation-context';
 import { observationStorage } from './observation-context.storage';
 
 export interface RestoredContextOptions {
   spanName: string;
   spanKind?: SpanKind;
-  spanAttributes?: Record<string, string | number>;
+  spanAttributes?: Partial<Record<SpanAttribute, string | number>>;
 }
 
 export async function withRestoredObservationContext<T>(
@@ -42,10 +42,10 @@ export async function withRestoredObservationContext<T>(
         {
           kind: options.spanKind ?? SpanKind.CONSUMER,
           attributes: {
-            [SpanAttributes.CORRELATION_ID]: obs.correlationId,
-            ...(obs.causationId ? { [SpanAttributes.CAUSATION_ID]: obs.causationId } : {}),
-            ...(obs.actorUserId ? { [SpanAttributes.ACTOR_USER_ID]: obs.actorUserId } : {}),
-            ...(obs.actorStoreId ? { [SpanAttributes.ACTOR_STORE_ID]: obs.actorStoreId } : {}),
+            [SPAN_ATTRIBUTES.CORRELATION_ID]: obs.correlationId,
+            ...(obs.causationId ? { [SPAN_ATTRIBUTES.CAUSATION_ID]: obs.causationId } : {}),
+            ...(obs.actorUserId ? { [SPAN_ATTRIBUTES.ACTOR_USER_ID]: obs.actorUserId } : {}),
+            ...(obs.actorStoreId ? { [SPAN_ATTRIBUTES.ACTOR_STORE_ID]: obs.actorStoreId } : {}),
             ...options.spanAttributes,
           },
         },

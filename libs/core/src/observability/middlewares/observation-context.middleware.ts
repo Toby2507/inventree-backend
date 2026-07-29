@@ -1,11 +1,15 @@
-import { CAUSATION_HEADER, CORRELATION_HEADER, IDEMPOTENCY_HEADER } from '@app/common/constants';
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import {
+  CAUSATION_HEADER,
+  CORRELATION_HEADER,
+  IDEMPOTENCY_HEADER,
+} from '@app/framework/nest/constants';
+import { Injectable, type NestMiddleware } from '@nestjs/common';
 import { context as otelCtx, propagation, ROOT_CONTEXT, trace } from '@opentelemetry/api';
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { v4 as uuidV4 } from 'uuid';
-import { ObservationContext } from '../context/observation-context';
+import type { ObservationContext } from '../context/observation-context';
 import { observationStorage } from '../context/observation-context.storage';
-import { SpanAttributes } from '../tracing/span-attributes';
+import { SPAN_ATTRIBUTES } from '../tracing/span-attributes';
 
 @Injectable()
 export class ObservationContextMiddleware implements NestMiddleware {
@@ -23,8 +27,8 @@ export class ObservationContextMiddleware implements NestMiddleware {
 
     const activeSpan = trace.getSpan(otelCtx.active());
     activeSpan?.setAttributes({
-      [SpanAttributes.CORRELATION_ID]: correlationId,
-      ...(causationId ? { [SpanAttributes.CAUSATION_ID]: causationId } : {}),
+      [SPAN_ATTRIBUTES.CORRELATION_ID]: correlationId,
+      ...(causationId ? { [SPAN_ATTRIBUTES.CAUSATION_ID]: causationId } : {}),
     });
 
     res.setHeader(CORRELATION_HEADER, correlationId);

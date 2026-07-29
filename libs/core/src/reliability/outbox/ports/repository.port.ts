@@ -1,5 +1,6 @@
-import { OperationalDB } from '@app/database';
-import { CreateOutboxEvent, OutboxEvent } from '../types/outbox.interface';
+import type { OperationalDB } from '@app/database';
+import type { Instant } from '@app/shared-kernel';
+import type { CreateOutboxEvent, OutboxEvent } from '../types/outbox.interface';
 
 export interface OutboxRepository {
   insert(db: OperationalDB, record: CreateOutboxEvent): Promise<void>;
@@ -7,17 +8,17 @@ export interface OutboxRepository {
     db: OperationalDB,
     limit: number,
     lockedBy: string,
-    lockDuratonMs: number,
+    lockDurationMs: number,
   ): Promise<OutboxEvent[]>;
   markPublished(db: OperationalDB, ids: string[], publishedBy: string): Promise<void>;
   markFailed(
     db: OperationalDB,
     id: string,
     error: string,
-    nextAttemptAt: Date,
+    nextAttemptAt: Instant,
     deadLetter: boolean,
   ): Promise<void>;
-  releaseExpiredLocks(db: OperationalDB): Promise<void>;
+  releaseExpiredLocks(db: OperationalDB): Promise<number>;
 }
 
 export const OUTBOX_REPOSITORY = Symbol('OUTBOX_REPOSITORY');

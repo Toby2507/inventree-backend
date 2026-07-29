@@ -1,44 +1,40 @@
-import { OBSERVABILITY_CONFIG, ObservabilityConfig } from '@app/config';
-import { Inject, Injectable, LoggerService } from '@nestjs/common';
-import pino, { Logger } from 'pino';
+import { OBSERVABILITY_CONFIG, type ObservabilityConfig } from '@app/config';
+import { Inject, Injectable, type LoggerService } from '@nestjs/common';
+import pino, { type Logger as PinoLogger } from 'pino';
 import { getOptionalObservationContext } from '../context/observation-context.storage';
-import { ContextLoggerPort, LoggerPort } from '../ports/logger.port';
+import type { ContextLogger, Logger } from '../ports/logger.port';
 
 type LogMeta = Record<string, unknown>;
 
 @Injectable()
-export class AppLoggerService implements LoggerPort, LoggerService {
-  private readonly pino: Logger;
+export class AppLoggerService implements Logger, LoggerService {
+  private readonly pino: PinoLogger;
 
   constructor(@Inject(OBSERVABILITY_CONFIG) config: ObservabilityConfig) {
-    this.pino = pino({
-      level: config.logLevel,
-      base: undefined, // strip pid/hostname — use OTEL resource attributes instead
-      timestamp: pino.stdTimeFunctions.isoTime,
-      formatters: {
-        level: (label) => ({ level: label }),
-      },
-      redact: {
-        paths: ['*.password', '*.passwordHash', '*.mfaSecret', '*.token', '*.secret'],
-        censor: '[REDACTED]',
-      },
-      ...(config.prettyPrint && {
-        transport: {
-          target: 'pino-pretty',
-          options: { colorize: true, translateTime: false, singleLine: true },
+    this.pino = pino(
+      {
+        level: config.logLevel,
+        base: undefined, // strip pid/hostname — use OTEL resource attributes instead
+        timestamp: pino.stdTimeFunctions.isoTime,
+        messageKey: 'message',
+        errorKey: 'error',
+        redact: {
+          paths: ['*.password', '*.passwordHash', '*.mfaSecret', '*.token', '*.secret'],
+          censor: '[REDACTED]',
         },
-      }),
-      mixin(): Record<string, unknown> {
-        const ctx = getOptionalObservationContext();
-        if (!ctx) return {};
-        return {
-          correlationId: ctx.correlationId,
-          ...(ctx.causationId ? { causationId: ctx.causationId } : {}),
-          ...(ctx.actor?.userId ? { actorUserId: ctx.actor.userId } : {}),
-          ...(ctx.actor?.storeId ? { actorStoreId: ctx.actor.storeId } : {}),
-        };
+        mixin(): Record<string, unknown> {
+          const ctx = getOptionalObservationContext();
+          if (!ctx) return {};
+          return {
+            correlationId: ctx.correlationId,
+            ...(ctx.causationId ? { causationId: ctx.causationId } : {}),
+            ...(ctx.actor?.userId ? { actorUserId: ctx.actor.userId } : {}),
+            ...(ctx.actor?.storeId ? { actorStoreId: ctx.actor.storeId } : {}),
+          };
+        },
       },
-    });
+      pino.destination(1),
+    );
   }
 
   log(message: string, meta?: LogMeta | string): void {
@@ -61,9 +57,9 @@ export class AppLoggerService implements LoggerPort, LoggerService {
     this.pino.trace(this.normalizeMeta(meta), message);
   }
 
-  forContext(contextName: string): ContextLoggerPort {
+  forContext(contextName: string): ContextLogger {
     const child = this.pino.child({ context: contextName });
-    return new ContextLogger(child);
+    return new ContextLoggerService(child);
   }
 
   private normalizeMeta(meta?: LogMeta | string): LogMeta {
@@ -73,8 +69,8 @@ export class AppLoggerService implements LoggerPort, LoggerService {
   }
 }
 
-export class ContextLogger implements ContextLoggerPort {
-  constructor(private readonly pino: Logger) {}
+export class ContextLoggerService implements ContextLogger {
+  constructor(private readonly pino: PinoLogger) {}
 
   log(message: string, meta: Record<string, unknown> = {}): void {
     this.pino.info(meta, message);

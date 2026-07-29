@@ -109,6 +109,24 @@
         "tsConfigPath": "libs/database/tsconfig.lib.json"
       }
     },
+    "framework": {
+      "type": "library",
+      "root": "libs/framework",
+      "entryFile": "index",
+      "sourceRoot": "libs/framework/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/framework/tsconfig.lib.json"
+      }
+    },
+    "shared-kernel": {
+      "type": "library",
+      "root": "libs/shared-kernel",
+      "entryFile": "index",
+      "sourceRoot": "libs/shared-kernel/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/shared-kernel/tsconfig.lib.json"
+      }
+    },
     "testing": {
       "type": "library",
       "root": "libs/testing",

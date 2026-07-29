@@ -1,13 +1,13 @@
-import { JsonValue } from '@app/common/types';
-import { OperationalDB } from '@app/database';
+import type { OperationalDB } from '@app/database';
+import { Duration, Instant, type JsonValue } from '@app/shared-kernel';
 import { Injectable } from '@nestjs/common';
 import { sql } from 'kysely';
-import {
+import type {
   CreateIdempotency,
   IdempotencyRecord,
   IdempotencyRow,
 } from './idempotency.persistence.types';
-import { IdempotencyRepository } from './idempotency.port';
+import type { IdempotencyRepository } from './idempotency.port';
 
 @Injectable()
 export class IdempotencyKyselyRepository implements IdempotencyRepository {
@@ -37,7 +37,7 @@ export class IdempotencyKyselyRepository implements IdempotencyRepository {
       .selectAll()
       .where('idempotency_key', '=', key)
       .where('scope', '=', scope)
-      .where('expires_at', '>', new Date())
+      .where('expires_at', '>', sql<Date>`now()`)
       .executeTakeFirst();
     return raw ? this.toRecord(raw) : null;
   }
@@ -58,7 +58,7 @@ export class IdempotencyKyselyRepository implements IdempotencyRepository {
       .where('idempotency_key', '=', key)
       .where('scope', '=', scope)
       .where('status', '=', 'in_progress')
-      .where('expires_at', '>', new Date())
+      .where('expires_at', '>', sql<Date>`now()`)
       .returningAll()
       .execute();
     return raw.length > 0 ? this.toRecord(raw[0]) : null;
@@ -80,7 +80,7 @@ export class IdempotencyKyselyRepository implements IdempotencyRepository {
       .where('idempotency_key', '=', key)
       .where('scope', '=', scope)
       .where('status', '=', 'in_progress')
-      .where('expires_at', '>', new Date())
+      .where('expires_at', '>', sql<Date>`now()`)
       .returningAll()
       .execute();
     return raw.length > 0 ? this.toRecord(raw[0]) : null;
@@ -95,16 +95,19 @@ export class IdempotencyKyselyRepository implements IdempotencyRepository {
   }
 
   async deleteExpired(db: OperationalDB): Promise<void> {
-    await db.deleteFrom('idempotency').where('expires_at', '<', new Date()).execute();
+    await db
+      .deleteFrom('idempotency')
+      .where('expires_at', '<', sql<Date>`now()`)
+      .execute();
   }
 
   async sweepStaleInProgress(db: OperationalDB, thresholdMin: number = 5): Promise<void> {
-    const threshold = new Date(Date.now() - thresholdMin * 60 * 1000);
+    const threshold = Instant.fromEpochMs(Date.now()).minus(Duration.minutes(thresholdMin));
     await db
       .updateTable('idempotency')
       .set({ status: 'failed', error: { message: 'Request timed out' }, resolved_at: sql`now()` })
       .where('status', '=', 'in_progress')
-      .where('created_at', '<', threshold)
+      .where('created_at', '<', threshold.toDate())
       .execute();
   }
 
@@ -116,9 +119,9 @@ export class IdempotencyKyselyRepository implements IdempotencyRepository {
       status: raw.status,
       response: raw.response,
       error: raw.error,
-      createdAt: raw.created_at,
-      expiresAt: raw.expires_at,
-      resolvedAt: raw.resolved_at,
+      createdAt: Instant.fromDate(raw.created_at),
+      expiresAt: Instant.fromDate(raw.expires_at),
+      resolvedAt: raw.resolved_at ? Instant.fromDate(raw.resolved_at) : null,
     };
   }
 }

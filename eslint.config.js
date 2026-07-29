@@ -20,7 +20,7 @@ module.exports = defineConfig([
       parser: tsParser,
       sourceType: 'module',
       parserOptions: {
-        project: 'tsconfig.json',
+        project: 'tsconfig.eslint.json',
         tsconfigRootDir: __dirname,
       },
       globals: {

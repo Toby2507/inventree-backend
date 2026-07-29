@@ -1,14 +1,19 @@
-import { DATABASE_CONFIG, DatabaseConfig } from '@app/config';
-import { LOGGER, LoggerPort } from '@app/core/observability';
-import { Inject, Injectable, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
+import { DATABASE_CONFIG, type DatabaseConfig } from '@app/config';
+import { LOGGER, type Logger } from '@app/core/observability';
+import {
+  Inject,
+  Injectable,
+  type OnApplicationBootstrap,
+  type OnApplicationShutdown,
+} from '@nestjs/common';
 import { Kysely, PostgresDialect } from 'kysely';
-import { Client, Pool, PoolConfig } from 'pg';
-import { DatabaseProviderPort } from './ports/provider.port';
-import { AnalyticsDB, OperationalDB } from './types/db.schema.types';
+import { Client, Pool, type PoolConfig } from 'pg';
+import type { DatabaseClient, DatabaseProvider } from './ports/provider.port';
+import type { AnalyticsDB, OperationalDB } from './types/db.schema.types';
 
 @Injectable()
-export class DatabaseProvider
-  implements OnApplicationBootstrap, OnApplicationShutdown, DatabaseProviderPort
+export class DatabaseProviderService
+  implements OnApplicationBootstrap, OnApplicationShutdown, DatabaseProvider
 {
   private readonly logger;
   private _operationalPrimary!: OperationalDB;
@@ -20,15 +25,14 @@ export class DatabaseProvider
   private _operationalRead!: OperationalDB;
   private _operationalWrite!: OperationalDB;
 
-  private _notificationClient!: Client;
-
   constructor(
     @Inject(DATABASE_CONFIG) private readonly config: DatabaseConfig,
-    @Inject(LOGGER) logger: LoggerPort,
+    @Inject(LOGGER) logger: Logger,
   ) {
-    this.logger = logger.forContext(DatabaseProvider.name);
+    this.logger = logger.forContext(DatabaseProviderService.name);
   }
 
+  // ==== LIFECYCLE HOOKS =====================
   async onApplicationBootstrap(): Promise<void> {
     this._operationalPrimary = this.createDbInstance({
       host: this.config.host,
@@ -59,33 +63,22 @@ export class DatabaseProvider
       idleTimeoutMillis: 60_000,
       connectionTimeoutMillis: 10_000,
     });
-    /**
-     * Notification client for LISTEN/NOTIFY events.
-     */
-    this._notificationClient = new Client({
-      user: this.config.user,
-      host: this.config.host,
-      database: this.config.name,
-      password: this.config.password,
-      port: this.config.port,
-    });
 
     await this.verifyConnections();
     this._analyticsRead = this._analyticsPrimary.withSchema('analytics');
     this._analyticsWrite = this._analyticsPrimary.withSchema('analytics');
     this._operationalRead = this._operationalReplica.withSchema('operational');
     this._operationalWrite = this._operationalPrimary.withSchema('operational');
-    await this.connectNotificationClient();
   }
 
   async onApplicationShutdown(): Promise<void> {
     await Promise.all([
       this.destroyDbInstance(this._operationalPrimary, 'operational'),
       this.destroyDbInstance(this._analyticsPrimary, 'analytics'),
-      this.disconnectNotificationClient(),
     ]);
   }
 
+  // ==== INSTANCE MANAGEMENT =====================
   private createDbInstance<T>(config: PoolConfig): Kysely<T> {
     return new Kysely<T>({
       dialect: new PostgresDialect({
@@ -116,32 +109,35 @@ export class DatabaseProvider
     }
   }
 
-  private async connectNotificationClient(): Promise<void> {
-    try {
-      await this._notificationClient.connect();
-      this.logger.log('Notification client connected');
-      this._notificationClient.on('error', (err) => {
-        this.logger.error('Notification client error', { error: err.message });
-      });
-    } catch (error) {
-      this.logger.error('Failed to connect notification client', {
-        error: error instanceof Error ? error.stack : String(error),
-      });
-      throw error;
-    }
+  // ==== NOTIFICATION CONNECTION FACTORY =====================
+  public async createNotificationClient(): Promise<DatabaseClient> {
+    const client = new Client({
+      user: this.config.user,
+      host: this.config.host,
+      database: this.config.name,
+      password: this.config.password,
+      port: this.config.port,
+    });
+    await client.connect();
+    client.on('error', (err) => {
+      this.logger.error('Notification client error', { error: err.message });
+    });
+    this.logger.log('Notification client connected');
+    return client;
   }
 
-  private async disconnectNotificationClient(): Promise<void> {
+  public async destroyNotificationClient(client: DatabaseClient): Promise<void> {
     try {
-      await this._notificationClient.end();
+      await client.end();
       this.logger.log('Notification client disconnected');
     } catch (error) {
-      this.logger.error('Error disconnecting notification client', {
+      this.logger.error('Failed to disconnect notification client', {
         error: error instanceof Error ? error.stack : String(error),
       });
     }
   }
 
+  // ==== GETTERS =====================
   get forBootstrapMigration(): OperationalDB {
     if (!this._operationalPrimary) throw new Error('Operational database not initialised');
     return this._operationalPrimary;
@@ -175,15 +171,5 @@ export class DatabaseProvider
   get operationalWrite(): OperationalDB {
     if (!this._operationalWrite) throw new Error('Operational database not initialised');
     return this._operationalWrite;
-  }
-
-  /**
-   * The persistent pg.Client used for LISTEN/NOTIFY.
-   * Call client.query('LISTEN channel') and attach a 'notification'
-   * listener. Do not use this for regular queries.
-   */
-  get notificationClient(): Client {
-    if (!this._notificationClient) throw new Error('Notification client not initialised');
-    return this._notificationClient;
   }
 }

@@ -1,12 +1,12 @@
-import { DomainEvent } from '@app/common/bases';
+import { DomainEvent, Instant } from '@app/shared-kernel';
 
 export interface UserEmailVerifiedPayload {
   userId: string;
   email: string;
-  verifiedAt: Date;
+  verifiedAt: Instant;
 }
 
-export class UserEmailVerifiedEvent extends DomainEvent<UserEmailVerifiedPayload> {
+export class UserEmailVerifiedEvent extends DomainEvent {
   static readonly EVENT_TYPE = 'identity.user.email_verified';
 
   readonly eventType = UserEmailVerifiedEvent.EVENT_TYPE;

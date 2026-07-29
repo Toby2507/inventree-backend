@@ -1,15 +1,15 @@
-import { DomainEvent } from '@app/common/bases';
-import { Mutable } from '@app/common/types';
 import { OutboxKyselyRepository } from '@app/core/reliability/outbox/persistence/outbox.kysely.repository';
-import { OperationalDB, OperationalSchema } from '@app/database';
+import type { OperationalDB, OperationalSchema } from '@app/database';
+import { Duration, Instant, type DomainEvent, type Mutable } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { fsSerializedOutboxContext } from '@app/testing/core/observability';
-import { feOutboxEvent } from '@app/testing/core/reliability/outbox';
-import { createTestContext, TestContext } from '@app/testing/database';
+import { type FDEventPayload, feOutboxEvent } from '@app/testing/core/reliability/outbox';
+import { createTestContext, type TestContext } from '@app/testing/database';
+import { type Kysely, sql } from 'kysely';
 
 describe('OutboxKyselyRepository (integration)', () => {
   let ctx: TestContext<OperationalSchema>;
-  let db: OperationalDB;
+  let db: Kysely<OperationalSchema>;
   let repo: OutboxKyselyRepository;
 
   const obsCtx = {
@@ -57,7 +57,7 @@ describe('OutboxKyselyRepository (integration)', () => {
     it('should claim a batch of pending events and return them for processing', async () => {
       const events = feOutboxEvent.generateMany(3);
       await repo.insert(db, { events, ctx });
-      const claimed = await repo.claimBatch(db, 10, 'test-worker', 30000);
+      const claimed = await repo.claimBatch(db, 10, 'test-worker', Duration.seconds(30).toMs());
       expect(claimed).toHaveLength(3);
       expect(claimed[0].status).toBe('locked');
       expect(claimed[0].lockedBy).toBe('test-worker');
@@ -73,7 +73,7 @@ describe('OutboxKyselyRepository (integration)', () => {
     it('should only claim events up to the specified limit', async () => {
       const events = feOutboxEvent.generateMany(5);
       await repo.insert(db, { events, ctx });
-      const claimed = await repo.claimBatch(db, 3, 'test-worker', 30000);
+      const claimed = await repo.claimBatch(db, 3, 'test-worker', Duration.seconds(30).toMs());
       expect(claimed).toHaveLength(3);
       const rows = await db.selectFrom('outbox_events').selectAll().execute();
       const lockedCount = rows.filter((row) => row.status === 'locked').length;
@@ -83,7 +83,7 @@ describe('OutboxKyselyRepository (integration)', () => {
     it('should not claim any event if limit is set to 0', async () => {
       const events = feOutboxEvent.generateMany(5);
       await repo.insert(db, { events, ctx });
-      const claimed = await repo.claimBatch(db, 0, 'test-worker', 30000);
+      const claimed = await repo.claimBatch(db, 0, 'test-worker', Duration.seconds(30).toMs());
       expect(claimed).toHaveLength(0);
       const rows = await db.selectFrom('outbox_events').selectAll().execute();
       const lockedCount = rows.filter((row) => row.status === 'locked').length;
@@ -94,8 +94,8 @@ describe('OutboxKyselyRepository (integration)', () => {
       const events = feOutboxEvent.generateMany(2);
       await repo.insert(db, { events, ctx });
       // Lock one event with a different worker
-      await repo.claimBatch(db, 1, 'test-worker', 30000);
-      const claimed = await repo.claimBatch(db, 10, 'test-worker-2', 30000);
+      await repo.claimBatch(db, 1, 'test-worker', Duration.seconds(30).toMs());
+      const claimed = await repo.claimBatch(db, 10, 'test-worker-2', Duration.seconds(30).toMs());
       expect(claimed).toHaveLength(1);
     });
 
@@ -103,16 +103,18 @@ describe('OutboxKyselyRepository (integration)', () => {
       const events = feOutboxEvent.generateMany(1);
       await repo.insert(db, { events, ctx });
       await db.updateTable('outbox_events').set({ next_attempt_at: faker.date.future() }).execute();
-      const claimed = await repo.claimBatch(db, 10, 'test-worker', 30000);
+      const claimed = await repo.claimBatch(db, 10, 'test-worker', Duration.seconds(30).toMs());
       expect(claimed).toHaveLength(0);
     });
 
     it('should claim events in order of occurrence from oldest to newest', async () => {
       const event1 = feOutboxEvent.generate();
-      (event1 as Mutable<DomainEvent>).occurredAt = new Date(Date.now() - 10000);
+      (event1 as Mutable<DomainEvent>).occurredAt = Instant.fromDate(new Date()).minus(
+        Duration.seconds(10),
+      );
       const event2 = feOutboxEvent.generate();
       await repo.insert(db, { events: [event2, event1], ctx });
-      const claimed = await repo.claimBatch(db, 1, 'test-worker', 30000);
+      const claimed = await repo.claimBatch(db, 1, 'test-worker', Duration.seconds(30).toMs());
       expect(claimed[0].aggregateId).toBe(event1.aggregateId);
     });
 
@@ -120,8 +122,8 @@ describe('OutboxKyselyRepository (integration)', () => {
       const events = feOutboxEvent.generateMany(1);
       await repo.insert(db, { events, ctx });
       const [claimed1, claimed2] = await Promise.all([
-        repo.claimBatch(db, 1, 'worker-1', 30000),
-        repo.claimBatch(db, 1, 'worker-2', 30000),
+        repo.claimBatch(db, 1, 'worker-1', Duration.seconds(30).toMs()),
+        repo.claimBatch(db, 1, 'worker-2', Duration.seconds(30).toMs()),
       ]);
       const total = [...claimed1, ...claimed2];
       expect(total).toHaveLength(1);
@@ -133,8 +135,8 @@ describe('OutboxKyselyRepository (integration)', () => {
     it('should not re-claim already locked events by the same worker', async () => {
       const events = feOutboxEvent.generateMany(1);
       await repo.insert(db, { events, ctx });
-      const claimed1 = await repo.claimBatch(db, 1, 'worker-1', 30000);
-      const claimed2 = await repo.claimBatch(db, 1, 'worker-1', 30000);
+      const claimed1 = await repo.claimBatch(db, 1, 'worker-1', Duration.seconds(30).toMs());
+      const claimed2 = await repo.claimBatch(db, 1, 'worker-1', Duration.seconds(30).toMs());
       expect(claimed1.length).toBe(1);
       expect(claimed2.length).toBe(0);
     });
@@ -197,18 +199,18 @@ describe('OutboxKyselyRepository (integration)', () => {
     });
 
     it('should requeue the event for retry if not dead-lettered', async () => {
-      const nextAttemptAt = new Date(Date.now() + 60000); // 1 minute later
+      const nextAttemptAt = Instant.fromEpochMs(Date.now()).plus(Duration.minutes(1));
       await repo.markFailed(db, eventId, 'Temporary error', nextAttemptAt, false);
       const row = await getEvent();
       expect(row?.status).toBe('pending');
-      expect(row?.next_attempt_at).toEqual(nextAttemptAt);
+      expect(row?.next_attempt_at?.getTime()).toEqual(nextAttemptAt.toEpochMs());
       expect(row?.last_error).toBe('Temporary error');
       expect(row?.last_error_at).not.toBeNull();
       expect(row?.publish_attempts).toBe(1);
     });
 
     it('should mark the event as failed if dead-lettered', async () => {
-      await repo.markFailed(db, eventId, 'Permanent error', new Date(), true);
+      await repo.markFailed(db, eventId, 'Permanent error', Instant.fromEpochMs(Date.now()), true);
       const row = await getEvent();
       expect(row?.status).toBe('failed');
       expect(row?.next_attempt_at).toBeNull();
@@ -220,7 +222,7 @@ describe('OutboxKyselyRepository (integration)', () => {
     it('should increment publish_attempts on each failure', async () => {
       const row = await getEvent();
       expect(row?.publish_attempts).toBe(0);
-      await repo.markFailed(db, eventId, 'Error 1', new Date(), false);
+      await repo.markFailed(db, eventId, 'Error 1', Instant.fromEpochMs(Date.now()), false);
       const rowAfterFirstFailure = await db
         .selectFrom('outbox_events')
         .selectAll()
@@ -230,7 +232,7 @@ describe('OutboxKyselyRepository (integration)', () => {
     });
 
     it('should clear lock fields when marking as failed', async () => {
-      await repo.markFailed(db, eventId, 'Error', new Date(), false);
+      await repo.markFailed(db, eventId, 'Error', Instant.fromEpochMs(Date.now()), false);
       const row = await getEvent();
       expect(row?.locked_at).toBeNull();
       expect(row?.locked_by).toBeNull();
@@ -254,7 +256,7 @@ describe('OutboxKyselyRepository (integration)', () => {
     });
 
     it('should not release locks that have not expired', async () => {
-      await repo.claimBatch(db, 1, 'test-worker', 5000);
+      await repo.claimBatch(db, 1, 'test-worker', Duration.seconds(5).toMs());
       await repo.releaseExpiredLocks(db);
       const row = await db.selectFrom('outbox_events').selectAll().executeTakeFirst();
       expect(row?.status).toBe('locked');
@@ -265,6 +267,46 @@ describe('OutboxKyselyRepository (integration)', () => {
       await repo.releaseExpiredLocks(db);
       const row = await db.selectFrom('outbox_events').selectAll().executeTakeFirst();
       expect(row?.status).toBe('pending');
+    });
+  });
+
+  describe('claimBatch — query plan under backlog', () => {
+    const seedOutboxEvents = async (
+      db: OperationalDB,
+      count: number,
+      override?: Partial<FDEventPayload>,
+    ) => {
+      const CHUNK_SIZE = 500;
+      const events = feOutboxEvent.generateMany(count, override);
+      for (let i = 0; i < events.length; i += CHUNK_SIZE) {
+        const chunk = events.slice(i, i + CHUNK_SIZE);
+        await repo.insert(db, { events: chunk, ctx: obsCtx });
+      }
+    };
+
+    it('should use the partial index and avoids a sequential scan with a large due backlog', async () => {
+      await seedOutboxEvents(db, 5_000); // future events
+      const plan = await sql<{ 'QUERY PLAN': string }>`
+        EXPLAIN (ANALYZE, FORMAT JSON)
+        UPDATE operational.outbox_events
+        SET status = 'locked',
+          locked_at = now(),
+          locked_by = 'load_test',
+          lock_expires_at = now() + INTERVAL '30 seconds'
+        WHERE id IN (
+          SELECT id
+          FROM operational.outbox_events
+          WHERE status = 'pending' AND next_attempt_at <= now()
+          ORDER BY occurred_at ASC
+          LIMIT 25
+          FOR UPDATE SKIP LOCKED
+        )
+        RETURNING id
+      `.execute(db);
+      const planJson = (plan.rows[0]['QUERY PLAN'][0] as any).Plan;
+      const planText = JSON.stringify(planJson);
+      expect(planText).not.toContain('Seq Scan');
+      expect(planText).toContain('idx_outbox_claim');
     });
   });
 });

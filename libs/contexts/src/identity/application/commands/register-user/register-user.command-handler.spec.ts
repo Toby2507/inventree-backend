@@ -4,7 +4,7 @@ import { faker } from '@app/testing';
 import { makeIdGeneratorMock } from '@app/testing/core/generators';
 import { makeDatabaseContextMock } from '@app/testing/database';
 import { makeArgon2HasherMock, makeUserRepositoryMock } from '@app/testing/identity';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { User } from '../../../domain/user/aggregates/user.aggregate';
 import { UserRegisteredEvent } from '../../../domain/user/events/user-registered.event';
 import { UserEmailAlreadyExistsException } from '../../../domain/user/exceptions/registration.exceptions';
@@ -12,11 +12,13 @@ import { USER_REPOSITORY } from '../../../domain/user/ports/repositories/user.re
 import { HASHING } from '../../ports/hashing.port';
 import { RegisterUserCommand } from './register-user.command';
 import { RegisterUserCommandHandler } from './register-user.command-handler';
+import { CLOCK, FixedClock, Instant } from '@app/shared-kernel';
 
 describe('RegisterUserCommandHandler', () => {
   let module: TestingModule;
   let handler: RegisterUserCommandHandler;
 
+  const clock = new FixedClock(Instant.parse('2024-01-01T00:00:00Z'));
   const argon2Hasher = makeArgon2HasherMock();
   const dbContext = makeDatabaseContextMock();
   const idGenerator = makeIdGeneratorMock();
@@ -34,6 +36,7 @@ describe('RegisterUserCommandHandler', () => {
     module = await Test.createTestingModule({
       providers: [
         RegisterUserCommandHandler,
+        { provide: CLOCK, useValue: clock },
         { provide: HASHING, useValue: argon2Hasher },
         { provide: USER_REPOSITORY, useValue: userRepository },
         { provide: ID_GENERATOR, useValue: idGenerator },

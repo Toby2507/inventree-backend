@@ -1,13 +1,13 @@
-import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
-import Redis from 'ioredis';
-import { RedisPort } from './redis.port';
+import { Inject, Injectable, type OnModuleDestroy } from '@nestjs/common';
+import type { Redis as IoRedis } from 'ioredis';
+import type { Redis } from './redis.port';
 import { REDIS_CLIENT } from './redis.provider';
 
 @Injectable()
-export class RedisService implements OnModuleDestroy, RedisPort {
-  constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
+export class RedisService implements OnModuleDestroy, Redis {
+  constructor(@Inject(REDIS_CLIENT) private readonly redis: IoRedis) {}
 
-  get client(): Redis {
+  get client(): IoRedis {
     return this.redis;
   }
 

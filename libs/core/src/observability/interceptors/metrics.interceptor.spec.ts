@@ -1,7 +1,7 @@
 import { makeMetricsMock } from '@app/testing/core/observability';
 import { makeCallHandlerMock, makeContextMock } from '@app/testing/system';
 import { firstValueFrom, of, throwError } from 'rxjs';
-import { MetricNames } from '../metrics/metric-names';
+import { METRIC_NAMES } from '../metrics/metric-names';
 import { MetricsInterceptor } from './metrics.interceptor';
 
 describe('MetricsInterceptor', () => {
@@ -33,7 +33,7 @@ describe('MetricsInterceptor', () => {
     });
     await runInterceptor();
     expect(metrics.increment).toHaveBeenCalledWith(
-      MetricNames.HTTP_TOTAL,
+      METRIC_NAMES.HTTP_TOTAL,
       expect.objectContaining({
         route: '/raw/path',
       }),
@@ -44,7 +44,7 @@ describe('MetricsInterceptor', () => {
     await runInterceptor();
     expect(metrics.adjust).toHaveBeenNthCalledWith(
       1,
-      MetricNames.HTTP_ACTIVE,
+      METRIC_NAMES.HTTP_ACTIVE,
       1,
       expect.objectContaining({ method: 'POST' }),
     );
@@ -53,17 +53,17 @@ describe('MetricsInterceptor', () => {
   it('records all terminal metrics on success', async () => {
     await runInterceptor();
     expect(metrics.record).toHaveBeenCalledWith(
-      MetricNames.HTTP_DURATION,
+      METRIC_NAMES.HTTP_DURATION,
       expect.any(Number),
       expect.objectContaining({ status_code: '201', method: 'POST' }),
     );
     expect(metrics.increment).toHaveBeenCalledWith(
-      MetricNames.HTTP_TOTAL,
+      METRIC_NAMES.HTTP_TOTAL,
       expect.objectContaining({ status_code: '201', route: '/api/v1/auth/register' }),
     );
     expect(metrics.adjust).toHaveBeenNthCalledWith(
       2,
-      MetricNames.HTTP_ACTIVE,
+      METRIC_NAMES.HTTP_ACTIVE,
       -1,
       expect.anything(),
     );
@@ -74,17 +74,17 @@ describe('MetricsInterceptor', () => {
     mockHandle.mockReturnValueOnce(throwError(() => error));
     await expect(() => runInterceptor()).rejects.toThrow();
     expect(metrics.record).toHaveBeenCalledWith(
-      MetricNames.HTTP_DURATION,
+      METRIC_NAMES.HTTP_DURATION,
       expect.any(Number),
       expect.objectContaining({ status_code: '500', method: 'POST' }),
     );
     expect(metrics.increment).toHaveBeenCalledWith(
-      MetricNames.HTTP_TOTAL,
+      METRIC_NAMES.HTTP_TOTAL,
       expect.objectContaining({ status_code: '500', route: '/api/v1/auth/register' }),
     );
     expect(metrics.adjust).toHaveBeenNthCalledWith(
       2,
-      MetricNames.HTTP_ACTIVE,
+      METRIC_NAMES.HTTP_ACTIVE,
       -1,
       expect.anything(),
     );

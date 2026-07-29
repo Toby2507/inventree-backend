@@ -1,3 +1,4 @@
+import { CryptographyModule } from '@app/core/security/cryptography';
 import { Global, Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { IdempotencyInterceptor } from './interceptors/idempotency.interceptor';
@@ -10,6 +11,7 @@ import { RedisIdempotencyStrategy } from './strategies/redis.strategy';
 
 @Global()
 @Module({
+  imports: [CryptographyModule],
   providers: [
     RedisIdempotencyStrategy,
     DurableIdempotencyStrategy,

@@ -1,4 +1,4 @@
-import { DomainEvent } from '@app/common/bases';
+import { DomainEvent } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 
 export interface FDEventPayload {

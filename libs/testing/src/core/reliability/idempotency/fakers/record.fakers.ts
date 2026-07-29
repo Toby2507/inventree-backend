@@ -1,8 +1,9 @@
-import {
+import type {
   CreateIdempotency,
   IdempotencyRecord,
   IdempotencyRedisRecord,
 } from '@app/core/reliability/idempotency/persistence/idempotency.persistence.types';
+import { Instant } from '@app/shared-kernel';
 import { createFaker } from '@app/testing/faker-factory';
 import { faker } from '@faker-js/faker';
 
@@ -20,9 +21,9 @@ export const fsIdempotencyRecord = createFaker<IdempotencyRecord>(() => ({
   status: faker.helpers.arrayElement(['in_progress', 'completed', 'failed']),
   response: { data: faker.lorem.sentence() },
   error: { message: faker.lorem.sentence() },
-  createdAt: faker.date.past(),
-  expiresAt: faker.date.future(),
-  resolvedAt: faker.helpers.arrayElement([null, faker.date.recent()]),
+  createdAt: Instant.fromDate(faker.date.past()),
+  expiresAt: Instant.fromDate(faker.date.future()),
+  resolvedAt: faker.helpers.arrayElement([null, Instant.fromDate(faker.date.recent())]),
 }));
 
 export const fsCreateIdempotencyInput = createFaker<CreateIdempotency>(() => ({

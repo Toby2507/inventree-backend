@@ -1,9 +1,10 @@
 import {
-  CreateUserProps,
+  type CreateUserProps,
   User,
-  UserSnapshot,
+  type UserSnapshot,
 } from '@app/contexts/identity/domain/user/aggregates/user.aggregate';
-import { UserSnapRow } from '@app/contexts/identity/infrastructure/persistence/mappers/user/user.persistence.types';
+import type { UserSnapRow } from '@app/contexts/identity/infrastructure/persistence/mappers/user/user.persistence.types';
+import { Instant } from '@app/shared-kernel';
 import { createEntityFaker, createFaker } from '@app/testing/faker-factory';
 import { faker } from '@faker-js/faker';
 import { fsUserSecurity } from './user-security.faker';
@@ -21,7 +22,7 @@ export const fsUser = createFaker<UserSnapshot>(() => {
     displayName: null,
     status: 'pending',
     passwordHash: faker.string.alphanumeric(128),
-    createdAt: faker.date.past(),
+    createdAt: Instant.fromDate(faker.date.past()),
     deletedAt: null,
     security: fsUserSecurity.generate({ userId }),
   };
@@ -48,6 +49,7 @@ export const feUser = createEntityFaker<User, CreateUserProps, UserSnapshot>(
     id: faker.string.uuid(),
     email: faker.internet.email(),
     passwordHash: faker.string.alphanumeric(128),
+    createdAt: Instant.fromDate(faker.date.recent()),
   }),
   fsUser.generate,
 );

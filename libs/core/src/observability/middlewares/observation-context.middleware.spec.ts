@@ -1,10 +1,14 @@
-import { CAUSATION_HEADER, CORRELATION_HEADER, IDEMPOTENCY_HEADER } from '@app/common/constants';
-import { Fn } from '@app/common/types';
+import {
+  CAUSATION_HEADER,
+  CORRELATION_HEADER,
+  IDEMPOTENCY_HEADER,
+} from '@app/framework/nest/constants';
+import type { Fn } from '@app/shared-kernel';
 import { faker } from '@app/testing';
 import { createOtelTestHarness } from '@app/testing/core/observability';
 import { makeRequestMock, makeResponseMock } from '@app/testing/system';
 import { getOptionalObservationContext } from '../context/observation-context.storage';
-import { SpanAttributes } from '../tracing/span-attributes';
+import { SPAN_ATTRIBUTES } from '../tracing/span-attributes';
 import { ObservationContextMiddleware } from './observation-context.middleware';
 
 const generatedUUID = faker.string.uuid();
@@ -78,8 +82,8 @@ describe('ObservationContextMiddleware', () => {
       const res = makeResponseMock();
       const next = () => {
         expect(otel.span.setAttributes).toHaveBeenCalledWith({
-          [SpanAttributes.CORRELATION_ID]: 'corr-001',
-          [SpanAttributes.CAUSATION_ID]: 'cause-001',
+          [SPAN_ATTRIBUTES.CORRELATION_ID]: 'corr-001',
+          [SPAN_ATTRIBUTES.CAUSATION_ID]: 'cause-001',
         });
       };
       await runInMiddleware(req, res, next);

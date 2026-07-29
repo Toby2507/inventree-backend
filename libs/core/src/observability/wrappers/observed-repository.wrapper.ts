@@ -1,7 +1,7 @@
 import { SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
 import { getOptionalObservationContext } from '../context/observation-context.storage';
-import { LoggerPort } from '../ports/logger.port';
-import { SpanAttributes } from '../tracing/span-attributes';
+import type { Logger } from '../ports/logger.port';
+import { SPAN_ATTRIBUTES } from '../tracing/span-attributes';
 import { INVENTREE_TRACER } from '../tracing/tracer.provider';
 
 /**
@@ -14,7 +14,7 @@ import { INVENTREE_TRACER } from '../tracing/tracer.provider';
  * ```
  *   {
  *     provide: USER_REPOSITORY,
- *     useFactory: (raw: UserKyselyRepository, logger: LoggerPort) =>
+ *     useFactory: (raw: UserKyselyRepository, logger: Logger) =>
  *       new ObservedRepositoryWrapper(raw, 'user', logger),
  *     inject: [UserKyselyRepository, LOGGER],
  *   }
@@ -26,7 +26,7 @@ export class ObservedRepositoryWrapper<T extends object> {
   constructor(
     private readonly repository: T,
     private readonly entityName: string,
-    logger: LoggerPort,
+    logger: Logger,
   ) {
     this.logger = logger.forContext(`Repository.${entityName}`);
 
@@ -53,9 +53,9 @@ export class ObservedRepositoryWrapper<T extends object> {
       {
         kind: SpanKind.INTERNAL,
         attributes: {
-          [SpanAttributes.REPOSITORY_ENTITY]: this.entityName,
-          [SpanAttributes.REPOSITORY_OPERATION]: operation,
-          ...(ctx ? { [SpanAttributes.CORRELATION_ID]: ctx.correlationId } : {}),
+          [SPAN_ATTRIBUTES.REPOSITORY_ENTITY]: this.entityName,
+          [SPAN_ATTRIBUTES.REPOSITORY_OPERATION]: operation,
+          ...(ctx ? { [SPAN_ATTRIBUTES.CORRELATION_ID]: ctx.correlationId } : {}),
         },
       },
       async (span) => {

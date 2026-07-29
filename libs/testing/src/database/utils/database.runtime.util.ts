@@ -1,4 +1,4 @@
-import { ControlledTransaction, Kysely, PostgresDialect } from 'kysely';
+import { ControlledTransaction, Kysely, PostgresDialect, sql } from 'kysely';
 import { Client, Pool } from 'pg';
 import { getAdminConfig, getUserConfig } from './database.infrastructure.util';
 
@@ -6,6 +6,7 @@ export interface TestContext<T = any> {
   begin(): Promise<Kysely<T>>;
   dispose(): Promise<void>;
   rollback(): Promise<void>;
+  run(op: (db: Kysely<any>) => Promise<void>): Promise<void>;
 }
 
 export const getTestDbName = () => {
@@ -46,6 +47,7 @@ export const createTestDb = <T = any>(): Kysely<T> => {
  * @example ```
  * beforeAll(async () => {
  *   ctx = await createTestContext();
+ *   await ctx.run(async (db) => {...}); // run migrations or seed data
  * });
  * beforeEach(async () => {
  *   db = await ctx.begin();
@@ -62,6 +64,28 @@ export const createTestContext = async (schema: string = 'operational'): Promise
   const dbInstance = createTestDb();
   let trx: ControlledTransaction<any, []> | null = null;
 
+  const migrationTable = `kysely_migration_${schema}`;
+  const excludedTables = new Set([migrationTable, `${migrationTable}_lock`]);
+  const tables = (
+    await dbInstance
+      .selectFrom('pg_tables')
+      .select('tablename')
+      .where('schemaname', '=', schema)
+      .execute()
+  )
+    .map((r) => r.tablename as string)
+    .filter((t) => !excludedTables.has(t));
+
+  const run = async (op: (db: Kysely<any>) => Promise<void>): Promise<void> => {
+    const trx = await dbInstance.startTransaction().execute();
+    try {
+      await op(trx.withSchema(schema));
+      await trx.commit().execute();
+    } catch (error) {
+      await trx.rollback().execute();
+      throw error;
+    }
+  };
   const rollback = async () => {
     if (!trx) return;
     await trx.rollback().execute();
@@ -72,10 +96,21 @@ export const createTestContext = async (schema: string = 'operational'): Promise
     trx = await dbInstance.startTransaction().execute();
     return trx.withSchema(schema);
   };
-  const dispose = async () => {
+  const reset = async () => {
     await rollback();
+    if (!tables.length) return;
+    await sql`
+      TRUNCATE TABLE ${sql.join(
+        tables.map((t) => sql.id(schema, t)),
+        sql`, `,
+      )}
+      RESTART IDENTITY CASCADE
+    `.execute(dbInstance);
+  };
+  const dispose = async () => {
+    await reset();
     await dbInstance.destroy();
   };
 
-  return { begin, dispose, rollback };
+  return { begin, dispose, rollback, run };
 };

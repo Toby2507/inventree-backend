@@ -2,7 +2,7 @@ import { faker } from '@app/testing';
 import { createOtelTestHarness, fsObservationContext } from '@app/testing/core/observability';
 import { SpanStatusCode } from '@opentelemetry/api';
 import { observationStorage } from '../context/observation-context.storage';
-import { SpanAttributes } from '../tracing/span-attributes';
+import { SPAN_ATTRIBUTES } from '../tracing/span-attributes';
 import { Trace } from './trace.decorator';
 
 class SomeService {
@@ -87,7 +87,7 @@ describe('@Trace() decorator', () => {
       expect.any(String),
       expect.objectContaining({
         attributes: expect.objectContaining({
-          [SpanAttributes.CORRELATION_ID]: ctx.correlationId,
+          [SPAN_ATTRIBUTES.CORRELATION_ID]: ctx.correlationId,
         }),
       }),
       expect.any(Function),
@@ -110,9 +110,9 @@ describe('@Trace() decorator', () => {
       expect.any(String),
       expect.objectContaining({
         attributes: expect.objectContaining({
-          [SpanAttributes.CAUSATION_ID]: ctxWithOptions.causationId,
-          [SpanAttributes.ACTOR_USER_ID]: ctxWithOptions.actor?.userId,
-          [SpanAttributes.ACTOR_STORE_ID]: ctxWithOptions.actor?.storeId,
+          [SPAN_ATTRIBUTES.CAUSATION_ID]: ctxWithOptions.causationId,
+          [SPAN_ATTRIBUTES.ACTOR_USER_ID]: ctxWithOptions.actor?.userId,
+          [SPAN_ATTRIBUTES.ACTOR_STORE_ID]: ctxWithOptions.actor?.storeId,
         }),
       }),
       expect.any(Function),
@@ -161,6 +161,6 @@ describe('@Trace() decorator', () => {
     const [, options] = otel.tracer.startActiveSpan.mock.calls[0];
     expect(result).toBe('done');
     expect(otel.tracer.startActiveSpan).toHaveBeenCalled();
-    expect(options.attributes).not.toHaveProperty(SpanAttributes.CORRELATION_ID);
+    expect(options.attributes).not.toHaveProperty(SPAN_ATTRIBUTES.CORRELATION_ID);
   });
 });

@@ -1,4 +1,4 @@
-export const MetricNames = {
+export const METRIC_NAMES = {
   COMMAND_DURATION: 'app.command.duration',
   COMMAND_TOTAL: 'app.command.total',
   QUERY_DURATION: 'app.query.duration',
@@ -18,4 +18,4 @@ export const MetricNames = {
   CUSTOM_TOTAL: 'app.custom.total',
 } as const;
 
-export type MetricName = (typeof MetricNames)[keyof typeof MetricNames];
+export type MetricName = (typeof METRIC_NAMES)[keyof typeof METRIC_NAMES];

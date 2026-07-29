@@ -1,12 +1,29 @@
-export const makeDatabaseConnectionMock = () => ({});
+import { OperationalDB } from '@app/database';
+import type { DatabaseClient, DatabaseProvider } from '@app/database/ports/provider.port';
+import { EventEmitter } from 'events';
 
-export const makeDatabaseClienMock = () => ({
-  on: jest.fn().mockReturnValue(undefined),
-  query: jest.fn().mockResolvedValue(undefined),
-  connect: jest.fn().mockResolvedValue(undefined),
-});
+type PgQueryable = DatabaseClient & {
+  query: (sql: string) => Promise<unknown>;
+  connect: () => Promise<DatabaseClient>;
+};
+
+export const makeDatabaseConnectionMock = () => ({}) as OperationalDB;
+
+export const makeDatabaseClientMock = () => {
+  const emitter = new EventEmitter();
+  const conn = Object.assign(emitter, {
+    query: jest.fn().mockResolvedValue(undefined),
+    connect: jest.fn().mockResolvedValue(undefined),
+  });
+  conn.on('error', () => {});
+  return conn as unknown as jest.Mocked<PgQueryable>;
+};
 
 export const makeDatabaseProviderMock = () => {
+  let client = makeDatabaseClientMock();
+  const recreateClient = () => {
+    client = makeDatabaseClientMock();
+  };
   return {
     forBootstrapMigration: makeDatabaseConnectionMock(),
     forOperationalMigration: makeDatabaseConnectionMock(),
@@ -15,6 +32,14 @@ export const makeDatabaseProviderMock = () => {
     analyticsWrite: makeDatabaseConnectionMock(),
     operationalRead: makeDatabaseConnectionMock(),
     operationalWrite: makeDatabaseConnectionMock(),
-    notificationClient: makeDatabaseClienMock(),
-  };
+    createNotificationClient: jest.fn().mockResolvedValue(client),
+    destroyNotificationClient: jest.fn().mockResolvedValue(undefined),
+    client,
+    recreateClient,
+  } as unknown as jest.Mocked<
+    DatabaseProvider & {
+      client: jest.Mocked<PgQueryable>;
+      recreateClient: () => void;
+    }
+  >;
 };

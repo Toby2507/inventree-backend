@@ -1,11 +1,11 @@
-import { DomainEvent } from '@app/common/bases';
+import { DomainEvent } from '@app/shared-kernel';
 
 export interface UserSuspendedPayload {
   userId: string;
   reason?: string;
 }
 
-export class UserSuspendedEvent extends DomainEvent<UserSuspendedPayload> {
+export class UserSuspendedEvent extends DomainEvent {
   static readonly EVENT_TYPE = 'identity.user.suspended';
 
   readonly eventType = UserSuspendedEvent.EVENT_TYPE;

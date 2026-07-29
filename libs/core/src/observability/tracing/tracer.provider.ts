@@ -6,13 +6,11 @@ import {
   W3CBaggagePropagator,
   W3CTraceContextPropagator,
 } from '@opentelemetry/core';
-import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-grpc';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
-import { Resource, resourceFromAttributes } from '@opentelemetry/resources';
-import { BatchLogRecordProcessor } from '@opentelemetry/sdk-logs';
+import { type Resource, resourceFromAttributes } from '@opentelemetry/resources';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
-import { NodeSDK, NodeSDKConfiguration } from '@opentelemetry/sdk-node';
+import { NodeSDK, type NodeSDKConfiguration } from '@opentelemetry/sdk-node';
 import {
   BatchSpanProcessor,
   ParentBasedSampler,
@@ -44,7 +42,6 @@ export function bootstrapTelemetry(props: ObservabilityConfig): void {
   });
   const traceExporter = new OTLPTraceExporter({ url });
   const metricExporter = new OTLPMetricExporter({ url });
-  const logExporter = new OTLPLogExporter({ url });
 
   const config: Partial<NodeSDKConfiguration> = {
     resource,
@@ -58,7 +55,6 @@ export function bootstrapTelemetry(props: ObservabilityConfig): void {
         exportIntervalMillis: 30_000,
       }),
     ],
-    logRecordProcessors: [new BatchLogRecordProcessor(logExporter)],
     instrumentations: [
       getNodeAutoInstrumentations({
         '@opentelemetry/instrumentation-pg': { enhancedDatabaseReporting: isDev },

@@ -1,7 +1,7 @@
-import { copyMethodMetadata } from '@app/common/utils';
-import { LoggerPort } from '../ports/logger.port';
+import { copyMethodMetadata } from '@app/framework/nest/utils';
+import type { Logger } from '../ports/logger.port';
 
-type LoggableInstance = { logger?: LoggerPort };
+type LoggableInstance = { logger?: Logger };
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -10,7 +10,7 @@ const isDev = process.env.NODE_ENV !== 'production';
  * LOG_LEVEL env needs to be set to debug to get the output from this
  *
  * Automatically logs the execution of the decorated method.
- * The class must expose `this.logger: LoggerPort` (injected via DI).
+ * The class must expose `this.logger: Logger` (injected via DI).
  */
 export function LogExecution(contextOverride?: string): MethodDecorator {
   return function (

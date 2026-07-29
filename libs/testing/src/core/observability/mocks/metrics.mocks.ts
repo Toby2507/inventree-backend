@@ -1,4 +1,4 @@
-import { MetricsPort } from '@app/core/observability';
+import type { Metrics } from '@app/core/observability';
 
 export const makeMetricsMock = () => {
   return {
@@ -9,5 +9,5 @@ export const makeMetricsMock = () => {
     timeAsync: jest
       .fn()
       .mockImplementation((_d: string, _t: string, _a: object, fn: () => Promise<unknown>) => fn()),
-  } as unknown as jest.Mocked<MetricsPort>;
+  } as unknown as jest.Mocked<Metrics>;
 };

@@ -1,5 +1,5 @@
-import { Kysely } from 'kysely';
-import { DB } from './db.types';
+import type { Kysely } from 'kysely';
+import type { DB } from './db.types';
 
 export type OperationalSchema = {
   [K in keyof DB as K extends `operational.${infer T}` ? T : never]: DB[K];

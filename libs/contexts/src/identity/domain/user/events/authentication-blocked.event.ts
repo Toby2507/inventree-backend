@@ -1,11 +1,11 @@
-import { DomainEvent } from '@app/common/bases';
+import { DomainEvent } from '@app/shared-kernel';
 
 export interface AuthenticationBlockedPayload {
   userId: string;
   reason?: string;
 }
 
-export class AuthenticationBlockedEvent extends DomainEvent<AuthenticationBlockedPayload> {
+export class AuthenticationBlockedEvent extends DomainEvent {
   static readonly EVENT_TYPE = 'identity.user.authentication_blocked';
 
   readonly eventType = AuthenticationBlockedEvent.EVENT_TYPE;

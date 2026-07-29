@@ -1,4 +1,4 @@
-import { IdempotencyRepository } from '@app/core/reliability/idempotency/persistence/idempotency.port';
+import type { IdempotencyRepository } from '@app/core/reliability/idempotency/persistence/idempotency.port';
 
 export const makeIdempotencyRepositoryMock = () => {
   return {

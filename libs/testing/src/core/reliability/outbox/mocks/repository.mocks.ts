@@ -1,4 +1,4 @@
-import { OutboxRepository } from '@app/core/reliability/outbox/ports/repository.port';
+import type { OutboxRepository } from '@app/core/reliability/outbox/ports/repository.port';
 
 export const makeOutboxRepositoryMock = () => {
   return {

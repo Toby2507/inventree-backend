@@ -1,5 +1,5 @@
-import { OperationalDB } from '@app/database';
-import { User } from '../../aggregates/user.aggregate';
+import type { OperationalDB } from '@app/database';
+import type { User } from '../../aggregates/user.aggregate';
 
 export interface UserRepository {
   existsByEmail(db: OperationalDB, email: string): Promise<boolean>;

@@ -1,24 +1,24 @@
-import { IDEMPOTENCY_HEADER } from '@app/common/constants';
-import { mapCodeToStatus } from '@app/common/exceptions';
-import { JsonValue } from '@app/common/types';
-import { REDIS, RedisPort } from '@app/core/infrastructure/redis';
-import { OBFUSCATION, ObfuscationPort } from '@app/core/security';
+import { REDIS, type Redis } from '@app/core/infrastructure/redis';
+import { CRYPTOGRAPHY, type Cryptography } from '@app/core/security/cryptography';
+import { IDEMPOTENCY_HEADER } from '@app/framework/nest/constants';
+import { mapExceptionCategoryToStatus } from '@app/framework/nest/utils';
+import type { JsonValue } from '@app/shared-kernel';
 import {
   BadRequestException,
-  CallHandler,
+  type CallHandler,
   ConflictException,
   Inject,
   Injectable,
   InternalServerErrorException,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { Observable, catchError, defer, from, of, throwError } from 'rxjs';
+import type { Request } from 'express';
+import { type Observable, catchError, defer, from, of, throwError } from 'rxjs';
 import { map, mergeMap, switchMap } from 'rxjs/operators';
-import { IdempotencyOptions } from '../decorators/idempotency.decorator';
+import type { IdempotencyOptions } from '../decorators/idempotency.decorator';
 import { IdempotencyException } from '../exceptions/idempotency.exception';
-import { IdempotencyRedisRecord } from '../persistence/idempotency.persistence.types';
-import { IdempotencyStrategy } from './interface';
+import type { IdempotencyRedisRecord } from '../persistence/idempotency.persistence.types';
+import type { IdempotencyStrategy } from './interface';
 
 @Injectable()
 export class RedisIdempotencyStrategy implements IdempotencyStrategy {
@@ -26,15 +26,15 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
   private readonly TTL_SECONDS = 86_400; // 24 hours
 
   constructor(
-    @Inject(REDIS) private readonly redis: RedisPort,
-    @Inject(OBFUSCATION) private readonly obfuscation: ObfuscationPort,
+    @Inject(REDIS) private readonly redis: Redis,
+    @Inject(CRYPTOGRAPHY) private readonly crypto: Cryptography,
   ) {}
 
   handle<T>(request: Request, next: CallHandler, options: IdempotencyOptions): Observable<T> {
     return defer(async () => {
       const key = request.header(IDEMPOTENCY_HEADER);
       if (!key) throw new BadRequestException('Missing Idempotency-Key');
-      const hash = this.obfuscation.hash(request.body);
+      const hash = this.crypto.sha256(request.body);
       const existingRecord = await this.getRecord(key, options.scope);
       if (existingRecord) {
         const record = this.resolveExistingRecord(existingRecord, hash);
@@ -51,6 +51,7 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
               const errorPayload = {
                 message: err.message,
                 code: err.code,
+                category: err.category,
                 status: err.status ?? err.getStatus?.(),
                 name: err.name,
               };
@@ -116,8 +117,8 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
     let status = 0;
     if (err && typeof err.getStatus === 'function') status = err.getStatus();
     else if (err?.status) status = err.status;
-    if (status === 0 && err.code) {
-      status = mapCodeToStatus(err.code);
+    if (status === 0 && err.category) {
+      status = mapExceptionCategoryToStatus(err.category);
       err.status = status; // Attach mapped status back to error for later use
     }
     if (status >= 400 && status < 500) return status !== 429 && status !== 408;
@@ -143,8 +144,8 @@ export class RedisIdempotencyStrategy implements IdempotencyStrategy {
   }
 
   private reconstructError(error: JsonValue): Error {
-    const { message, code } = error as any;
-    const err = new IdempotencyException(message, code);
+    const { message, code, category } = error as any;
+    const err = new IdempotencyException(message, code, category);
     return err;
   }
 }

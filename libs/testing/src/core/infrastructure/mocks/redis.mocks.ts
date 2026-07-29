@@ -1,4 +1,4 @@
-import { RedisPort } from '@app/core/infrastructure/redis';
+import type { Redis } from '@app/core/infrastructure/redis';
 
 export const makeRedisMock = () => {
   return {
@@ -7,5 +7,5 @@ export const makeRedisMock = () => {
     set: jest.fn(),
     setNX: jest.fn(),
     del: jest.fn(),
-  } as unknown as jest.Mocked<RedisPort>;
+  } as unknown as jest.Mocked<Redis>;
 };

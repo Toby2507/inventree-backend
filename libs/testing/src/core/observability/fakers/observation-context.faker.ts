@@ -1,4 +1,4 @@
-import {
+import type {
   ObservationContext,
   SerializedOutboxContext,
 } from '@app/core/observability/context/observation-context';

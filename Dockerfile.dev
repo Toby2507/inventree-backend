@@ -6,14 +6,15 @@ RUN npm install --global pnpm@10.30.3
 COPY package.json pnpm-lock.yaml ./
 # Install all dependencies (including dev)
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-  pnpm install --frozen-lockfile --store-dir /pnpm/store
+  pnpm config set store-dir /pnpm/store && \
+  pnpm install --frozen-lockfile
 # Copy entrypoint script
 COPY /scripts/docker-entrypoint.dev.sh /entrypoint.sh
 # Make entrypoint executable
 RUN chmod +x /entrypoint.sh
 # Get app name from argument (e.g. "worker-core")
-ARG APP_NAME
+# ARG APP_NAME
 # Set environment variable for app name (optional, can also be passed at runtime)
-ENV APP_NAME=${APP_NAME}
+# ENV APP_NAME=${APP_NAME}
 # Start the app in development mode
 ENTRYPOINT [ "/entrypoint.sh" ]

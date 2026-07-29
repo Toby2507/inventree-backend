@@ -2,7 +2,7 @@ name: inventree_observability
 
 services:
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest
+    image: otel/opentelemetry-collector-contrib:0.157.0
     container_name: inventree_otel_collector
     volumes:
       - ./observability/otel-collector/config.yaml:/etc/otelcol-contrib/config.yaml
@@ -18,7 +18,7 @@ services:
       - loki
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:13.1.1
     container_name: inventree_grafana
     ports:
       - 3000:3000
@@ -32,8 +32,30 @@ services:
       - tempo
       - loki
 
+  alloy:
+    image: grafana/alloy:v1.18.0
+    container_name: inventree_allou
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    ports:
+      - 12345:12345
+    volumes:
+      - ./observability/alloy/config.alloy:/etc/alloy/config.alloy
+      - alloy_data:/var/lib/alloy/data
+      - /:/rootfs:ro
+      - /run:/run:ro
+      - /var/log:/var/log:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - inventree
+    restart: unless-stopped
+
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
+    image: gcr.io/cadvisor/cadvisor:v0.55.1
     container_name: inventree_cadvisor
     ports:
       - 8080:8080
@@ -46,7 +68,7 @@ services:
       - inventree
 
   node-exporter:
-    image: prom/node-exporter:latest
+    image: prom/node-exporter:v1.12.1
     container_name: inventree_node_exporter
     ports:
       - 9100:9100
@@ -64,7 +86,7 @@ services:
       - inventree
 
   postgres-exporter:
-    image: prometheuscommunity/postgres-exporter
+    image: prometheuscommunity/postgres-exporter:v0.20.1
     container_name: inventree_postgres_exporter
     environment:
       DATA_SOURCE_NAME: "postgresql://${DB_USER:-inventree}:${DB_PASSWORD:-localdevpassword}@${DB_HOST:-db}:${DB_PORT:-5432}/${DB_NAME:-inventree}?sslmode=disable"
@@ -74,7 +96,7 @@ services:
       - inventree
 
   redis-exporter:
-    image: oliver006/redis_exporter
+    image: oliver006/redis_exporter:v1.88.0
     container_name: inventree_redis_exporter
     environment:
       REDIS_ADDR: ${REDIS_URL}
@@ -84,7 +106,7 @@ services:
       - inventree
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.13.1
     container_name: inventree_prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yaml'
@@ -97,7 +119,7 @@ services:
       - inventree
 
   tempo:
-    image: grafana/tempo:latest
+    image: grafana/tempo:3.0.2
     container_name: inventree_tempo
     command: ["-config.file=/etc/tempo.yaml"]
     ports:
@@ -110,7 +132,7 @@ services:
       - inventree
 
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.7.4
     container_name: inventree_loki
     ports:
       - 3100:3100
@@ -136,3 +158,6 @@ volumes:
   tempo_data:
     driver: local
     name: inventree_tempo_data
+  alloy_data:
+    driver: local
+    name: inventree_alloy_data
